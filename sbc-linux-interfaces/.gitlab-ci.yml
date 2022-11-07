@@ -1,0 +1,60 @@
+image: "mjbogusz/cpp-ci:latest"
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - check
+  - build
+  - deploy
+
+check:cppcheck:
+  stage: check
+  script:
+    - cppcheck --version
+    - tools/run-cppcheck.sh
+
+check:clang-tidy:
+  stage: check
+  script:
+    - clang-tidy --version
+    - tools/run-clang-tidy.sh
+
+check:uncrustify:
+  stage: check
+  script:
+    - uncrustify --version
+    - tools/run-uncrustify.sh --check
+
+build:gcc:
+  stage: build
+  script:
+    - tools/build.sh
+  artifacts:
+    paths:
+      - build
+
+pages:
+  stage: deploy
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH'
+  script:
+    - doxygen --version
+    - tools/doxygen.sh
+    - cp -r docs/html public
+  artifacts:
+    paths:
+      - public
+
+gitlab-release:
+  stage: deploy
+  rules:
+    - if: "$CI_COMMIT_TAG"
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  script:
+    - echo 'Automatic Gitlab release job'
+  release:
+    name: "Release $CI_COMMIT_TAG"
+    description: "Automatic release: $CI_COMMIT_TAG"
+    tag_name: $CI_COMMIT_TAG
+    ref: $CI_COMMIT_TAG

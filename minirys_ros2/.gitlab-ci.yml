@@ -1,0 +1,92 @@
+image: ros:galactic
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - lint
+  - build
+  - test
+  - deploy
+
+xmllint:
+  stage: lint
+  script:
+    - ament_xmllint package.xml
+
+cmakelint:
+  stage: lint
+  script:
+    - ament_lint_cmake CMakeLists.txt
+
+uncrustify:
+  stage: lint
+  script:
+    - dpkg -i pkgs/uncrustify_0.72.0-1_focal_amd64.deb
+    - uncrustify --version
+    - tools/run-uncrustify.sh --check
+
+colcon:
+  stage: build
+  needs:
+    - xmllint
+    - uncrustify
+    - cmakelint
+  script:
+    - mkdir -p /ws/src
+    - cd /ws/src
+    - cp -r ${CI_PROJECT_DIR} ./
+    - git clone https://gitlab.com/mjbogusz/sbc-linux-interfaces.git
+    - git clone https://gitlab.com/mjbogusz/vl53l1x-linux.git
+    - git clone https://gitlab.com/mjbogusz/l6470-linux.git
+    - git clone https://gitlab.com/mjbogusz/minirys_msgs.git
+    - git clone https://gitlab.com/mjbogusz/minirys_sensors.git
+    - cd /ws
+    - apt update && apt install ros-galactic-rttest ros-galactic-tlsf-cpp -y
+    - colcon build --cmake-force-configure --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    - cp -r /ws ${CI_PROJECT_DIR}/
+  artifacts:
+    paths:
+      - ws/
+
+cppcheck:
+  stage: test
+  needs:
+    - colcon
+  script:
+    - mv ws /ws
+    - cd /ws/src/${CI_PROJECT_NAME}
+    - . /ws/install/setup.sh
+    - export CMAKE_PREFIX_PATH=$AMENT_PREFIX_PATH:$CMAKE_PREFIX_PATH
+    - apt update && apt install ros-galactic-rttest ros-galactic-tlsf-cpp cppcheck -y
+    - cppcheck --version
+    - tools/run-cppcheck.sh
+
+clang-tidy:
+  stage: test
+  needs:
+    - colcon
+  script:
+    - mv ws /ws
+    - cd /ws/src/${CI_PROJECT_NAME}
+    - . /ws/install/setup.sh
+    - export CMAKE_PREFIX_PATH=$AMENT_PREFIX_PATH:$CMAKE_PREFIX_PATH
+    - apt update && apt install ros-galactic-rttest ros-galactic-tlsf-cpp clang-tidy -y
+    - clang-tidy --version
+    - tools/run-clang-tidy.sh
+
+pages:
+  stage: deploy
+  needs:
+    - cppcheck
+    - clang-tidy
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+  script:
+    - apt update && apt install doxygen graphviz -y
+    - doxygen --version
+    - tools/doxygen.sh
+    - cp -r docs/html public
+  artifacts:
+    paths:
+      - public

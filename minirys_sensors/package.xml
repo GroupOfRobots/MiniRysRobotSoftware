@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+	<name>minirys_sensors</name>
+	<version>0.3.0</version>
+	<description>A library gathering together the following sensors used on the MiniRyś robot</description>
+
+	<maintainer email="mjbogusz@gitlab.com">mjbogusz</maintainer>
+	<license>TBD</license>
+
+	<url type="website">https://gitlab.com/mjbogusz/minirys_sensors</url>
+
+	<buildtool_depend>cmake</buildtool_depend>
+	<doc_depend>doxygen</doc_depend>
+
+	<depend>sbc-linux-interfaces</depend>
+
+	<export>
+		<build_type>cmake</build_type>
+	</export>
+</package>
+

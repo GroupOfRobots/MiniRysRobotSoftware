@@ -1,0 +1,30 @@
+---
+Checks: '-*,
+ bugprone-*,
+ cppcoreguidelines-*,
+ -cppcoreguidelines-avoid-c-arrays,
+ -cppcoreguidelines-avoid-magic-numbers,
+ -cppcoreguidelines-pro-bounds-constant-array-index,
+ -cppcoreguidelines-pro-type-union-access,
+ -cppcoreguidelines-pro-type-vararg,
+ -cppcoreguidelines-special-member-functions,
+ misc-*,
+ -misc-no-recursion,
+ -misc-non-private-member-variables-in-classes,
+ modernize-*,
+ -modernize-avoid-bind,
+ -modernize-avoid-c-arrays,
+ -modernize-use-nodiscard,
+ -modernize-use-trailing-return-type,
+ performance-*,
+ readability-*,
+ -readability-implicit-bool-conversion,
+ -readability-magic-numbers,
+ -readability-uppercase-literal-suffix'
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.*'
+AnalyzeTemporaryDtors: false
+CheckOptions:
+  - key: modernize-use-default-member-init.UseAssignment
+    value: 1
+...

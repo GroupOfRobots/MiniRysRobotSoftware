@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+	<name>l6470-linux</name>
+	<version>0.2.1</version>
+	<description>A L6470 library for GNU/Linux</description>
+
+	<maintainer email="mjbogusz@gitlab.com">mjbogusz</maintainer>
+	<license>Beerware</license>
+
+	<url type="website">https://gitlab.com/mjbogusz/l6470-linux</url>
+	<url type="repository">https://gitlab.com/mjbogusz/l6470-linux</url>
+
+	<buildtool_depend>cmake</buildtool_depend>
+	<doc_depend>doxygen</doc_depend>
+
+	<depend>sbc-linux-interfaces</depend>
+
+	<export>
+		<build_type>cmake</build_type>
+	</export>
+</package>
+

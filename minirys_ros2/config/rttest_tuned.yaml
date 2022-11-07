@@ -1,0 +1,13 @@
+minirys:
+  minirys_rttest:
+    ros__parameters:
+      setScheduling: true
+      setMemoryStrategy: true
+      lockMemory: true
+      schedulerPriority: 98
+      schedulerPolicy: "rr"
+      iterations: 120000 # = 20 minutes, 20[min] * 60[s/min] * 100[it/s]
+      updatePeriod: 10000000 # [ns] = 10ms
+      stackSizeMB: 10
+      prefaultDynamicSizeMB: 512
+      filename: "/tmp/minirys_rttest.results.txt"

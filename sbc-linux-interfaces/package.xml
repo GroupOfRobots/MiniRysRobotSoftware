@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+	<name>sbc-linux-interfaces</name>
+	<version>0.1.4</version>
+	<description>A library for talking to SBC's (e.g. Raspberry Pi, Orange Pi) peripherals under GNU/Linux</description>
+
+	<maintainer email="mjbogusz@gitlab.com">mjbogusz</maintainer>
+	<license>MIT</license>
+
+	<url type="website">https://gitlab.com/mjbogusz/sbc-linux-interfaces</url>
+
+	<buildtool_depend>cmake</buildtool_depend>
+	<doc_depend>doxygen</doc_depend>
+
+	<export>
+		<build_type>cmake</build_type>
+	</export>
+</package>
+

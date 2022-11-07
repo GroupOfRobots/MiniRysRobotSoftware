@@ -1,0 +1,47 @@
+image: "mjbogusz/cpp-ci:latest"
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - check
+  - build
+  - deploy
+
+check:cppcheck:
+  stage: check
+  script:
+    - cppcheck --version
+    - tools/run-cppcheck.sh
+
+check:clang-tidy:
+  stage: check
+  script:
+    - clang-tidy --version
+    - tools/run-clang-tidy.sh
+
+check:uncrustify:
+  stage: check
+  script:
+    - uncrustify --version
+    - tools/run-uncrustify.sh --check
+
+build:gcc:
+  stage: build
+  script:
+    - tools/build.sh
+  artifacts:
+    paths:
+      - build
+
+pages:
+  stage: deploy
+  only:
+    - main
+  script:
+    - doxygen --version
+    - tools/doxygen.sh
+    - cp -r docs/html public
+  artifacts:
+    paths:
+      - public
