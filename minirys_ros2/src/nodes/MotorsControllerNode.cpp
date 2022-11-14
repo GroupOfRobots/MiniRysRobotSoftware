@@ -8,7 +8,8 @@ using std::placeholders::_1;
 
 MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 	Node("motors_controller_cs", options),
-	enabled(false),
+	enabledL(false),
+    enabledR(false),
 	balancing(false),
 	targetBalancing(false),
 	targetBalancingPrev(false),
@@ -134,7 +135,7 @@ void MotorsControllerNode::update() {
 		RCLCPP_ERROR_STREAM(this->get_logger(), "Error getting time since last call!");
 	}
 
-	if (!this->enabled) {
+	if (!this->enabledL || !this->enabledR) {
 		auto message = minirys_msgs::msg::MotorCommand();
 		message.speed_l = 0.0f;
 		message.speed_r = 0.0f;
@@ -168,8 +169,6 @@ void MotorsControllerNode::update() {
 	} else if (this->targetBalancing) {
 		speeds = this->standUp();
         this->angleRegulator.zero();
-        //speeds.first = 0;
-        //speeds.second = 0;
 	} else {
 		speeds = this->calculateSpeedsFlat();
 	}
@@ -206,20 +205,20 @@ void MotorsControllerNode::receiveMotorRSpeed(const std_msgs::msg::Float64::Shar
 }
 
 void MotorsControllerNode::receiveMotorLStatus(const minirys_msgs::msg::MotorDriverStatus::SharedPtr message) {
-	if (message->undervoltage || message->thermal_warning || message->thermal_shutdown || message->overcurrent) {
-		this->enabled = true;
+	if (!message->undervoltage || !message->thermal_warning || !message->thermal_shutdown || !message->overcurrent) {
+		this->enabledL = false;
 	}
     else {
-        this->enabled = false;
+        this->enabledL = true;
     }
 }
 
 void MotorsControllerNode::receiveMotorRStatus(const minirys_msgs::msg::MotorDriverStatus::SharedPtr message) {
-	if (message->undervoltage || message->thermal_warning || message->thermal_shutdown || message->overcurrent) {
-		this->enabled = true;
+	if (!message->undervoltage || !message->thermal_warning || !message->thermal_shutdown || !message->overcurrent) {
+		this->enabledR = false;
 	}
     else {
-        this->enabled = false;
+        this->enabledR = true;
     }
 }
 
@@ -270,7 +269,6 @@ std::pair<double, double> MotorsControllerNode::standUp() {
 			// We're up, switch to balancing regulation
 			this->standingUpDir = 0;
 			this->balancing = true;
-            //return {0.0,0.0};
 		} else if (this->steadyROSClock.now() - this->standingUpStart >= 1500ms) {
 			// We didn't have enough speed, try again
 			this->standingUpDir = 0;

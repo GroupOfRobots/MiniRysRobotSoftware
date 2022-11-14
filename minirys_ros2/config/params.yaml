@@ -51,9 +51,9 @@ minirys:
   fan_regulator_cs:
     ros__parameters:
       updateFrequency: 2.0
-      fanLevelLow: 30.0
-      fanLevelMedium: 60.0
-      fanLevelHigh: 100.0
+      fanLevelLow: 0.4
+      fanLevelMedium: 0.8
+      fanLevelHigh: 1.0
       thresholdCPUWarning: 50.0
       thresholdCPUCritical: 65.0
       thresholdMainWarning: 45.0
@@ -73,13 +73,13 @@ minirys:
       pidSpeedKp: 0.0
       pidSpeedKi: 0.0
       pidSpeedKd: 0.0
-      pidAngleKp: 100.0
-      pidAngleKi: 1.57
-      pidAngleKd: 0.00001
+      pidAngleKp: 100.0   #100.0
+      pidAngleKi: 1.61   #1.61
+      pidAngleKd: 0.00001     #0.00001
 
   odometry_cs:
     ros__parameters:
-      updateFrequency: 1.0
+      updateFrequency: 10.0
       invertLeftMotor: true
       invertRightMotor: false
       wheelRadius: 0.055

@@ -21,7 +21,9 @@ public:
 	~MotorsControllerNode() override;
 
 private:
-	bool enabled;
+	bool enabledL;
+
+    bool enabledR;
 
 	bool balancing;
 
