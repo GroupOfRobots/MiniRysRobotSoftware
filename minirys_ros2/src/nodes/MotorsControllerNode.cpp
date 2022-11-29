@@ -8,8 +8,8 @@ using std::placeholders::_1;
 
 MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 	Node("motors_controller_cs", options),
-	enabledL(false),
-    enabledR(false),
+	enabledL(true),
+    enabledR(true),
 	balancing(false),
 	targetBalancing(false),
 	targetBalancingPrev(false),
@@ -206,18 +206,44 @@ void MotorsControllerNode::receiveMotorRSpeed(const std_msgs::msg::Float64::Shar
 
 void MotorsControllerNode::receiveMotorLStatus(const minirys_msgs::msg::MotorDriverStatus::SharedPtr message) {
 	if (!message->undervoltage || !message->thermal_warning || !message->thermal_shutdown || !message->overcurrent) {
-		this->enabledL = false;
+        if (!message->undervoltage) {
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Undervoltage");
+        }
+        if (!message->thermal_warning) {
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Thermal warning");
+        }
+        if (!message->thermal_shutdown) {
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Thermal shutdown");
+        }
+        if (!message->overcurrent) {
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Overcurrent");
+        }
+        RCLCPP_ERROR_STREAM(this->get_logger(), "Left motor stopped");
+        this->enabledL = true;
 	}
-    else {
+    else{
         this->enabledL = true;
     }
 }
 
 void MotorsControllerNode::receiveMotorRStatus(const minirys_msgs::msg::MotorDriverStatus::SharedPtr message) {
 	if (!message->undervoltage || !message->thermal_warning || !message->thermal_shutdown || !message->overcurrent) {
-		this->enabledR = false;
+        if (!message->undervoltage) {
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Undervoltage");
+        }
+        if (!message->thermal_warning) {
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Thermal warning");
+        }
+        if (!message->thermal_shutdown) {
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Thermal shutdown");
+        }
+        if (!message->overcurrent) {
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Overcurrent");
+        }
+        RCLCPP_ERROR_STREAM(this->get_logger(), "Right motor stoppedd");
+		this->enabledR = true;
 	}
-    else {
+    else{
         this->enabledR = true;
     }
 }
@@ -241,7 +267,7 @@ std::pair<double, double> MotorsControllerNode::calculateSpeedsBalancing() {
 	if (this->enableSpeedRegulator) {
 		outputTargetAngle = this->speedRegulator.update(-this->targetForwardSpeed, -currentSpeed, this->robotAngularPosition);
 	}
-	double outputWheelSpeed = this->angleRegulator.update(outputTargetAngle, this->robotAngularPosition, currentSpeed);
+	double outputWheelSpeed = this->angleRegulator.update(outputTargetAngle, -this->robotAngularPosition, currentSpeed);
 
 	return {
 		std::min(std::max(outputWheelSpeed + this->targetRotationSpeed, -this->maxWheelSpeed), this->maxWheelSpeed),
@@ -251,7 +277,7 @@ std::pair<double, double> MotorsControllerNode::calculateSpeedsBalancing() {
 
 std::pair<double, double> MotorsControllerNode::standUp() {
 	if (this->standingUpDir == 0) {
-		this->standingUpDir = this->robotAngularPosition > 0 ? -1 : 1;
+		this->standingUpDir = this->robotAngularPosition < 0 ? -1 : 1;
 		this->standingUpPhase = 0;
 		this->standingUpStart = this->steadyROSClock.now();
 	}
@@ -265,7 +291,7 @@ std::pair<double, double> MotorsControllerNode::standUp() {
 		}
 	} else {
 		// Phase 1: reverse the direction and get up using the momentum
-		if (this->robotAngularPosition * this->standingUpDir < 0) {
+		if (this->robotAngularPosition * this->standingUpDir > 0) {
 			// We're up, switch to balancing regulation
 			this->standingUpDir = 0;
 			this->balancing = true;

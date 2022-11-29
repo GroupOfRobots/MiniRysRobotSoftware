@@ -19,6 +19,9 @@ IMUNode::IMUNode(I2CBus::SharedPtr i2cBus, rclcpp::NodeOptions options):
 	this->declare_parameter("filterFactor", rclcpp::ParameterValue(0.05));
 	this->declare_parameter("angleCorrection", rclcpp::ParameterValue(0.089545));
 	this->declare_parameter("angleHistorySize", rclcpp::ParameterValue(4));
+    this->declare_parameter("gyroOffsetX", rclcpp::ParameterValue(3.850143));
+    this->declare_parameter("gyroOffsetY", rclcpp::ParameterValue(-5.236362));
+    this->declare_parameter("gyroOffsetZ", rclcpp::ParameterValue(-4.604892));
 
 	this->updatePeriod = std::chrono::duration<double>(1.0 / this->get_parameter("updateFrequency").as_double());
 	RCLCPP_INFO_STREAM(this->get_logger(), "Got param: update period (s) " << this->updatePeriod.count());
@@ -38,9 +41,9 @@ IMUNode::IMUNode(I2CBus::SharedPtr i2cBus, rclcpp::NodeOptions options):
 void IMUNode::update() {
 	// Read the clock and the raw IMU data
 	auto now = this->get_clock()->now();
-	double gyroX = this->imu.readFloatGyroX();
-	double gyroY = this->imu.readFloatGyroY();
-	double gyroZ = this->imu.readFloatGyroZ();
+	double gyroX = this->imu.readFloatGyroX() - this->get_parameter("gyroOffsetX").as_double();
+	double gyroY = this->imu.readFloatGyroY() - this->get_parameter("gyroOffsetY").as_double();
+	double gyroZ = this->imu.readFloatGyroZ() - this->get_parameter("gyroOffsetZ").as_double();
 	double accelX = this->imu.readFloatAccelX();
 	double accelY = this->imu.readFloatAccelY();
 	double accelZ = this->imu.readFloatAccelZ();

@@ -19,7 +19,7 @@ minirys:
     ros__parameters:
       updateFrequency: 100.0
       filterFactor: 0.05
-      angleCorrection: 0.000346 #(Yellow 0.000346) #-0.189545 orange 0.042729
+      angleCorrection: 0.042729 #(Yellow 0.000346) #-0.189545 orange 0.042729
       angleHistorySize: 4
       gyroOffsetX: 1.977383 #(Yellow 3.850143) #in deg
       gyroOffsetY: -6.768773 #(Yellow -5.236362) #in deg

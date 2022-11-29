@@ -70,9 +70,9 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: Deceleration " << accelerationSPS);
 	// Current/voltage settings
 	this->motors->setOCThreshold(3000);
-	this->motors->setAccelerationKVAL(0x80);  //80
-	this->motors->setDecelerationKVAL(0x80);  //80
-	this->motors->setRunKVAL(0xB4);  //B4
+	this->motors->setAccelerationKVAL(0x64);  //80
+	this->motors->setDecelerationKVAL(0x64);  //80
+	this->motors->setRunKVAL(0x80);  //B4
 	this->motors->setHoldKVAL(0x32);  //00
 	// Disable BEMF compensation and the FLAG (alarm) pin
 	this->motors->setParam(L6470::REG_ADDR_ST_SLP, 0x00);
@@ -134,8 +134,8 @@ void MotorsNode::update() {
 	auto statusMessageL = minirys_msgs::msg::MotorDriverStatus();
 	auto statusMessageR = minirys_msgs::msg::MotorDriverStatus();
 
-	positionMessageL.data = static_cast<double>(motorPositions[0]) * 2.0 * M_PI / (this->stepsPerRevolution *32.0);
-	positionMessageR.data = static_cast<double>(motorPositions[1]) * 2.0 * M_PI / (this->stepsPerRevolution *32.0);
+	positionMessageL.data = static_cast<double>(motorPositions[0]) * 2.0 * M_PI / (this->stepsPerRevolution * 32.0);
+	positionMessageR.data = static_cast<double>(motorPositions[1]) * 2.0 * M_PI / (this->stepsPerRevolution * 32.0);
 	speedMessageL.data = static_cast<double>(motorSpeeds[0]) * 2.0 * M_PI / this->stepsPerRevolution * (motorStatuses[0].direction == 0 ? 1 : -1);
 	speedMessageR.data = static_cast<double>(motorSpeeds[1]) * 2.0 * M_PI / this->stepsPerRevolution * (motorStatuses[1].direction == 0 ? 1 : -1);
 	statusMessageL.hi_z = motorStatuses[0].hiZ;
