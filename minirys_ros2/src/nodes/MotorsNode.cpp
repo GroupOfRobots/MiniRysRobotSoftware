@@ -49,9 +49,9 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 
 	RCLCPP_INFO_STREAM(this->get_logger(), "L6470: configuring");
 	// Set 62.5kHz PWM frequency
-    this->motors->setOscillatorMode(L6470::OSC_MODE_EXT_16MHZ_XTAL_DRIVE,0);
-    this->motors->setOscillatorMode(L6470::OSC_MODE_INT_16MHZ_OSCOUT_16MHZ,1);
-    //this->motors->setOscillatorMode(L6470::OSC_MODE_INT_16MHZ_OSCOUT_16MHZ);
+    this->motors->setOscillatorMode(L6470::OSC_MODE_EXT_16MHZ_XTAL_DRIVE,0); //OSCIN pin of right stepper motor driver is physically connected to OSCOUT left motor driver
+    this->motors->setOscillatorMode(L6470::OSC_MODE_INT_16MHZ_OSCOUT_16MHZ,1); // in order to synchronize clocks
+    //this->motors->setOscillatorMode(L6470::OSC_MODE_INT_16MHZ_OSCOUT_16MHZ); //old setting without clocks connection
 	this->motors->setPWMFrequency(L6470::PWM_DIV_1, L6470::PWM_MULT_2);
 	// Other CONFIG register values
 	this->motors->setSlewRate(L6470::SLEW_RATE_260V_US);
@@ -137,10 +137,10 @@ void MotorsNode::update() {
 	auto statusMessageL = minirys_msgs::msg::MotorDriverStatus();
 	auto statusMessageR = minirys_msgs::msg::MotorDriverStatus();
 
-	positionMessageL.data = static_cast<double>(motorPositions[0]) * 2.0 * M_PI / (this->stepsPerRevolution);
-	positionMessageR.data = static_cast<double>(motorPositions[1]) * 2.0 * M_PI / (this->stepsPerRevolution);
-	speedMessageL.data = static_cast<double>(motorSpeeds[0]) * 2.0 * M_PI * 32.0 / this->stepsPerRevolution * (motorStatuses[0].direction == 0 ? 1 : -1);
-	speedMessageR.data = static_cast<double>(motorSpeeds[1]) * 2.0 * M_PI * 32.0 / this->stepsPerRevolution * (motorStatuses[1].direction == 0 ? 1 : -1);
+	positionMessageL.data = static_cast<double>(motorPositions[0]) * 2.0 * M_PI / (this->stepsPerRevolution) * 32.0;
+	positionMessageR.data = static_cast<double>(motorPositions[1]) * 2.0 * M_PI / (this->stepsPerRevolution) * 32.0;
+	speedMessageL.data = static_cast<double>(motorSpeeds[0]) * 2.0 * M_PI / this->stepsPerRevolution * (motorStatuses[0].direction == 0 ? 1 : -1);
+	speedMessageR.data = static_cast<double>(motorSpeeds[1]) * 2.0 * M_PI / this->stepsPerRevolution * (motorStatuses[1].direction == 0 ? 1 : -1);
 	statusMessageL.hi_z = motorStatuses[0].hiZ;
 	statusMessageL.busy = motorStatuses[0].busy;
 	statusMessageL.direction = motorStatuses[0].direction;

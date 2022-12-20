@@ -43,9 +43,9 @@ minirys:
   motors_ve:
     ros__parameters:
       updateFrequency: 100.0
-      stepsPerRevolution: 6400.0
-      maxSpeed: 0.314 #12.56 # 2*Pi = 1rps
-      acceleration: 30.0 # 2*Pi = 1rps
+      stepsPerRevolution: 200.0
+      maxSpeed: 12.56 #12.56 # 2*Pi = 1rps
+      acceleration: 300.0 # 2*Pi = 1rps
 
   # Control Subsystem
   fan_regulator_cs:
