@@ -2,6 +2,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/range.hpp>
+#include <sensor_msgs/msg/laser_scan.hpp>
 
 #include <GPIOPin.hpp>
 #include <I2CBus.hpp>
@@ -37,6 +38,8 @@ private:
 	rclcpp::TimerBase::SharedPtr updateTimer;
 
 	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr distancePublishers[6];
+
+    rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr scanPublisher;
 
 	void update();
 };

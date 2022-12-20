@@ -3,6 +3,9 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_ros/transform_broadcaster.h>
 
 using namespace std::chrono_literals;
 
@@ -36,6 +39,8 @@ IMUNode::IMUNode(I2CBus::SharedPtr i2cBus, rclcpp::NodeOptions options):
 	this->angularPosePublisher = this->create_publisher<minirys_msgs::msg::AngularPose>("internal/angular_pose", 10);
 
 	this->updateTimer = this->create_wall_timer(updatePeriod, std::bind(&IMUNode::update, this));
+
+    angle_broadcaster = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 }
 
 void IMUNode::update() {
@@ -87,6 +92,25 @@ void IMUNode::update() {
 	poseMessage.header.stamp = now;
 	poseMessage.angular_position = angleFiltered;
 	poseMessage.angular_velocity = angularVelocity;
+
+    // Transform broadcaster
+    auto angle_trans = geometry_msgs::msg::TransformStamped();
+    angle_trans.header.stamp = this->get_clock()->now();
+    angle_trans.header.frame_id = "base_link";
+    angle_trans.child_frame_id = "robot_base";
+
+    angle_trans.transform.translation.x = 0.0;
+    angle_trans.transform.translation.y = 0.0;
+    angle_trans.transform.translation.z = 0.0;
+    tf2::Quaternion q;
+    q.setRPY(0, -(angleFiltered + 1.5708), 0); //robot model was defined in horizontal position -> +1.5708 and imu is physically mounted in different orientation -> -()
+    angle_trans.transform.rotation.x = q.x();
+    angle_trans.transform.rotation.y = q.y();
+    angle_trans.transform.rotation.z = q.z();
+    angle_trans.transform.rotation.w = q.w();
+
+    //send the transform
+    angle_broadcaster->sendTransform(angle_trans);
 
 	// Send the messages
 	this->imuPublisher->publish(imuMessage);

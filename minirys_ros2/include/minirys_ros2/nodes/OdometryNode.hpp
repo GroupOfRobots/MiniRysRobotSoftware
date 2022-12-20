@@ -7,6 +7,7 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/float64.hpp>
+#include <tf2_ros/transform_broadcaster.h>
 
 class OdometryNode: public rclcpp::Node {
 public:
@@ -36,6 +37,7 @@ private:
 	double motorSpeedL;
 	double motorSpeedR;
 
+    std::shared_ptr<tf2_ros::TransformBroadcaster> odom_broadcaster;
 
 	rclcpp::TimerBase::SharedPtr updateTimer;
 

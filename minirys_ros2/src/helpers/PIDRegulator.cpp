@@ -1,7 +1,5 @@
 #include "minirys_ros2/helpers/PIDRegulator.hpp"
-
 #include <algorithm>
-#include <iostream>
 
 PIDRegulator::PIDRegulator():
 	looptime(0.0),

@@ -265,10 +265,11 @@ std::pair<double, double> MotorsControllerNode::calculateSpeedsBalancing() {
     double currentSpeed = (this->motorSpeedL + this->motorSpeedR) / 2;
     //RCLCPP_INFO_STREAM(this->get_logger(), "CurrentSpeed: " << currentSpeed);
 	if (this->enableSpeedRegulator) {
-		outputTargetAngle = this->speedRegulator.update(-this->targetForwardSpeed, -currentSpeed, this->robotAngularPosition);
+		outputTargetAngle = this->speedRegulator.update(this->targetForwardSpeed, currentSpeed, -this->robotAngularPosition);
+        //outputTargetAngle = this->speedRegulator.update(this->targetForwardSpeed, currentSpeed);
 	}
 	double outputWheelSpeed = this->angleRegulator.update(outputTargetAngle, -this->robotAngularPosition, currentSpeed);
-
+    //double outputWheelSpeed = this->angleRegulator.update(outputTargetAngle, this->robotAngularPosition);
 	return {
 		std::min(std::max(outputWheelSpeed + this->targetRotationSpeed, -this->maxWheelSpeed), this->maxWheelSpeed),
 		std::min(std::max(outputWheelSpeed - this->targetRotationSpeed, -this->maxWheelSpeed), this->maxWheelSpeed)

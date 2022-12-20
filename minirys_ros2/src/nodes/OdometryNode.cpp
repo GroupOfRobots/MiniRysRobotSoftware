@@ -2,6 +2,7 @@
 
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_ros/transform_broadcaster.h>
 
 #include <chrono>
 #include <functional>
@@ -83,6 +84,7 @@ OdometryNode::OdometryNode(rclcpp::NodeOptions options):
 	);
 
 	this->updateTimer = this->create_wall_timer(period, std::bind(&OdometryNode::update, this));
+    odom_broadcaster = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 }
 
 void OdometryNode::update() {
@@ -102,8 +104,8 @@ void OdometryNode::update() {
 		this->poseTheta += 2.0 * M_PI;
 	}
 
-	double poseChangeX = distanceAvg * sin(this->poseTheta);
-	double poseChangeY = distanceAvg * cos(this->poseTheta);
+	double poseChangeX = distanceAvg * cos(this->poseTheta);
+	double poseChangeY = distanceAvg * sin(this->poseTheta);
 
 	this->poseX += poseChangeX;
 	this->poseY += poseChangeY;
@@ -111,9 +113,30 @@ void OdometryNode::update() {
 	double speedL = this->motorSpeedL * wheelCircL;
 	double speedR = this->motorSpeedR * wheelCircR;
 
+    //first, we'll publish the transform over tf
+
+    auto odom_trans = geometry_msgs::msg::TransformStamped();
+    odom_trans.header.stamp = this->get_clock()->now();
+    odom_trans.header.frame_id = "odom";
+    odom_trans.child_frame_id = "base_link";
+
+    odom_trans.transform.translation.x = this->poseX;
+    odom_trans.transform.translation.y = this->poseY;
+    odom_trans.transform.translation.z = 0.0;
+    tf2::Quaternion q;
+    q.setRPY(0, 0, this->poseTheta);
+    odom_trans.transform.rotation.x = q.x();
+    odom_trans.transform.rotation.y = q.y();
+    odom_trans.transform.rotation.z = q.z();
+    odom_trans.transform.rotation.w = q.w();
+
+    //send the transform
+    odom_broadcaster->sendTransform(odom_trans);
+
 	auto messageOdom = nav_msgs::msg::Odometry();
 	messageOdom.header.stamp = this->get_clock()->now();
-	messageOdom.header.frame_id = "imu";
+	messageOdom.header.frame_id = "odom";
+    messageOdom.child_frame_id = "base_link";
 	messageOdom.pose.pose.position.x = this->poseX;
 	messageOdom.pose.pose.position.y = this->poseY;
 	messageOdom.pose.pose.orientation.w = cos(this->poseTheta / 2);

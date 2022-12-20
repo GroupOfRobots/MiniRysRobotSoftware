@@ -59,6 +59,9 @@ int main() {
 	auto ocThresholds = driver.getOCThreshold();
 	std::cout << std::hex << "Config: 0: " << configs[0] << " | 1: " << configs[1] << std::endl;
 	std::cout << std::hex << "OC threshold: 0: " << ocThresholds[0] << " | 1: " << ocThresholds[1] << std::endl;
+    std::vector<float> speeds = {250.0, 250.0};
+    std::vector<L6470::Direction> dirs = {L6470::DIRECTION_FWD, L6470::DIRECTION_REV};
+    std::vector<L6470::Direction> dirs2 = {L6470::DIRECTION_REV, L6470::DIRECTION_FWD};
 
 	while (!exitFlag) {
 		std::cout << "Loop" << std::endl;
@@ -101,10 +104,10 @@ int main() {
 			<< std::setfill(' ') << std::setw(5) << (int)statuses[1].stepClockActive
 			<< std::endl;
 
-		driver.run(250, direction ? L6470::DIRECTION_FWD : L6470::DIRECTION_REV);
+		driver.run(speeds,  direction ? dirs : dirs2);
 
 		direction = !direction;
-		std::this_thread::sleep_for(3s);
+		std::this_thread::sleep_for(10s);
 	}
 
 	std::cout << "\t soft reset" << std::endl;

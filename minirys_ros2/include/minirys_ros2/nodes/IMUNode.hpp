@@ -4,6 +4,7 @@
 
 #include <minirys_msgs/msg/angular_pose.hpp>
 #include <sensor_msgs/msg/imu.hpp>
+#include <tf2_ros/transform_broadcaster.h>
 
 #include <I2CBus.hpp>
 #include <LSM6.hpp>
@@ -26,6 +27,8 @@ private:
 	double filterFactor;
 	double angleCorrection;
 	unsigned int angleHistorySize;
+
+    std::shared_ptr<tf2_ros::TransformBroadcaster> angle_broadcaster;
 
 	rclcpp::TimerBase::SharedPtr updateTimer;
 

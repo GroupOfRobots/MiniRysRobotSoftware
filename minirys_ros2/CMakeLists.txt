@@ -74,10 +74,13 @@ ament_target_dependencies(IMUNode
   minirys_sensors
   sensor_msgs
   minirys_msgs
+  tf2
+  tf2_geometry_msgs
 )
 target_link_libraries(IMUNode
   sbc-linux-interfaces
   minirys_sensors
+
 )
 # Temperature
 add_library(TemperatureNode

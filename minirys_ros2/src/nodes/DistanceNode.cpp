@@ -41,6 +41,7 @@ DistanceNode::DistanceNode(rclcpp::NodeOptions options):
 
 		this->sensors[i]->powerOff();
 	}
+    this->scanPublisher = this->create_publisher<sensor_msgs::msg::LaserScan>("internal/laser_scan", 10);
 
 	for (int i = 0; i < 6; i++) {
 		this->sensors[i]->powerOn();
@@ -75,6 +76,15 @@ void DistanceNode::update() {
 	message.field_of_view = 0.4712389;
 	message.radiation_type = sensor_msgs::msg::Range::INFRARED;
 
+    auto scan = sensor_msgs::msg::LaserScan();
+    scan.angle_min = 0;
+    scan.angle_max = 6.28318530718;
+    scan.angle_increment = 1.57079632679;
+    scan.time_increment = 0.1;
+    scan.scan_time = 0.1;
+    scan.range_min = 0;
+    scan.range_max = 4;
+
 	for (int i = 0; i < 6; i++) {
 		auto distance = this->sensors[i]->getDistance();
 		if (distance == 65535) {
@@ -84,5 +94,19 @@ void DistanceNode::update() {
 		message.header.frame_id = "distance_" + std::to_string(i);
 		message.range = static_cast<float>(distance) / 1000.0f;
 		this->distancePublishers[i]->publish(message);
+
 	}
+    auto distance0 = this->sensors[0]->getDistance();
+    auto distance1 = this->sensors[1]->getDistance();
+    auto distance2 = this->sensors[2]->getDistance();
+    auto distance5 = this->sensors[5]->getDistance();
+    auto range0 = (static_cast<float>(distance0) / 1000.0f) + 0.033f; //adding offsets to ranges in order to make laser scan in centre of robot
+    auto range1 = (static_cast<float>(distance1) / 1000.0f) + 0.082f;
+    auto range2 = (static_cast<float>(distance2) / 1000.0f) + 0.05f;
+    auto range5 = (static_cast<float>(distance5) / 1000.0f) + 0.05f;
+    std::vector<float> scan_ranges = {range0, range2, range1, range5};
+    scan.ranges = scan_ranges;
+    scan.header.stamp = this->get_clock()->now();
+    scan.header.frame_id = "laser_scan";
+    this->scanPublisher->publish(scan);
 }
