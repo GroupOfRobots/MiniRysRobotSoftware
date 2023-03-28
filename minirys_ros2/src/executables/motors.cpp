@@ -3,6 +3,11 @@
 
 int main(int argc, char const* argv[]) {
 	RTTExecutor::setupRT(3, 98, SCHED_RR);
+    // initiate communication interfaces
+    if (bcm2835_init() == 0) {
+        fprintf(stderr, "Not able to init the bmc2835 library\n");
+        return -1;
+    }
 	rclcpp::init(argc, argv);
 
 	rclcpp::executors::SingleThreadedExecutor executor;

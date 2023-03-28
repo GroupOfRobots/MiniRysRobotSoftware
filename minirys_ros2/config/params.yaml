@@ -44,8 +44,8 @@ minirys:
     ros__parameters:
       updateFrequency: 100.0
       stepsPerRevolution: 200.0
-      maxSpeed: 12.56 #12.56 # 2*Pi = 1rps
-      acceleration: 300.0 # 2*Pi = 1rps
+      maxSpeed: 14.56 # 2*Pi = 1rps
+      acceleration: 14.628 # 2*Pi = 1rps
 
   # Control Subsystem
   fan_regulator_cs:
@@ -65,10 +65,10 @@ minirys:
       invertLeftMotor: true
       invertRightMotor: false
       enableSpeedRegulator: false
-      maxLinearSpeed: 10.5
-      maxRotationSpeed: 10.5
-      maxWheelSpeed: 10.5
-      maxStandUpSpeed: 8.0
+      maxLinearSpeed: 14.0 # 2*Pi = 1rps
+      maxRotationSpeed: 14.0 # 2*Pi = 1rps
+      maxWheelSpeed: 14.0 # 2*Pi = 1rps
+      maxStandUpSpeed: 11.0 # 2*Pi = 1rps
       maxBalancingAngle: 0.25
       pidSpeedKp: 0.001 #0.05 to za duzo 0.01 git
       pidSpeedKi: 0.00000005 #0.0005 git #0.5 to zajebiscie duzy uchyb ustalony 5.5 ogromne oscylacje
@@ -83,7 +83,7 @@ minirys:
       invertLeftMotor: true
       invertRightMotor: false
       wheelRadius: 0.055
-      wheelSeparation: 0.139
+      wheelSeparation: 0.1452
       wheelRadiusCorrection: 1.00
       wheelSeparationCorrection: 1.00
 

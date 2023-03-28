@@ -6,8 +6,19 @@
 #include <minirys_msgs/msg/motor_driver_status.hpp>
 #include <std_msgs/msg/float64.hpp>
 
-#include <L6470.hpp>
-#include <SPIBus.hpp>
+//#include <L6470.hpp>
+#include <motorsclass.h>
+#include <memory>
+//#include <SPIBus.hpp>
+
+void clipValue(float & value, float max);
+
+struct motor_status {
+    bool status[13];
+    motor_status(){
+        for (int i; i < 13; i++) status[i] = false;
+    };
+};
 
 class MotorsNode: public rclcpp::Node {
 public:
@@ -21,17 +32,25 @@ private:
 	double stepsPerRevolution;
 	double maxSpeed;
 
-	SPIBus::SharedPtr spi;
+	//SPIBus::SharedPtr spi;
 
-	GPIOPin::SharedPtr resetPin;
+	//GPIOPin::SharedPtr resetPin;
 
-	GPIOPin::SharedPtr busyPin;
+	//GPIOPin::SharedPtr busyPin;
 
-	L6470::SharedPtr motors;
+    //Motors *motors;
+    std::shared_ptr<Motors> motors;
 
 	double speedL;
 
 	double speedR;
+
+    bool motorsEnabled;
+    float motorSpeedLeft;
+    float motorSpeedRight;
+    float maxAcceleration;
+    bool invertLeftSpeed;
+    bool invertRightSpeed;
 
 	rclcpp::TimerBase::SharedPtr updateTimer;
 
@@ -52,4 +71,16 @@ private:
 	void update();
 
 	void receiveMotorCommand(const minirys_msgs::msg::MotorCommand::SharedPtr message);
+
+    void enableMotors();
+    void disableMotors();
+
+    void setMotorSpeeds(float speedLeft, float speedRight, bool ignoreAcceleration = false);
+    float getMotorSpeedLeft() const;
+    float getMotorSpeedRight() const;
+
+    void getMotorsStatusRegisters(long &motor0, long &motor1);
+    motor_status getMotorStatusLeft();
+    motor_status getMotorStatusRight();
+    //void getMotorsSpeedConfiguration(float &max, float &min, float &acc, float &dec);
 };
