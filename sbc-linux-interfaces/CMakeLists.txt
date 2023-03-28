@@ -28,6 +28,8 @@ add_library(${PROJECT_NAME} SHARED
   src/I2CBus.cpp
   src/PWMPin.cpp
   src/SPIBus.cpp
+  src/bcm2835.cpp
+
 )
 target_include_directories(${PROJECT_NAME}
   PUBLIC
