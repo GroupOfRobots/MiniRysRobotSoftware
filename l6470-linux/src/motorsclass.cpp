@@ -1,5 +1,5 @@
 /**
- * @file autodriver.cpp
+ * @file motorsclass.cpp
  *
  */
 /*
@@ -29,21 +29,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <assert.h>
-#include <chrono>         // std::chrono::system_clock
-#include <ctime>          // std::time_t, std::tm, std::localtime, std::mktime
 #include <iostream>
 
-#include "bcm2835.hpp"
-
-//#if defined(__linux__)
-//#else
-// #include "bcm2835_gpio.h"
-// #include "bcm2835_spi.h"
-//#endif
-
 #include "motorsclass.h"
-
-#include "l6470constants.h"
 
 #define BUSY_PIN_NOT_USED	0xFF
 
@@ -56,6 +44,7 @@ Motors::Motors(uint8_t nSpiChipSelect, uint8_t nResetPin) : l_bIsBusy(false), l_
 	m_nPosition = 0;
 	m_nResetPin = nResetPin;
 	m_nBusyPin = BUSY_PIN_NOT_USED;
+    m_nCount = 2;
 
 	bcm2835_spi_begin();
 	bcm2835_gpio_fsel(GPIO_RESET_OUT, BCM2835_GPIO_FSEL_OUTP);
@@ -77,21 +66,242 @@ Motors::Motors(uint8_t nSpiChipSelect, uint8_t nResetPin) : l_bIsBusy(false), l_
 
 Motors::~Motors(void) {
 	hardHiZ();
-	m_nPosition=0;
-	this->hardStop();
-	m_nPosition=1;
-	this->hardStop();
+    for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+        this->softStop();
+        this->resetDev();
+    }
 	l_bIsBusy = false;
 	l_bIsConnected = false;
 	r_bIsBusy = false;
 	r_bIsConnected = false;
 }
 
+void Motors::setOscillatorMode(const TL6470ConfigOsc& oscillator, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setOscMode(oscillator);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setOscMode(oscillator);
+    }
+}
+
+void Motors::configStepSelMode(uint8_t stepMode, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->configStepMode(stepMode);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->configStepMode(stepMode);
+    }
+}
+
+void Motors::setMaximumSpeed(float speedInStepsPerSecond, std::optional<u_int8_t> index) {
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setMaxSpeed(speedInStepsPerSecond);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setMaxSpeed(speedInStepsPerSecond);
+    }
+}
+
+void Motors::setMinimumSpeed(float speedInStepsPerSecond, std::optional<u_int8_t> index) {
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setMinSpeed(speedInStepsPerSecond);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setMinSpeed(speedInStepsPerSecond);
+    }
+}
+
+void Motors::setFullStepModeSpeed(float speedInStepsPerSecond, std::optional<u_int8_t> index) {
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setFullSpeed(speedInStepsPerSecond);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setFullSpeed(speedInStepsPerSecond);
+    }
+}
+
+void Motors::setAcceleration(float accInStepsPerSecond2, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setAcc(accInStepsPerSecond2);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setAcc(accInStepsPerSecond2);
+    }
+}
+
+void Motors::setDeceleration(float decInStepsPerSecond2, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setDec(decInStepsPerSecond2);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setDec(decInStepsPerSecond2);
+    }
+}
+
+void Motors::setPWMFrequency(int divisor, int multiplier, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setPWMFreq(divisor, multiplier);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setPWMFreq(divisor, multiplier);
+    }
+}
+
+void Motors::setPowSlewRate(int slewRate, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setSlewRate(slewRate);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setSlewRate(slewRate);
+    }
+}
+
+void Motors::setOverCurrentThreshold(uint8_t threshold, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setOCThreshold(threshold);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setOCThreshold(threshold);
+    }
+}
+
+void Motors::setOverCurrentShutdown(uint8_t shutdown, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setOCShutdown(shutdown);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setOCShutdown(shutdown);
+    }
+}
+
+void Motors::setVoltageCompensation(int vsCompMode, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setVoltageComp(vsCompMode);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setVoltageComp(vsCompMode);
+    }
+}
+
+void Motors::setSwitchModeConfig(int switchMode, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setSwitchMode(switchMode);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setSwitchMode(switchMode);
+    }
+}
+
+void Motors::setBackEMF(std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setParam(L6470_PARAM_ST_SLP,0x00);
+            this->setParam(L6470_PARAM_FN_SLP_ACC,0x00);
+            this->setParam(L6470_PARAM_FN_SLP_DEC,0x00);
+            this->setParam(L6470_PARAM_ALARM_EN,0x00);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setParam(L6470_PARAM_ST_SLP,0x00);
+        this->setParam(L6470_PARAM_FN_SLP_ACC,0x00);
+        this->setParam(L6470_PARAM_FN_SLP_DEC,0x00);
+        this->setParam(L6470_PARAM_ALARM_EN,0x00);
+    }
+}
+void Motors::setAccCurrentKVAL(uint8_t kValInput, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setAccKVAL(kValInput);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setAccKVAL(kValInput);
+    }
+}
+
+void Motors::setDecCurrentKVAL(uint8_t kValInput, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setDecKVAL(kValInput);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setDecKVAL(kValInput);
+    }
+}
+
+void Motors::setRunCurrentKVAL(uint8_t kValInput, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setRunKVAL(kValInput);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setRunKVAL(kValInput);
+    }
+}
+
+void Motors::setHoldCurrentKVAL(uint8_t kValInput, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->setHoldKVAL(kValInput);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->setHoldKVAL(kValInput);
+    }
+}
+
 void Motors::setUp(){
 
 	m_nPosition = 0;
-
-	this->setParam(L6470_PARAM_CONFIG,0x2e8B); //16MHz
+    this->setOscillatorMode(L6470_CONFIG_OSC_EXT_16MHZ_XTAL_DRIVE, LEFT_MOTOR);
+	//this->setParam(L6470_PARAM_CONFIG,0x2e8B); //16MHz
 	this->configStepMode(0x06);   // 64microsteps per step
 	this->setMaxSpeed(1000);        // 350 steps/s max
 	this->setMinSpeed(0);        // 10 steps/s min
@@ -115,7 +325,8 @@ void Motors::setUp(){
 
 	m_nPosition = 1;
 
-	this->setParam(L6470_PARAM_CONFIG,0x2e8B); //16MHz
+	//this->setParam(L6470_PARAM_CONFIG,0x2e8B); //16MHz
+    this->setOscillatorMode(L6470_CONFIG_OSC_INT_16MHZ_OSCOUT_16MHZ, RIGHT_MOTOR);
 	this->configStepMode(0x06);   // 64microsteps per step
 	this->setMaxSpeed(1000);        // 350 steps/s max
 	this->setMinSpeed(0);        // 10 steps/s min
@@ -138,41 +349,32 @@ void Motors::setUp(){
 	//this->setFullSpeed(120);       // microstep above 120 steps/s, default value 602.7
 }
 
-void Motors::setMaxSpeedForBoth(float speed){
-	m_nPosition = 0;
-	this->setMaxSpeed(speed);
-	m_nPosition = 1;
-	this->setMaxSpeed(speed);
+void Motors::setSpeeds(const std::array<float,2>& speeds){
+    for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+        speeds[m_nPosition] >=0 ? this->run(L6470_DIR_FWD,speeds[m_nPosition]) : this->run(L6470_DIR_REV,-1*speeds[m_nPosition]);
+    }
 }
 
-void Motors::setSpeed(float speedLeft, float speedRight){
-	// // auto start = std::chrono::system_clock::now();
-	// m_nPosition=0;
-	// while (this->busyCheck())
-	// 	;
-	// m_nPosition=1;
-	// while (this->busyCheck())
-	// 	;
-	// // auto end = std::chrono::system_clock::now();
-	// // std::chrono::duration<double> elapsed_seconds = end-start;
- //    // std::cout << "busyCheck duration: " << elapsed_seconds.count() << "s\n";
-	m_nPosition=0;
-	if (speedLeft>=0)this->run(L6470_DIR_FWD,speedLeft);
-	else this->run(L6470_DIR_REV,-1*speedLeft);
-
-	m_nPosition=1;
-	if (speedRight>=0)this->run(L6470_DIR_FWD,speedRight);
-	else this->run(L6470_DIR_REV,-1*speedRight);
-}
-
-void Motors::setMicrostep(uint8_t step){
-
-
-		m_nPosition = 0;
-		this->configStepMode(step);
-
-		m_nPosition = 1;
-		this->configStepMode(step);
+std::vector<int32_t> Motors::getSpeeds(std::optional<u_int8_t> index){
+    std::vector<int32_t> speeds;
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            int32_t temp = getParam(L6470_PARAM_SPEED);
+            if (temp & 0x00200000) {
+                temp |= 0xffc00000;
+            }
+            speeds.emplace_back(temp);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        int32_t temp = getParam(L6470_PARAM_SPEED);
+        if (temp & 0x00200000) {
+            temp |= 0xffc00000;
+        }
+        speeds.emplace_back(temp);
+    }
+    return speeds;
 }
 
 void Motors::stop(){
@@ -231,8 +433,6 @@ uint8_t Motors::SPIXfer(uint8_t data) {
  * Additional method
  */
 bool Motors::IsConnected(int position){
-
-
 	if (position) {
 		return r_bIsConnected;
 	}else{
@@ -240,40 +440,87 @@ bool Motors::IsConnected(int position){
 	}
 }
 
-long Motors::getPositionLeft(){
-		m_nPosition=0;
-		return this->getPos();
+std::vector<int32_t> Motors::getPosition(std::optional<u_int8_t> index){
+    std::vector<int32_t> positions;
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            positions.emplace_back(this->getPos());
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        positions.emplace_back(this->getPos());
+    }
+    return positions;
 }
 
-long Motors::getPositionRight(){
-		m_nPosition=1;
-		return this->getPos();
+void Motors::resetPosition(std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->resetPos();
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->resetPos();
+    }
 }
 
-void Motors::resetPosition(){
-		m_nPosition=0;
-		this->resetPos();
-		m_nPosition=1;
-		this->resetPos();
+void Motors::resetDevice(std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            this->resetDev();
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        this->resetDev();
+    }
 }
 
-int Motors::getBatteryVoltage(){
-	int voltage;
-	m_nPosition = 0;
-	voltage = this->getVoltageComp();
-	m_nPosition = 1;
-	voltage += this->getVoltageComp();
-
-	return (voltage/16)*3.3*3.1;
+std::vector<Motors::motorStatus> Motors::getMotorStatus(std::optional<u_int8_t> index){
+    std::vector<Motors::motorStatus> statuses;
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            const long rawStatus = this->getStatus();
+            Motors::motorStatus status;
+            status.stepLossA = ~rawStatus & L6470_STATUS_STEP_LOSS_A;
+            status.stepLossB = ~rawStatus & L6470_STATUS_STEP_LOSS_B;
+            status.overCurrent = rawStatus & L6470_STATUS_OCD;
+            status.thermalShutdown = rawStatus & L6470_STATUS_TH_SD;
+            status.thermalWarning = rawStatus & L6470_STATUS_TH_WRN;
+            status.underVoltageLockout = rawStatus & L6470_STATUS_UVLO;
+            status.motorStopped = ~rawStatus & 0x0060;
+            status.motorAcceleration = (~rawStatus & 0x0040) & (rawStatus & 0x0020);
+            status.motorDeceleration = (rawStatus & 0x0040) & (~rawStatus & 0x0020);
+            status.motorConstSpeed = rawStatus & 0x0060;
+            status.direction = rawStatus & L6470_STATUS_DIR;
+            status.hiZ = rawStatus & L6470_STATUS_HIZ;
+            status.busy = ~rawStatus & L6470_STATUS_BUSY;
+            statuses.emplace_back(status);
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        const long rawStatus = this->getStatus();
+        Motors::motorStatus status;
+        status.stepLossA = ~rawStatus & L6470_STATUS_STEP_LOSS_A;
+        status.stepLossB = ~rawStatus & L6470_STATUS_STEP_LOSS_B;
+        status.overCurrent = rawStatus & L6470_STATUS_OCD;
+        status.thermalShutdown = rawStatus & L6470_STATUS_TH_SD;
+        status.thermalWarning = rawStatus & L6470_STATUS_TH_WRN;
+        status.underVoltageLockout = rawStatus & L6470_STATUS_UVLO;
+        status.motorStopped = ~rawStatus & 0x0060;
+        status.motorAcceleration = (~rawStatus & 0x0040) & (rawStatus & 0x0020);
+        status.motorDeceleration = (rawStatus & 0x0040) & (~rawStatus & 0x0020);
+        status.motorConstSpeed = rawStatus & 0x0060;
+        status.direction = rawStatus & L6470_STATUS_DIR;
+        status.hiZ = rawStatus & L6470_STATUS_HIZ;
+        status.busy = ~rawStatus & L6470_STATUS_BUSY;
+        statuses.emplace_back(status);
+    }
+    return statuses;
 }
 
-long Motors::getStatusLeft(){
-	m_nPosition = 0;
-	return this->getStatus();
-}
 
-long Motors::getStatusRight(){
-	m_nPosition = 1;
-	return this->getStatus();
-}
 
