@@ -1,5 +1,5 @@
 /**
- * @file autodriver.h
+ * @file motorsclass.h
  *
  */
 /*
@@ -26,12 +26,13 @@
  * THE SOFTWARE.
  */
 
-#ifndef AUTODRIVER_H_
-#define AUTODRIVER_H_
-
 #include <stdint.h>
 #include <memory>
+#include <optional>
+#include <vector>
+#include <array>
 #include "l6470.h"
+#include "l6470constants.h"
 #include "bcm2835.hpp"
 
 #define GPIO_BUSY_IN	RPI_V2_GPIO_P1_13
@@ -45,16 +46,49 @@ public:
 
 	int busyCheck(void);
 	void setUp(void);
-	void setSpeed(float,float);
+	void setSpeeds(const std::array<float,2>&);
+    std::vector<int32_t> getSpeeds(std::optional<u_int8_t> index = std::nullopt);
 	void stop(void);
-	long getPositionLeft();
-	long getPositionRight();
-	void resetPosition();
-	int getBatteryVoltage();
-	void setMicrostep(uint8_t);
-	void setMaxSpeedForBoth(float);
-	long getStatusLeft();
-	long getStatusRight();
+
+    struct motorStatus{
+        bool hiZ;
+        bool busy;
+        bool motorAcceleration;
+        bool motorDeceleration;
+        bool direction;
+        bool motorStopped;
+        bool motorConstSpeed;
+        bool underVoltageLockout;
+        bool thermalWarning;
+        bool thermalShutdown;
+        bool overCurrent;
+        bool stepLossA;
+        bool stepLossB;
+    };
+
+    std::vector<int32_t> getPosition(std::optional<u_int8_t> index = std::nullopt);
+	void resetPosition(std::optional<u_int8_t> index = std::nullopt);
+    void resetDevice(std::optional<u_int8_t> index = std::nullopt);
+    std::vector<Motors::motorStatus> getMotorStatus(std::optional<u_int8_t> index = std::nullopt);
+
+    void setOscillatorMode(const TL6470ConfigOsc&, std::optional<u_int8_t> index = std::nullopt);
+    void configStepSelMode(uint8_t, std::optional<u_int8_t> index = std::nullopt);
+    void setMaximumSpeed(float, std::optional<u_int8_t> index = std::nullopt);
+    void setMinimumSpeed(float, std::optional<u_int8_t> index = std::nullopt);
+    void setFullStepModeSpeed(float, std::optional<u_int8_t> index = std::nullopt);
+    void setAcceleration(float, std::optional<u_int8_t> index = std::nullopt);
+    void setDeceleration(float, std::optional<u_int8_t> index = std::nullopt);
+    void setPWMFrequency(int, int, std::optional<u_int8_t> index = std::nullopt);
+    void setPowSlewRate(int, std::optional<u_int8_t> index = std::nullopt);
+    void setOverCurrentThreshold(uint8_t, std::optional<u_int8_t> index = std::nullopt);
+    void setOverCurrentShutdown(uint8_t, std::optional<u_int8_t> index = std::nullopt);
+    void setVoltageCompensation(int, std::optional<u_int8_t> index = std::nullopt);
+    void setSwitchModeConfig(int, std::optional<u_int8_t> index = std::nullopt);
+    void setBackEMF(std::optional<u_int8_t> index = std::nullopt);
+    void setAccCurrentKVAL(uint8_t, std::optional<u_int8_t> index = std::nullopt);
+    void setDecCurrentKVAL(uint8_t, std::optional<u_int8_t> index = std::nullopt);
+    void setRunCurrentKVAL(uint8_t, std::optional<u_int8_t> index = std::nullopt);
+    void setHoldCurrentKVAL(uint8_t, std::optional<u_int8_t> index = std::nullopt);
 
 private:
 	uint8_t SPIXfer(uint8_t);
@@ -71,10 +105,14 @@ private:
 	uint8_t m_nSpiChipSelect;
 	uint8_t m_nResetPin;
 	uint8_t m_nBusyPin;
+    uint8_t m_nCount;
 	bool l_bIsBusy;
 	bool l_bIsConnected;
 	bool r_bIsBusy;
 	bool r_bIsConnected;
 };
 
-#endif /* AUTODRIVER_H_ */
+enum motors : int {
+    LEFT_MOTOR = 0,
+    RIGHT_MOTOR = 1
+};
