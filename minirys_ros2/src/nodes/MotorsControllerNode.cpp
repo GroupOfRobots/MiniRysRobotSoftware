@@ -47,6 +47,7 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 	this->declare_parameter("pidAngleKd", rclcpp::ParameterValue(0.0));
 
 	// Get and save/use the parameters
+    std::this_thread::sleep_for(100ms);
 	auto period = std::chrono::duration<double>(1.0 / this->get_parameter("updateFrequency").as_double());
 	this->invertLeftMotor = this->get_parameter("invertLeftMotor").as_bool();
 	this->invertRightMotor = this->get_parameter("invertRightMotor").as_bool();
@@ -178,7 +179,7 @@ void MotorsControllerNode::update() {
 	message.header.frame_id = "motors_controller";
 	message.speed_l = speeds.first * (this->invertLeftMotor ? 1 : -1);
 	message.speed_r = speeds.second * (this->invertRightMotor ? 1 : -1);
-	message.enable = true;
+	//message.enable = true;
 	this->motorCommandPublisher->publish(message);
 }
 
@@ -207,45 +208,39 @@ void MotorsControllerNode::receiveMotorRSpeed(const std_msgs::msg::Float64::Shar
 void MotorsControllerNode::receiveMotorLStatus(const minirys_msgs::msg::MotorDriverStatus::SharedPtr message) {
 	if (!message->undervoltage || !message->thermal_warning || !message->thermal_shutdown || !message->overcurrent) {
         if (!message->undervoltage) {
-            RCLCPP_ERROR_STREAM(this->get_logger(), "Undervoltage");
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Detected undervoltage on left driver");
         }
         if (!message->thermal_warning) {
-            RCLCPP_ERROR_STREAM(this->get_logger(), "Thermal warning");
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Detected thermal warning on left driver");
         }
         if (!message->thermal_shutdown) {
-            RCLCPP_ERROR_STREAM(this->get_logger(), "Thermal shutdown");
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Detected thermal shutdown on left driver");
         }
         if (!message->overcurrent) {
-            RCLCPP_ERROR_STREAM(this->get_logger(), "Overcurrent");
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Detected overcurrent on left driver");
         }
-        RCLCPP_ERROR_STREAM(this->get_logger(), "Left motor stopped");
-        this->enabledL = true;
+        RCLCPP_ERROR_STREAM(this->get_logger(), "Motors stopped");
+        this->enabledL = false;
 	}
-    else{
-        this->enabledL = true;
-    }
 }
 
 void MotorsControllerNode::receiveMotorRStatus(const minirys_msgs::msg::MotorDriverStatus::SharedPtr message) {
 	if (!message->undervoltage || !message->thermal_warning || !message->thermal_shutdown || !message->overcurrent) {
         if (!message->undervoltage) {
-            RCLCPP_ERROR_STREAM(this->get_logger(), "Undervoltage");
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Detected undervoltage on right driver");
         }
         if (!message->thermal_warning) {
-            RCLCPP_ERROR_STREAM(this->get_logger(), "Thermal warning");
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Detected thermal warning on right driver");
         }
         if (!message->thermal_shutdown) {
-            RCLCPP_ERROR_STREAM(this->get_logger(), "Thermal shutdown");
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Detected thermal shutdown on right driver");
         }
         if (!message->overcurrent) {
-            RCLCPP_ERROR_STREAM(this->get_logger(), "Overcurrent");
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Detected overcurrent on right driver");
         }
-        RCLCPP_ERROR_STREAM(this->get_logger(), "Right motor stoppedd");
-		this->enabledR = true;
+        RCLCPP_ERROR_STREAM(this->get_logger(), "Motors stopped");
+		this->enabledR = false;
 	}
-    else{
-        this->enabledR = true;
-    }
 }
 
 std::pair<double, double> MotorsControllerNode::calculateSpeedsFlat() const {

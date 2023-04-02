@@ -28,14 +28,13 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 	RCLCPP_INFO_STREAM(this->get_logger(), "Got param: acceleration " << acceleration);
 	// Acceleration in steps per second
 	auto accelerationSPS = acceleration / 2.0 / M_PI * this->stepsPerRevolution;
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: accelerationSPS " << accelerationSPS);
 
     RCLCPP_INFO_STREAM(this->get_logger(), "L6470: initializing");
     this->motors = std::make_shared<Motors>(BCM2835_SPI_CS0, GPIO_RESET_OUT);
 
 	RCLCPP_INFO_STREAM(this->get_logger(), "L6470: resetting");
 	this->motors->resetDevice();
-	std::this_thread::sleep_for(100ms);
+	std::this_thread::sleep_for(10ms);
 
 	RCLCPP_INFO_STREAM(this->get_logger(), "L6470: configuring");
 	// Set 62.5kHz PWM frequency
@@ -62,10 +61,10 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 	// Current/voltage settings
 	this->motors->setOverCurrentThreshold(L6470_OCD_TH_3000mA);
     //this->motors->setStallThreshold(0x40);
-	this->motors->setAccCurrentKVAL(0x80);  //80
-	this->motors->setDecCurrentKVAL(0x80);  //80
-	this->motors->setRunCurrentKVAL(0x70);  //B4 70
-	this->motors->setHoldCurrentKVAL(0x40);  //40
+	this->motors->setAccCurrentKVAL(0x96);  //80
+	this->motors->setDecCurrentKVAL(0x96);  //80
+	this->motors->setRunCurrentKVAL(0x96);  //B4 70
+	this->motors->setHoldCurrentKVAL(0x32);  //40
 	// Disable BEMF compensation and the FLAG (alarm) pin
 	this->motors->setBackEMF();
 	RCLCPP_INFO_STREAM(this->get_logger(), "L6470: setup done");
@@ -100,14 +99,11 @@ MotorsNode::~MotorsNode() {
 }
 
 void MotorsNode::update() {
-	std::array<float,2> speeds;
-    //RCLCPP_INFO_STREAM(this->get_logger(), "Received motors speed: " << this->speedL << ' ' << this->speedR << '\n');
+	std::vector<float> speeds;
 	auto speedLSPS = this->speedL / (2.0 * M_PI) * this->stepsPerRevolution;
 	auto speedRSPS = this->speedR / (2.0 * M_PI) * this->stepsPerRevolution;
-    //RCLCPP_INFO_STREAM(this->get_logger(), "Calculated motors speed: " << speedLSPS << ' ' << speedRSPS << '\n');
-	speeds[LEFT_MOTOR]=speedLSPS;
-	speeds[RIGHT_MOTOR]=speedRSPS;
-    //RCLCPP_INFO_STREAM(this->get_logger(), "Set motors speed: " << speeds[0] << ' ' << speeds[1] << '\n');
+	speeds.emplace_back(speedLSPS);
+	speeds.emplace_back(speedRSPS);
     this->motors->setSpeeds(speeds);
 
     auto motorPositions = this->motors->getPosition();
@@ -121,36 +117,36 @@ void MotorsNode::update() {
 	auto statusMessageL = minirys_msgs::msg::MotorDriverStatus();
 	auto statusMessageR = minirys_msgs::msg::MotorDriverStatus();
 
-	positionMessageL.data = static_cast<double>(motorPositions[0]) * 2.0 * M_PI / (this->stepsPerRevolution * 32.0);
-	positionMessageR.data = static_cast<double>(motorPositions[1]) * 2.0 * M_PI / (this->stepsPerRevolution * 32.0);
-	speedMessageL.data = static_cast<double>(motorSpeeds[0]) * 2.0 * M_PI / this->stepsPerRevolution; //* (motorStatuses[0].direction == 0 ? 1 : -1);
-	speedMessageR.data = static_cast<double>(motorSpeeds[1]) * 2.0 * M_PI / this->stepsPerRevolution; //* (motorStatuses[1].direction == 0 ? 1 : -1);
-    statusMessageL.hi_z = motorStatuses[0].hiZ;
-    statusMessageL.busy = motorStatuses[0].busy;
-    statusMessageL.direction = motorStatuses[0].direction;
-    statusMessageL.motor_stopped = motorStatuses[0].motorStopped;
-    statusMessageL.motor_accelerating = motorStatuses[0].motorAcceleration;
-    statusMessageL.motor_decelerating = motorStatuses[0].motorDeceleration;
-    statusMessageL.motor_const_speed = motorStatuses[0].motorConstSpeed;
-    statusMessageL.undervoltage = motorStatuses[0].underVoltageLockout;
-    statusMessageL.thermal_warning = motorStatuses[0].thermalWarning;
-    statusMessageL.thermal_shutdown = motorStatuses[0].thermalShutdown;
-    statusMessageL.overcurrent = motorStatuses[0].overCurrent;
-    statusMessageL.step_loss_a = motorStatuses[0].stepLossA;
-    statusMessageL.step_loss_b = motorStatuses[0].stepLossB;
-    statusMessageR.hi_z = motorStatuses[1].hiZ;
-    statusMessageR.busy = motorStatuses[1].busy;
-    statusMessageR.direction = motorStatuses[1].direction;
-    statusMessageR.motor_stopped = motorStatuses[1].motorStopped;
-    statusMessageR.motor_accelerating = motorStatuses[1].motorAcceleration;
-    statusMessageR.motor_decelerating = motorStatuses[1].motorDeceleration;
-    statusMessageR.motor_const_speed = motorStatuses[1].motorConstSpeed;
-    statusMessageR.undervoltage = motorStatuses[1].underVoltageLockout;
-    statusMessageR.thermal_warning = motorStatuses[1].thermalWarning;
-    statusMessageR.thermal_shutdown = motorStatuses[1].thermalShutdown;
-    statusMessageR.overcurrent = motorStatuses[1].overCurrent;
-    statusMessageR.step_loss_a = motorStatuses[1].stepLossA;
-    statusMessageR.step_loss_b = motorStatuses[1].stepLossB;
+	positionMessageL.data = static_cast<double>(motorPositions[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * 32.0);
+	positionMessageR.data = static_cast<double>(motorPositions[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * 32.0);
+	speedMessageL.data = static_cast<double>(motorSpeeds[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * (motorStatuses[LEFT_MOTOR].direction == 0 ? 1 : -1));
+	speedMessageR.data = static_cast<double>(motorSpeeds[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * (motorStatuses[RIGHT_MOTOR].direction == 0 ? 1 : -1));
+    statusMessageL.hi_z = motorStatuses[LEFT_MOTOR].hiZ;
+    statusMessageL.busy = motorStatuses[LEFT_MOTOR].busy;
+    statusMessageL.direction = motorStatuses[LEFT_MOTOR].direction;
+    statusMessageL.motor_stopped = motorStatuses[LEFT_MOTOR].motorStopped;
+    statusMessageL.motor_accelerating = motorStatuses[LEFT_MOTOR].motorAcceleration;
+    statusMessageL.motor_decelerating = motorStatuses[LEFT_MOTOR].motorDeceleration;
+    statusMessageL.motor_const_speed = motorStatuses[LEFT_MOTOR].motorConstSpeed;
+    statusMessageL.undervoltage = motorStatuses[LEFT_MOTOR].underVoltageLockout;
+    statusMessageL.thermal_warning = motorStatuses[LEFT_MOTOR].thermalWarning;
+    statusMessageL.thermal_shutdown = motorStatuses[LEFT_MOTOR].thermalShutdown;
+    statusMessageL.overcurrent = motorStatuses[LEFT_MOTOR].overCurrent;
+    statusMessageL.step_loss_a = motorStatuses[LEFT_MOTOR].stepLossA;
+    statusMessageL.step_loss_b = motorStatuses[LEFT_MOTOR].stepLossB;
+    statusMessageR.hi_z = motorStatuses[RIGHT_MOTOR].hiZ;
+    statusMessageR.busy = motorStatuses[RIGHT_MOTOR].busy;
+    statusMessageR.direction = motorStatuses[RIGHT_MOTOR].direction;
+    statusMessageR.motor_stopped = motorStatuses[RIGHT_MOTOR].motorStopped;
+    statusMessageR.motor_accelerating = motorStatuses[RIGHT_MOTOR].motorAcceleration;
+    statusMessageR.motor_decelerating = motorStatuses[RIGHT_MOTOR].motorDeceleration;
+    statusMessageR.motor_const_speed = motorStatuses[RIGHT_MOTOR].motorConstSpeed;
+    statusMessageR.undervoltage = motorStatuses[RIGHT_MOTOR].underVoltageLockout;
+    statusMessageR.thermal_warning = motorStatuses[RIGHT_MOTOR].thermalWarning;
+    statusMessageR.thermal_shutdown = motorStatuses[RIGHT_MOTOR].thermalShutdown;
+    statusMessageR.overcurrent = motorStatuses[RIGHT_MOTOR].overCurrent;
+    statusMessageR.step_loss_a = motorStatuses[RIGHT_MOTOR].stepLossA;
+    statusMessageR.step_loss_b = motorStatuses[RIGHT_MOTOR].stepLossB;
 
 	statusMessageL.header.frame_id = "motor_l";
 	statusMessageR.header.frame_id = "motor_r";

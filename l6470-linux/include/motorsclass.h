@@ -5,7 +5,7 @@
 /*
  * Based on https://github.com/sparkfun/L6470-AutoDriver/tree/master/Libraries/Arduino
  */
-/* Copyright (C) 2017 by Arjan van Vught mailto:info@raspberrypi-dmx.nl
+/* Copyright (C) 2023 by Jakub Ostrysz
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,16 +40,6 @@
 
 class Motors: public L6470 {
 public:
-	Motors(uint8_t, uint8_t);
-
-	~Motors(void);
-
-	int busyCheck(void);
-	void setUp(void);
-	void setSpeeds(const std::array<float,2>&);
-    std::vector<int32_t> getSpeeds(std::optional<u_int8_t> index = std::nullopt);
-	void stop(void);
-
     struct motorStatus{
         bool hiZ;
         bool busy;
@@ -66,11 +56,19 @@ public:
         bool stepLossB;
     };
 
+	Motors(uint8_t, uint8_t);
+
+	~Motors(void);
+
+	int busyCheck(void);
+	void setSpeeds(const std::vector<float>&, std::optional<u_int8_t> index = std::nullopt);
+    unsigned long spdCalc(float);
+    std::vector<unsigned long> getSpeeds(std::optional<u_int8_t> index = std::nullopt);
+	void stop(void);
     std::vector<int32_t> getPosition(std::optional<u_int8_t> index = std::nullopt);
 	void resetPosition(std::optional<u_int8_t> index = std::nullopt);
     void resetDevice(std::optional<u_int8_t> index = std::nullopt);
     std::vector<Motors::motorStatus> getMotorStatus(std::optional<u_int8_t> index = std::nullopt);
-
     void setOscillatorMode(const TL6470ConfigOsc&, std::optional<u_int8_t> index = std::nullopt);
     void configStepSelMode(uint8_t, std::optional<u_int8_t> index = std::nullopt);
     void setMaximumSpeed(float, std::optional<u_int8_t> index = std::nullopt);
@@ -89,18 +87,10 @@ public:
     void setDecCurrentKVAL(uint8_t, std::optional<u_int8_t> index = std::nullopt);
     void setRunCurrentKVAL(uint8_t, std::optional<u_int8_t> index = std::nullopt);
     void setHoldCurrentKVAL(uint8_t, std::optional<u_int8_t> index = std::nullopt);
+    bool IsConnected(int);
 
 private:
 	uint8_t SPIXfer(uint8_t);
-
-	/*
-	 * Additional methods
-	 */
-public:
-	bool IsConnected(int);
-
-
-private:
 	uint8_t m_nPosition; //0-left 1-right
 	uint8_t m_nSpiChipSelect;
 	uint8_t m_nResetPin;
