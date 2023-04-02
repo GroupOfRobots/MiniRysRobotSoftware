@@ -44,8 +44,8 @@ minirys:
     ros__parameters:
       updateFrequency: 100.0
       stepsPerRevolution: 200.0
-      maxSpeed: 54.56 # 2*Pi = 1rps
-      acceleration: 14.628 # 2*Pi = 1rps
+      maxSpeed: 62.8318530718 # 2*Pi = 1rps
+      acceleration: 251.327412287 # 2*Pi = 1rps
 
   # Control Subsystem
   fan_regulator_cs:
@@ -65,9 +65,9 @@ minirys:
       invertLeftMotor: true
       invertRightMotor: false
       enableSpeedRegulator: false
-      maxLinearSpeed: 54.0 # 2*Pi = 1rps
-      maxRotationSpeed: 54.0 # 2*Pi = 1rps
-      maxWheelSpeed: 54.0 # 2*Pi = 1rps
+      maxLinearSpeed: 18.8495559215 # 2*Pi = 1rps
+      maxRotationSpeed: 18.8495559215 # 2*Pi = 1rps
+      maxWheelSpeed: 18.8495559215 # 2*Pi = 1rps
       maxStandUpSpeed: 11.0 # 2*Pi = 1rps
       maxBalancingAngle: 0.25
       pidSpeedKp: 0.001 #0.05 to za duzo 0.01 git

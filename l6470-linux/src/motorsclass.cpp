@@ -5,7 +5,7 @@
 /*
  * Based on https://github.com/sparkfun/L6470-AutoDriver/tree/master/Libraries/Arduino
  */
-/* Copyright (C) 2017-2018 by Arjan van Vught mailto:info@raspberrypi-dmx.nl
+/* Copyright (C) 2023 by Jakub Ostrysz
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -249,6 +249,7 @@ void Motors::setBackEMF(std::optional<u_int8_t> index){
         this->setParam(L6470_PARAM_ALARM_EN,0x00);
     }
 }
+
 void Motors::setAccCurrentKVAL(uint8_t kValInput, std::optional<u_int8_t> index){
     if(index == std::nullopt){
         for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
@@ -297,98 +298,59 @@ void Motors::setHoldCurrentKVAL(uint8_t kValInput, std::optional<u_int8_t> index
     }
 }
 
-void Motors::setUp(){
-
-	m_nPosition = 0;
-    this->setOscillatorMode(L6470_CONFIG_OSC_EXT_16MHZ_XTAL_DRIVE, LEFT_MOTOR);
-	//this->setParam(L6470_PARAM_CONFIG,0x2e8B); //16MHz
-	this->configStepMode(0x06);   // 64microsteps per step
-	this->setMaxSpeed(1000);        // 350 steps/s max
-	this->setMinSpeed(0);        // 10 steps/s min
-	this->setAcc(8000);              // accelerate at 350 steps/s/s
-	this->setDec(8000);//1000
-	this->setPWMFreq((0x00)<<13, (0x07)<<10); // 62.5kHz PWM freq
-	this->setSlewRate(L6470_CONFIG_POW_SR_260V_us);   // Upping the edge speed increases torque.
-	this->setOCThreshold(0x09);  // OC threshold 3000mA
-	this->setOCShutdown(0x0000); // don't shutdown on OC
-	//this->setVoltageComp(0x0000); // don't compensate for motor V
-	//this->setSwitchMode(0x0010);    // Switch is not hard stop
-	this->setParam(L6470_PARAM_ST_SLP,0x00);
-	this->setParam(L6470_PARAM_FN_SLP_ACC,0x00);
-	this->setParam(L6470_PARAM_FN_SLP_DEC,0x00);
-	this->setParam(L6470_PARAM_ALARM_EN,0x00);
-	this->setAccKVAL(0x96);           // We'll tinker with these later, if needed.
-	this->setDecKVAL(0x96);
-	this->setRunKVAL(0x96);
-	this->setHoldKVAL(0x32);           // This controls the holding current; keep it low.
-	//this->setFullSpeed(120);       // microstep above 120 steps/s, default value 602.7
-
-	m_nPosition = 1;
-
-	//this->setParam(L6470_PARAM_CONFIG,0x2e8B); //16MHz
-    this->setOscillatorMode(L6470_CONFIG_OSC_INT_16MHZ_OSCOUT_16MHZ, RIGHT_MOTOR);
-	this->configStepMode(0x06);   // 64microsteps per step
-	this->setMaxSpeed(1000);        // 350 steps/s max
-	this->setMinSpeed(0);        // 10 steps/s min
-	this->setAcc(8000);             // accelerate at 350 steps/s/s
-	this->setDec(8000);//1000
-	this->setPWMFreq((0x00)<<13, (0x07)<<10); // 62.5kHz PWM freq
-	this->setSlewRate(L6470_CONFIG_POW_SR_260V_us);   // Upping the edge speed increases torque.
-	this->setOCThreshold(0x09);  // OC threshold 3000mA
-	this->setOCShutdown(0x0000); // don't shutdown on OC
-	//this->setVoltageComp(0x0000); // don't compensate for motor V
-	//this->setSwitchMode(0x0010);    // Switch is not hard stop
-	this->setParam(L6470_PARAM_ST_SLP,0x00);
-	this->setParam(L6470_PARAM_FN_SLP_ACC,0x00);
-	this->setParam(L6470_PARAM_FN_SLP_DEC,0x00);
-	this->setParam(L6470_PARAM_ALARM_EN,0x00);
-	this->setAccKVAL(0x96);           // We'll tinker with these later, if needed.
-	this->setDecKVAL(0x96);
-	this->setRunKVAL(0x96);
-	this->setHoldKVAL(0x32);         // This controls the holding current; keep it low.
-	//this->setFullSpeed(120);       // microstep above 120 steps/s, default value 602.7
-}
-
-void Motors::setSpeeds(const std::array<float,2>& speeds){
-    for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+void Motors::setSpeeds(const std::vector<float>& speeds, std::optional<u_int8_t> index){
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            speeds[m_nPosition] >=0 ? this->run(L6470_DIR_FWD,speeds[m_nPosition]) : this->run(L6470_DIR_REV,-1*speeds[m_nPosition]);
+        }
+    }
+    else{
+        m_nPosition = index.value();
         speeds[m_nPosition] >=0 ? this->run(L6470_DIR_FWD,speeds[m_nPosition]) : this->run(L6470_DIR_REV,-1*speeds[m_nPosition]);
     }
 }
 
-std::vector<int32_t> Motors::getSpeeds(std::optional<u_int8_t> index){
-    std::vector<int32_t> speeds;
+unsigned long Motors::spdCalc(float stepsPerSec) {
+    unsigned long temp = stepsPerSec / 67.103864;
+    if (temp > 0x000FFFFF)
+        return 0x000FFFFF;
+    else
+        return temp;
+}
+
+std::vector<unsigned long> Motors::getSpeeds(std::optional<u_int8_t> index){
+    std::vector<unsigned long> speeds;
     if(index == std::nullopt){
         for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
-            int32_t temp = getParam(L6470_PARAM_SPEED);
+            unsigned long temp = getParam(L6470_PARAM_SPEED);
             if (temp & 0x00200000) {
                 temp |= 0xffc00000;
             }
+            temp = spdCalc(temp);
             speeds.emplace_back(temp);
         }
     }
     else{
         m_nPosition = index.value();
-        int32_t temp = getParam(L6470_PARAM_SPEED);
+        unsigned long temp = getParam(L6470_PARAM_SPEED);
         if (temp & 0x00200000) {
             temp |= 0xffc00000;
         }
+        temp = spdCalc(temp);
         speeds.emplace_back(temp);
     }
     return speeds;
 }
 
 void Motors::stop(){
-
 	m_nPosition=0;
 	this->softStop();
 	m_nPosition=1;
 	this->softStop();
 	m_nPosition=0;
-	while (this->busyCheck())
-		;
+	while (this->busyCheck());
 	m_nPosition=1;
-	while (this->busyCheck())
-		;
+	while (this->busyCheck());
 	m_nPosition=0;
 	this->hardHiZ();
 	m_nPosition=1;
@@ -402,13 +364,13 @@ int Motors::busyCheck(void) {
 		} else {
 			return 1;
 		}
-	}else{
+	}
+    else{
 		if (getParam(L6470_PARAM_STATUS) & L6470_STATUS_BUSY) {
 			return 0;
 		} else {
 			return 1;
 		}
-
 	}
 }
 
@@ -429,9 +391,6 @@ uint8_t Motors::SPIXfer(uint8_t data) {
 	return dataPacket[m_nPosition];
 }
 
-/*
- * Additional method
- */
 bool Motors::IsConnected(int position){
 	if (position) {
 		return r_bIsConnected;
