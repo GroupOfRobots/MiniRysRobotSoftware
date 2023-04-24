@@ -63,7 +63,7 @@ minirys:
   fan_regulator_cs:
     ros__parameters:
       updateFrequency: 2.0
-      fanLevelLow: 0.4
+      fanLevelLow: 0.6
       fanLevelMedium: 0.8
       fanLevelHigh: 1.0
       thresholdCPUWarning: 50.0
