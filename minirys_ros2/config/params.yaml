@@ -34,6 +34,18 @@ minirys:
       image_size: [1920, 1080]
       white_balance_automatic: true
 
+  lidar_vr:
+    ros__parameters:
+      product_name: "LDLiDAR_LD06"
+      topic_name: "internal/scan"
+      frame_id: "base_laser"
+      port_name: "/dev/serial0"
+      port_baudrate: 230400
+      laser_scan_dir: true
+      enable_angle_crop_func: false
+      angle_crop_min: 135.0
+      angle_crop_max: 225.0
+
   # Virtual Effectors configs
   fan_ve:
     ros__parameters:
