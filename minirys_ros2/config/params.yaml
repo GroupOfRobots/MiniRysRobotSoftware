@@ -38,7 +38,7 @@ minirys:
     ros__parameters:
       product_name: "LDLiDAR_LD06"
       topic_name: "internal/scan"
-      frame_id: "base_laser"
+      frame_id: "laser_scan"
       port_name: "/dev/serial0"
       port_baudrate: 230400
       laser_scan_dir: true
