@@ -413,6 +413,20 @@ std::vector<int32_t> Motors::getPosition(std::optional<u_int8_t> index){
     return positions;
 }
 
+std::vector<uint8_t> Motors::getMicroStepMode(std::optional<u_int8_t> index){
+    std::vector<uint8_t> stepMode;
+    if(index == std::nullopt){
+        for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
+            stepMode.emplace_back(this->getStepMode());
+        }
+    }
+    else{
+        m_nPosition = index.value();
+        stepMode.emplace_back(this->getStepMode());
+    }
+    return stepMode;
+}
+
 void Motors::resetPosition(std::optional<u_int8_t> index){
     if(index == std::nullopt){
         for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){

@@ -30,6 +30,7 @@
 #include <memory>
 #include <optional>
 #include <vector>
+#include <cmath>
 #include <array>
 #include "l6470.h"
 #include "l6470constants.h"
@@ -66,6 +67,7 @@ public:
     std::vector<unsigned long> getSpeeds(std::optional<u_int8_t> index = std::nullopt);
 	void stop(void);
     std::vector<int32_t> getPosition(std::optional<u_int8_t> index = std::nullopt);
+    std::vector<uint8_t> getMicroStepMode(std::optional<u_int8_t> index = std::nullopt);
 	void resetPosition(std::optional<u_int8_t> index = std::nullopt);
     void resetDevice(std::optional<u_int8_t> index = std::nullopt);
     std::vector<Motors::motorStatus> getMotorStatus(std::optional<u_int8_t> index = std::nullopt);
