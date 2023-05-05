@@ -14,6 +14,7 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 	this->declare_parameter("stepsPerRevolution", rclcpp::ParameterValue(200.0));
 	this->declare_parameter("maxSpeed", rclcpp::ParameterValue(2.0 * M_PI));
 	this->declare_parameter("acceleration", rclcpp::ParameterValue(2.0 * M_PI));
+    this->declare_parameter("wheelRadius", rclcpp::ParameterValue(0.0));
 
 	auto period = std::chrono::duration<double>(1.0 / this->get_parameter("updateFrequency").as_double());
 	RCLCPP_INFO_STREAM(this->get_logger(), "Got param: update period (s) " << period.count());
@@ -28,6 +29,9 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 	RCLCPP_INFO_STREAM(this->get_logger(), "Got param: acceleration " << acceleration);
 	// Acceleration in steps per second
 	auto accelerationSPS = acceleration / 2.0 / M_PI * this->stepsPerRevolution;
+
+    this->wheelRadius = this->get_parameter("wheelRadius").as_double();
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: wheel radius " << this->wheelRadius);
 
     RCLCPP_INFO_STREAM(this->get_logger(), "L6470: initializing");
     this->motors = std::make_shared<Motors>(BCM2835_SPI_CS0, GPIO_RESET_OUT);
@@ -61,10 +65,10 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 	// Current/voltage settings
 	this->motors->setOverCurrentThreshold(L6470_OCD_TH_3000mA);
     //this->motors->setStallThreshold(0x40);
-	this->motors->setAccCurrentKVAL(0x96);  //80
-	this->motors->setDecCurrentKVAL(0x96);  //80
-	this->motors->setRunCurrentKVAL(0x96);  //B4 70
-	this->motors->setHoldCurrentKVAL(0x32);  //40
+	this->motors->setAccCurrentKVAL(0x64);  //80/96
+	this->motors->setDecCurrentKVAL(0x64);  //80/96
+	this->motors->setRunCurrentKVAL(0x64);  //B4 70/96
+	this->motors->setHoldCurrentKVAL(0x32);  //40/32
 	// Disable BEMF compensation and the FLAG (alarm) pin
 	this->motors->setBackEMF();
 	RCLCPP_INFO_STREAM(this->get_logger(), "L6470: setup done");
