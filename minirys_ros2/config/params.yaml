@@ -58,6 +58,7 @@ minirys:
       stepsPerRevolution: 200.0
       maxSpeed: 62.8318530718 # 2*Pi = 1rps
       acceleration: 251.327412287 # 2*Pi = 1rps
+      wheelRadius: 0.055
 
   # Control Subsystem
   fan_regulator_cs:
@@ -77,6 +78,8 @@ minirys:
       invertLeftMotor: true
       invertRightMotor: false
       enableSpeedRegulator: false
+      wheelRadius: 0.055
+      wheelSeparation: 0.1452
       maxLinearSpeed: 18.8495559215 # 2*Pi = 1rps
       maxRotationSpeed: 18.8495559215 # 2*Pi = 1rps
       maxWheelSpeed: 18.8495559215 # 2*Pi = 1rps

@@ -26,6 +26,8 @@ private:
 
 	double maxSpeed;
 
+    double wheelRadius;
+
     std::shared_ptr<Motors> motors;
 
 	rclcpp::TimerBase::SharedPtr updateTimer;

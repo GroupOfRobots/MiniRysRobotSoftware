@@ -130,6 +130,8 @@ void OdometryNode::update() {
     odom_trans.transform.rotation.z = q.z();
     odom_trans.transform.rotation.w = q.w();
 
+    //RCLCPP_INFO_STREAM(this->get_logger(), "Theta: " << this->poseTheta);
+
     //send the transform
     odom_broadcaster->sendTransform(odom_trans);
 
@@ -143,8 +145,8 @@ void OdometryNode::update() {
 	messageOdom.pose.pose.orientation.x = 0;
 	messageOdom.pose.pose.orientation.y = 0;
 	messageOdom.pose.pose.orientation.z = sin(this->poseTheta / 2);
-	messageOdom.twist.twist.linear.x = 0;
-	messageOdom.twist.twist.linear.y = (speedL + speedR) / 2.0;
+	messageOdom.twist.twist.linear.x = (speedL + speedR) / 2.0;
+	messageOdom.twist.twist.linear.y = 0;
 	messageOdom.twist.twist.linear.z = 0;
 	messageOdom.twist.twist.angular.x = 0;
 	messageOdom.twist.twist.angular.y = 0;
