@@ -5,6 +5,7 @@
 #include <minirys_msgs/msg/motor_command.hpp>
 #include <minirys_msgs/msg/motor_driver_status.hpp>
 #include <std_msgs/msg/float64.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
 
 #include <motorsclass.h>
 
@@ -31,6 +32,8 @@ private:
     std::shared_ptr<Motors> motors;
 
 	rclcpp::TimerBase::SharedPtr updateTimer;
+
+    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr  jointPublisher;
 
 	rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr motorPositionLPublisher;
 

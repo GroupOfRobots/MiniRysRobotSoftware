@@ -26,6 +26,7 @@ def generate_launch_description():
         executable="motors",
         namespace=namespace_value,
         parameters=[params_path],
+        remappings=[('/minirys/joint_states', '/joint_states')]
     )
 
     return LaunchDescription([
