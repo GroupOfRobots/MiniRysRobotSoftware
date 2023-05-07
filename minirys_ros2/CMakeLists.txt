@@ -29,6 +29,8 @@ find_package(minirys_msgs REQUIRED)
 find_package(minirys_sensors REQUIRED)
 find_package(vl53l1x-linux REQUIRED)
 find_package(l6470-linux REQUIRED)
+find_package(ldlidar_stl_ros2 REQUIRED)
+
 
 include_directories(include)
 
@@ -119,6 +121,7 @@ ament_target_dependencies(MotorsNode
   l6470-linux
   std_msgs
   minirys_msgs
+  sensor_msgs
 )
 target_link_libraries(MotorsNode
   sbc-linux-interfaces
