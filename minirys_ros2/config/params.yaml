@@ -79,7 +79,7 @@ minirys:
       invertRightMotor: false
       enableSpeedRegulator: false
       wheelRadius: 0.055
-      wheelSeparation: 0.1452
+      wheelSeparation: 0.134
       maxLinearSpeed: 18.8495559215 # 2*Pi = 1rps
       maxRotationSpeed: 18.8495559215 # 2*Pi = 1rps
       maxWheelSpeed: 18.8495559215 # 2*Pi = 1rps
@@ -98,7 +98,7 @@ minirys:
       invertLeftMotor: true
       invertRightMotor: false
       wheelRadius: 0.055
-      wheelSeparation: 0.1452
+      wheelSeparation: 0.134
       wheelRadiusCorrection: 1.00
       wheelSeparationCorrection: 1.00
 
