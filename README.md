@@ -1,0 +1,3 @@
+# MiniRysPhysicalSoftware
+
+supervisor: @Kuba Ostrysz
