@@ -65,10 +65,10 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 	// Current/voltage settings
 	this->motors->setOverCurrentThreshold(L6470_OCD_TH_3000mA);
     //this->motors->setStallThreshold(0x40);
-	this->motors->setAccCurrentKVAL(64);  //80/96
-	this->motors->setDecCurrentKVAL(0x64);  //80/96
-	this->motors->setRunCurrentKVAL(0x64);  //B4 70/96
-	this->motors->setHoldCurrentKVAL(0x32);  //40/32
+	this->motors->setAccCurrentKVAL(0x90);  //80/96
+	this->motors->setDecCurrentKVAL(0x90);  //80/96
+	this->motors->setRunCurrentKVAL(0x80);  //B4 70/96
+	this->motors->setHoldCurrentKVAL(0x16);  //40/32
 	// Disable BEMF compensation and the FLAG (alarm) pin
 	this->motors->setBackEMF();
 	RCLCPP_INFO_STREAM(this->get_logger(), "L6470: setup done");
