@@ -147,6 +147,14 @@ ament_target_dependencies(FanRegulatorNode
   std_msgs
   minirys_msgs
 )
+# Joystick controller
+add_library(JoyconReceiverNode
+        src/nodes/JoyconReceiverNode.cpp
+        )
+ament_target_dependencies(JoyconReceiverNode
+        rclcpp
+        geometry_msgs
+        )
 # Motors controller
 add_library(MotorsControllerNode
   src/nodes/MotorsControllerNode.cpp
@@ -252,6 +260,14 @@ target_link_libraries(fan
   RTTExecutor
 )
 
+add_executable(joycon_receiver_node
+        src/executables/joycon_receiver_node.cpp
+        )
+target_link_libraries(joycon_receiver_node
+        JoyconReceiverNode
+        RTTExecutor
+        )
+
 # Main virtual effectors executable
 add_executable(minirys_ve
   src/executables/minirys_ve.cpp
@@ -313,6 +329,7 @@ install(
     battery
     distance
     fan
+    joycon_receiver_node
     imu
     motors
     odometry

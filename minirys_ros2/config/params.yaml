@@ -50,14 +50,14 @@ minirys:
   fan_ve:
     ros__parameters:
       updateFrequency: 2.0
-      pwmFrequency: 10.0
+      pwmFrequency: 50.0 # 10.0
 
   motors_ve:
     ros__parameters:
       updateFrequency: 100.0
       stepsPerRevolution: 200.0
-      maxSpeed: 62.8318530718 # 2*Pi = 1rps
-      acceleration: 251.327412287 # 2*Pi = 1rps
+      maxSpeed: 620.8318530718 # 2*Pi = 1rps
+      acceleration: 62.8 #z 251.327 na pocz 2*Pi = 1rps
       wheelRadius: 0.055
 
   # Control Subsystem
@@ -80,9 +80,9 @@ minirys:
       enableSpeedRegulator: false
       wheelRadius: 0.055
       wheelSeparation: 0.134
-      maxLinearSpeed: 18.8495559215 # 2*Pi = 1rps
-      maxRotationSpeed: 18.8495559215 # 2*Pi = 1rps
-      maxWheelSpeed: 18.8495559215 # 2*Pi = 1rps
+      maxLinearSpeed: 12.0 #18.8495559215 # 2*Pi = 1rps
+      maxRotationSpeed: 12.0 #18.8495559215 # 2*Pi = 1rps
+      maxWheelSpeed: 12.0 # 18.8495559215 # 2*Pi = 1rps
       maxStandUpSpeed: 11.0 # 2*Pi = 1rps
       maxBalancingAngle: 0.25
       pidSpeedKp: 0.001 #0.05 to za duzo 0.01 git
