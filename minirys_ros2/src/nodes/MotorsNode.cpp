@@ -14,7 +14,6 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 	this->declare_parameter("stepsPerRevolution", rclcpp::ParameterValue(200.0));
 	this->declare_parameter("maxSpeed", rclcpp::ParameterValue(2.0 * M_PI));
 	this->declare_parameter("acceleration", rclcpp::ParameterValue(2.0 * M_PI));
-    this->declare_parameter("wheelRadius", rclcpp::ParameterValue(0.0));
 
 	auto period = std::chrono::duration<double>(1.0 / this->get_parameter("updateFrequency").as_double());
 	RCLCPP_INFO_STREAM(this->get_logger(), "Got param: update period (s) " << period.count());
@@ -29,9 +28,6 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 	RCLCPP_INFO_STREAM(this->get_logger(), "Got param: acceleration " << acceleration);
 	// Acceleration in steps per second
 	auto accelerationSPS = acceleration / 2.0 / M_PI * this->stepsPerRevolution;
-
-    this->wheelRadius = this->get_parameter("wheelRadius").as_double();
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: wheel radius " << this->wheelRadius);
 
     RCLCPP_INFO_STREAM(this->get_logger(), "L6470: initializing");
     this->motors = std::make_shared<Motors>(BCM2835_SPI_CS0, GPIO_RESET_OUT);
@@ -65,10 +61,10 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 	// Current/voltage settings
 	this->motors->setOverCurrentThreshold(L6470_OCD_TH_3000mA);
     //this->motors->setStallThreshold(0x40);
-	this->motors->setAccCurrentKVAL(0x90);  //80/96
-	this->motors->setDecCurrentKVAL(0x90);  //80/96
-	this->motors->setRunCurrentKVAL(0x80);  //B4 70/96
-	this->motors->setHoldCurrentKVAL(0x16);  //40/32
+	this->motors->setAccCurrentKVAL(0x70);  //80
+	this->motors->setDecCurrentKVAL(0x70);  //80
+	this->motors->setRunCurrentKVAL(0x70);  //B4 70
+	this->motors->setHoldCurrentKVAL(0x70);  //40
 	// Disable BEMF compensation and the FLAG (alarm) pin
 	this->motors->setBackEMF();
 	RCLCPP_INFO_STREAM(this->get_logger(), "L6470: setup done");
@@ -94,7 +90,6 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 		10
 	);
 
-    this->jointPublisher = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
 	this->updateTimer = this->create_wall_timer(period, std::bind(&MotorsNode::update, this));
 }
 
@@ -122,11 +117,8 @@ void MotorsNode::update() {
 	auto statusMessageL = minirys_msgs::msg::MotorDriverStatus();
 	auto statusMessageR = minirys_msgs::msg::MotorDriverStatus();
 
-    auto step_mode = this->motors->getMicroStepMode();
-    auto wheelsJointsPosition = sensor_msgs::msg::JointState();
-
-	positionMessageL.data = static_cast<double>(motorPositions[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[LEFT_MOTOR])));
-	positionMessageR.data = static_cast<double>(motorPositions[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[RIGHT_MOTOR])));
+	positionMessageL.data = static_cast<double>(motorPositions[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * 32.0);
+	positionMessageR.data = static_cast<double>(motorPositions[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * 32.0);
 	speedMessageL.data = static_cast<double>(motorSpeeds[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * (motorStatuses[LEFT_MOTOR].direction == 0 ? 1 : -1));
 	speedMessageR.data = static_cast<double>(motorSpeeds[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * (motorStatuses[RIGHT_MOTOR].direction == 0 ? 1 : -1));
     statusMessageL.hi_z = motorStatuses[LEFT_MOTOR].hiZ;
@@ -160,15 +152,6 @@ void MotorsNode::update() {
 	statusMessageR.header.frame_id = "motor_r";
 	statusMessageL.header.stamp = this->get_clock()->now();
 	statusMessageR.header.stamp = statusMessageL.header.stamp;
-
-    wheelsJointsPosition.header.stamp = this->get_clock()->now();
-    wheelsJointsPosition.name.resize(2);
-    wheelsJointsPosition.position.resize(2);
-    wheelsJointsPosition.name[0] ="base_link_to_rightwheel_joint";
-    wheelsJointsPosition.position[0] = static_cast<double>(motorPositions[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[RIGHT_MOTOR])));
-    wheelsJointsPosition.name[1] ="base_link_to_leftwheel_joint";
-    wheelsJointsPosition.position[1] = static_cast<double>(motorPositions[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[LEFT_MOTOR])));
-    this->jointPublisher->publish(wheelsJointsPosition);
 
 	this->motorPositionLPublisher->publish(positionMessageL);
 	this->motorPositionRPublisher->publish(positionMessageR);

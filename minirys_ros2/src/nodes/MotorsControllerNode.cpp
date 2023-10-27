@@ -1,7 +1,8 @@
 #include "minirys_ros2/nodes/MotorsControllerNode.hpp"
-
+#include <iostream>
 #include <chrono>
 #include <functional>
+
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -29,8 +30,6 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 	this->declare_parameter("invertLeftMotor", rclcpp::ParameterValue(false));
 	this->declare_parameter("invertRightMotor", rclcpp::ParameterValue(false));
 	this->declare_parameter("enableSpeedRegulator", rclcpp::ParameterValue(true));
-    this->declare_parameter("wheelRadius", rclcpp::ParameterValue(0.0));
-    this->declare_parameter("wheelSeparation", rclcpp::ParameterValue(0.0));
 
 	// Limits
 	/// TODO: Adjust the default values of these limits
@@ -54,8 +53,6 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 	this->invertLeftMotor = this->get_parameter("invertLeftMotor").as_bool();
 	this->invertRightMotor = this->get_parameter("invertRightMotor").as_bool();
 	this->enableSpeedRegulator = this->get_parameter("enableSpeedRegulator").as_bool();
-    this->wheelRadius = this->get_parameter("wheelRadius").as_double();
-    this->wheelSeparation = this->get_parameter("wheelSeparation").as_double();
 
 	this->maxLinearSpeed = this->get_parameter("maxLinearSpeed").as_double();
 	this->maxRotationSpeed = this->get_parameter("maxRotationSpeed").as_double();
@@ -69,6 +66,8 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 	auto pidAngleKp = this->get_parameter("pidAngleKp").as_double();
 	auto pidAngleKi = this->get_parameter("pidAngleKi").as_double();
 	auto pidAngleKd = this->get_parameter("pidAngleKd").as_double();
+	//auto pidAngleTi = this->get_parameter("pidAngleTi").as_double();
+	//auto pidAngleTd = this->get_parameter("pidAngleTd").as_double();
 
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKp " << pidSpeedKp);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKi " << pidSpeedKi);
@@ -76,7 +75,8 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKp " << pidAngleKp);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKi " << pidAngleKi);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKd " << pidAngleKd);
-
+	this->anglePid = PID((float) period.count(), (float) pidAngleKp, (float) pidAngleKi, (float) pidAngleKd);
+	this->speedPid = PID((float) period.count(), (float) pidSpeedKp, (float) pidSpeedKi, (float) pidSpeedKd);
 	this->speedRegulator.setParams(period, pidSpeedKp, pidSpeedKi, pidSpeedKd, this->maxBalancingAngle);
 	this->angleRegulator.setParams(period, pidAngleKp, pidAngleKi, pidAngleKd, this->maxWheelSpeed);
 
@@ -158,7 +158,7 @@ void MotorsControllerNode::update() {
 
 	std::pair<double, double> speeds;
 
-	if (this->balancing && std::abs(this->robotAngularPosition) > 1.0) {
+	if (this->balancing && std::abs(this->robotAngularPosition) > 0.7) {
 		this->balancing = false;
 	}
 	if (this->balancing && !this->targetBalancing) {
@@ -188,11 +188,8 @@ void MotorsControllerNode::update() {
 }
 
 void MotorsControllerNode::receiveVelocityCommand(const geometry_msgs::msg::Twist::SharedPtr message) {
-	this->targetForwardSpeed = std::min(std::max(message->linear.x/this->wheelRadius, -this->maxLinearSpeed), this->maxLinearSpeed);
-	this->targetRotationSpeed = std::min(std::max(message->angular.z*this->wheelSeparation/(2*this->wheelRadius), -this->maxRotationSpeed), this->maxRotationSpeed);
-//    RCLCPP_INFO_STREAM(this->get_logger(), "Forward Speed: " << this->targetForwardSpeed);
-//    RCLCPP_INFO_STREAM(this->get_logger(), "Rotation Speed: " << this->targetRotationSpeed);
-
+	this->targetForwardSpeed = std::min(std::max(message->linear.y, -this->maxLinearSpeed), this->maxLinearSpeed);
+	this->targetRotationSpeed = std::min(std::max(message->angular.z, -this->maxRotationSpeed), this->maxRotationSpeed);
 }
 
 void MotorsControllerNode::receiveBalanceMode(const std_msgs::msg::Bool::SharedPtr message) {
@@ -264,17 +261,25 @@ std::pair<double, double> MotorsControllerNode::calculateSpeedsFlat() const {
 
 std::pair<double, double> MotorsControllerNode::calculateSpeedsBalancing() {
 	double outputTargetAngle = 0.0f;
+	//std::cout<<this->robotAngularPosition<<std::endl;
     double currentSpeed = (this->motorSpeedL + this->motorSpeedR) / 2;
     //RCLCPP_INFO_STREAM(this->get_logger(), "CurrentSpeed: " << currentSpeed);
 	if (this->enableSpeedRegulator) {
-		outputTargetAngle = this->speedRegulator.update(this->targetForwardSpeed, currentSpeed, -this->robotAngularPosition);
-        //outputTargetAngle = this->speedRegulator.update(this->targetForwardSpeed, currentSpeed);
+		//outputTargetAngle = this->speedRegulator.update(this->targetForwardSpeed, currentSpeed, -this->robotAngularPosition);
+        //outputTargetAngle = this->speedRegulator.update(this->targetForwardSpeed, currentSpeed,0.0f);
+	outputTargetAngle = this->speedPid.pid(currentSpeed, this->targetForwardSpeed);
+	//RCLCPP_INFO_STREAM(this->get_logger(), "pid angle: "<<outputTargetAngle);
+	outputTargetAngle = std::min(std::max(-outputTargetAngle, -0.25), 0.25);
 	}
-	double outputWheelSpeed = this->angleRegulator.update(outputTargetAngle, -this->robotAngularPosition, currentSpeed);
-    //double outputWheelSpeed = this->angleRegulator.update(outputTargetAngle, this->robotAngularPosition);
+	//double outputWheelSpeed = this->angleRegulator.update(outputTargetAngle, -this->robotAngularPosition,currentSpeed );
+    	double outputWheelSpeed = this->anglePid.pid(this->robotAngularPosition,outputTargetAngle);
+//double outputWheelSpeed = this->angleRegulator.update(outputTargetAngle, this->robotAngularPosition);
+	RCLCPP_INFO_STREAM(this->get_logger(), "pid speed: "<<currentSpeed);
+	//RCLCPP_INFO_STREAM(this->get_logger(), "pid angle: "<<outputTargetAngle);
 	return {
+	
 		std::min(std::max(outputWheelSpeed + this->targetRotationSpeed, -this->maxWheelSpeed), this->maxWheelSpeed),
-		std::min(std::max(outputWheelSpeed - this->targetRotationSpeed, -this->maxWheelSpeed), this->maxWheelSpeed)
+                std::min(std::max(outputWheelSpeed - this->targetRotationSpeed, -this->maxWheelSpeed), this->maxWheelSpeed)
 	};
 }
 
@@ -282,6 +287,8 @@ std::pair<double, double> MotorsControllerNode::standUp() {
 	if (this->standingUpDir == 0) {
 		this->standingUpDir = this->robotAngularPosition < 0 ? -1 : 1;
 		this->standingUpPhase = 0;
+		this->anglePid.clear();
+       		this->speedPid.clear();
 		this->standingUpStart = this->steadyROSClock.now();
 	}
 
@@ -294,7 +301,7 @@ std::pair<double, double> MotorsControllerNode::standUp() {
 		}
 	} else {
 		// Phase 1: reverse the direction and get up using the momentum
-		if (this->robotAngularPosition * this->standingUpDir > 0) {
+		if (this->robotAngularPosition >= -0.3 && this->robotAngularPosition <= 0.3) {
 			// We're up, switch to balancing regulation
 			this->standingUpDir = 0;
 			this->balancing = true;

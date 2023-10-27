@@ -26,7 +26,6 @@
   <depend>vl53l1x-linux</depend>
   <depend>l6470-linux</depend>
   <depend>sbc-linux-interfaces</depend>
-  <depend>ldlidar_stl_ros2</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -19,7 +19,7 @@ minirys:
     ros__parameters:
       updateFrequency: 100.0
       filterFactor: 0.05
-      angleCorrection: 0.00 #(Yellow 0.000346) #-0.189545 orange 0.042729
+      angleCorrection: 0.03 #(Yellow 0.000346) #-0.189545 orange 0.042729
       angleHistorySize: 4
       gyroOffsetX: 3.850143 #(Yellow 3.850143) #in deg
       gyroOffsetY: -5.236362 #(Yellow -5.236362) #in deg
@@ -50,14 +50,14 @@ minirys:
   fan_ve:
     ros__parameters:
       updateFrequency: 2.0
-      pwmFrequency: 50.0 # 10.0
+      pwmFrequency: 10.0
 
   motors_ve:
     ros__parameters:
       updateFrequency: 100.0
       stepsPerRevolution: 200.0
-      maxSpeed: 620.8318530718 # 2*Pi = 1rps
-      acceleration: 62.8 #z 251.327 na pocz 2*Pi = 1rps
+      maxSpeed: 48.8318530718 # 2*Pi = 1rps
+      acceleration: 81.0 # 2*Pi = 1rps
       wheelRadius: 0.055
 
   # Control Subsystem
@@ -77,20 +77,22 @@ minirys:
       updateFrequency: 100.0
       invertLeftMotor: true
       invertRightMotor: false
-      enableSpeedRegulator: false
+      enableSpeedRegulator: true
       wheelRadius: 0.055
       wheelSeparation: 0.134
-      maxLinearSpeed: 12.0 #18.8495559215 # 2*Pi = 1rps
-      maxRotationSpeed: 12.0 #18.8495559215 # 2*Pi = 1rps
-      maxWheelSpeed: 12.0 # 18.8495559215 # 2*Pi = 1rps
-      maxStandUpSpeed: 11.0 # 2*Pi = 1rps
-      maxBalancingAngle: 0.25
-      pidSpeedKp: 0.001 #0.05 to za duzo 0.01 git
-      pidSpeedKi: 0.00000005 #0.0005 git #0.5 to zajebiscie duzy uchyb ustalony 5.5 ogromne oscylacje
-      pidSpeedKd: 0.01
-      pidAngleKp: 70.0   #100.0
-      pidAngleKi: 1.01   #1.61
-      pidAngleKd: 0.00001     #0.00001
+      maxLinearSpeed: 15.8495559215 # 2*Pi = 1rps
+      maxRotationSpeed: 15.8495559215 # 2*Pi = 1rps
+      maxWheelSpeed: 15.8495559215 # 2*Pi = 1rps
+      maxStandUpSpeed: 7.0 # 2*Pi = 1rps
+      maxBalancingAngle: 0.30
+      pidSpeedKp: 0.0013 #0.001 0.05 to za duzo 0.01 git
+      pidSpeedKi: 0.09 #0.00000005 0.0005 git 0.5 to zajebiscie duzy uchyb ustalony 5.5 ogromne oscylacje
+      pidSpeedKd: 0.0016 #0.01
+      pidAngleKp: 43.5   #100.0
+      pidAngleKi: 0.7 # 0.8   #1.61
+      pidAngleKd: 0.10 #0.00011     #0.00001
+      #pidAngleTi: 1000000000000.0
+     # pidAngleTd: 0.0
 
   odometry_cs:
     ros__parameters:

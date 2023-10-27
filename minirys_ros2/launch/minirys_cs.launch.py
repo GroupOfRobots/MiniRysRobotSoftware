@@ -24,8 +24,7 @@ def generate_launch_description():
 		package="minirys_ros2",
 		executable="minirys_cs",
 		namespace=namespace_value,
-		parameters=[params_path],
-		remappings=[('/minirys/cmd_vel', '/cmd_vel')]
+		parameters=[params_path]
 	)
 
 	return LaunchDescription([

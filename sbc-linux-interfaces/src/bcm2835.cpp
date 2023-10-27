@@ -126,22 +126,22 @@ static uint8_t bcm2835_correct_order(uint8_t b)
 	return b;
 }
 
-#ifdef BCM2835_HAVE_LIBCAP
-#include <sys/capability.h>
-static int bcm2835_has_capability(cap_value_t capability)
-{
-    int ok = 0;
-    cap_t cap = cap_get_proc();
-    if (cap)
-    {
-        cap_flag_value_t value;
-        if (cap_get_flag(cap,capability,CAP_EFFECTIVE,&value) == 0 && value == CAP_SET)
-            ok = 1;
-       cap_free(cap);
-    }
-    return ok;
-}
-#endif
+//#ifdef BCM2835_HAVE_LIBCAP
+//#include <sys/capability.h>
+//static int bcm2835_has_capability(cap_value_t capability)
+//{
+//    int ok = 0;
+//    cap_t cap = cap_get_proc();
+//    if (cap)
+//    {
+//        cap_flag_value_t value;
+//        if (cap_get_flag(cap,capability,CAP_EFFECTIVE,&value) == 0 && value == CAP_SET)
+//            ok = 1;
+ //      cap_free(cap);
+ //   }
+ //   return ok;
+//}
+//#endif
 
 /*
 // Low level register access functions

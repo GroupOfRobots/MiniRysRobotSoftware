@@ -25,8 +25,7 @@ def generate_launch_description():
         package="minirys_ros2",
         executable="motors",
         namespace=namespace_value,
-        parameters=[params_path],
-        remappings=[('/minirys/joint_states', '/joint_states')]
+        parameters=[params_path]
     )
 
     return LaunchDescription([

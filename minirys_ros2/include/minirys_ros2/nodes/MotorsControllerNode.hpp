@@ -2,7 +2,7 @@
 
 #include "minirys_ros2/helpers/PIDRegulator.hpp"
 #include "minirys_ros2/helpers/TimeMeasure.hpp"
-
+#include "minirys_ros2/nodes/pid.cpp"
 #include <rclcpp/rclcpp.hpp>
 
 #include <geometry_msgs/msg/twist.hpp>
@@ -55,9 +55,6 @@ private:
 
 	bool invertRightMotor;
 
-    double wheelRadius;
-
-    double wheelSeparation;
 	// m/s?, TODO: get from maxWheelSpeed
 	double maxLinearSpeed;
 	// rps, TODO: get from maxWheelSpeed
@@ -68,6 +65,9 @@ private:
     double maxStandUpSpeed;
     // rad?
 	double maxBalancingAngle;
+
+	PID anglePid = PID(0.5f);
+	PID speedPid = PID(0.5f);
 
 	PIDRegulator angleRegulator;
 
