@@ -111,6 +111,18 @@ ament_target_dependencies(FanNode
 target_link_libraries(FanNode
   sbc-linux-interfaces
 )
+# Servo
+add_library(ServoNode
+  src/nodes/ServoNode.cpp
+)
+ament_target_dependencies(ServoNode
+  rclcpp
+  sbc-linux-interfaces
+  std_msgs
+)
+target_link_libraries(ServoNode
+  sbc-linux-interfaces
+)
 # Motors
 add_library(MotorsNode
   src/nodes/MotorsNode.cpp
@@ -143,6 +155,15 @@ add_library(FanRegulatorNode
   src/nodes/FanRegulatorNode.cpp
 )
 ament_target_dependencies(FanRegulatorNode
+  rclcpp
+  std_msgs
+  minirys_msgs
+)
+# Servo controller
+add_library(ServoControllerNode
+  src/nodes/ServoControllerNode.cpp
+)
+ament_target_dependencies(ServoControllerNode
   rclcpp
   std_msgs
   minirys_msgs
@@ -255,6 +276,14 @@ target_link_libraries(motors
 add_executable(fan
   src/executables/fan.cpp
 )
+
+add_executable(servo
+  src/executables/servo.cpp
+)
+target_link_libraries(servo
+  ServoNode
+  RTTExecutor
+)
 target_link_libraries(fan
   FanNode
   RTTExecutor
@@ -274,6 +303,7 @@ add_executable(minirys_ve
 )
 target_link_libraries(minirys_ve
   FanNode
+  ServoNode
   MotorsNode
   RTTExecutor
 )
@@ -297,6 +327,7 @@ add_executable(minirys_cs
 target_link_libraries(minirys_cs
   CommunicationNode
   FanRegulatorNode
+  ServoControllerNode
   MotorsControllerNode
   OdometryNode
   RTTExecutor
@@ -308,6 +339,7 @@ add_executable(minirys_cs_rttest
 target_link_libraries(minirys_cs_rttest
   CommunicationNode
   FanRegulatorNode
+  ServoControllerNode
   MotorsControllerNode
   OdometryNode
   RTTExecutor
@@ -318,6 +350,7 @@ add_executable(minirys_cs_rttest_rt
 target_link_libraries(minirys_cs_rttest_rt
   CommunicationNode
   FanRegulatorNode
+  ServoControllerNode
   MotorsControllerNode
   OdometryNode
   RTTExecutor
@@ -329,6 +362,7 @@ install(
     battery
     distance
     fan
+    servo
     joycon_receiver_node
     imu
     motors
