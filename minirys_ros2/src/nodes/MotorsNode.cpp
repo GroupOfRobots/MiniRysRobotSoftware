@@ -94,7 +94,7 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 		10
 	);
 
-    this->jointPublisher = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
+//    this->jointPublisher = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
 	this->updateTimer = this->create_wall_timer(period, std::bind(&MotorsNode::update, this));
 }
 
@@ -123,7 +123,7 @@ void MotorsNode::update() {
 	auto statusMessageR = minirys_msgs::msg::MotorDriverStatus();
 
     auto step_mode = this->motors->getMicroStepMode();
-    auto wheelsJointsPosition = sensor_msgs::msg::JointState();
+//    auto wheelsJointsPosition = sensor_msgs::msg::JointState();
 
 	positionMessageL.data = static_cast<double>(motorPositions[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[LEFT_MOTOR])));
 	positionMessageR.data = static_cast<double>(motorPositions[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[RIGHT_MOTOR])));
@@ -161,14 +161,14 @@ void MotorsNode::update() {
 	statusMessageL.header.stamp = this->get_clock()->now();
 	statusMessageR.header.stamp = statusMessageL.header.stamp;
 
-    wheelsJointsPosition.header.stamp = this->get_clock()->now();
-    wheelsJointsPosition.name.resize(2);
-    wheelsJointsPosition.position.resize(2);
-    wheelsJointsPosition.name[0] ="base_link_to_rightwheel_joint";
-    wheelsJointsPosition.position[0] = static_cast<double>(motorPositions[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[RIGHT_MOTOR])));
-    wheelsJointsPosition.name[1] ="base_link_to_leftwheel_joint";
-    wheelsJointsPosition.position[1] = static_cast<double>(motorPositions[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[LEFT_MOTOR])));
-    this->jointPublisher->publish(wheelsJointsPosition);
+//    wheelsJointsPosition.header.stamp = this->get_clock()->now();
+//    wheelsJointsPosition.name.resize(2);
+//    wheelsJointsPosition.position.resize(2);
+//    wheelsJointsPosition.name[0] ="base_link_to_rightwheel_joint";
+//    wheelsJointsPosition.position[0] = static_cast<double>(motorPositions[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[RIGHT_MOTOR])));
+//    wheelsJointsPosition.name[1] ="base_link_to_leftwheel_joint";
+//    wheelsJointsPosition.position[1] = static_cast<double>(motorPositions[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[LEFT_MOTOR])));
+//    this->jointPublisher->publish(wheelsJointsPosition);
 
 	this->motorPositionLPublisher->publish(positionMessageL);
 	this->motorPositionRPublisher->publish(positionMessageR);
