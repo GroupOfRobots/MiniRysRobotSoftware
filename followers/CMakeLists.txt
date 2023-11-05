@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(line_follower)
+project(followers)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -34,11 +34,11 @@ add_library(pid
   src/pid.cpp
 )
 
-add_executable(distanceFollower src/distanceFollower.cpp)
-ament_target_dependencies(distanceFollower rclcpp std_msgs sensor_msgs geometry_msgs)
+add_executable(wallfollower src/wallfollower.cpp)
+ament_target_dependencies(wallfollower rclcpp std_msgs sensor_msgs geometry_msgs )
 
 install(TARGETS
-   distanceFollower
+   wallfollower
    DESTINATION lib/${PROJECT_NAME}
  )
 
@@ -55,8 +55,17 @@ install(PROGRAMS
 )
 
 install(PROGRAMS
-  py_scripts/working_pid.py
+  py_scripts/linefollower_no_cam.py
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+install(DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}
 )
 
 ament_package()

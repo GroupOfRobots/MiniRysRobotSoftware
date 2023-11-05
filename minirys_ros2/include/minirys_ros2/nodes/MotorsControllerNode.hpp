@@ -11,6 +11,7 @@
 #include <minirys_msgs/msg/motor_driver_status.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/float64.hpp>
+#include <memory>
 
 class MotorsControllerNode: public rclcpp::Node {
 public:
@@ -66,8 +67,10 @@ private:
     // rad?
 	double maxBalancingAngle;
 
-	PID anglePid = PID(0.5f);
-	PID speedPid = PID(0.5f);
+	//PID anglePid = PID(0.5f);
+	//PID speedPid = PID(0.5f);
+	std::unique_ptr<PID> anglePid;
+	std::unique_ptr<PID> speedPid;
 
 	PIDRegulator angleRegulator;
 

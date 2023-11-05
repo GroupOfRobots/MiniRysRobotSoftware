@@ -1,0 +1,28 @@
+
+line_follower:
+  ros__parameters:
+    timer_period: 0.05
+    maxU: 5.14
+    K: 0.009
+    Ti: 100.0
+    Td: 0.03
+    turnOffsetParam: 1.0
+    linearSpeed: -1.0
+  
+wall_follower:
+  ros__parameters:
+    timer_period: 0.05
+    K: 5.5
+    Ti: 100.0
+    Td: 0.015
+    linearSpeed: -1.0
+    
+line_follower_no_cam:
+  ros__parameters:
+    timer_period: 0.05
+    maxU: 5.14
+    K: 0.009
+    Ti: 100.0
+    Td: 0.03
+    turnOffsetParam: 1.0
+    linearSpeed: -1.0

@@ -5,16 +5,15 @@ from sensor_msgs.msg import Image
 import cv2 
 from cv_bridge import CvBridge 
 import numpy as np
-from picamera2 import Picamera2
+from rclpy.parameter import Parameter
 from pid import PID
 from geometry_msgs.msg import Twist
 
 class BinnImg(Node):
     img = None
-    picam2 = None
     pid = None
-    minU = -5.14
-    maxU = 5.14
+    #minU = -5.14
+    #maxU = 5.14
     #points = [(220, 270),(220, 230),(220, 200),(220, 170)]
     points = [(220, 200)]
     leftT = (435, 270)
@@ -22,15 +21,42 @@ class BinnImg(Node):
     y = 0
 
     def __init__(self):
-        super().__init__('line_follower')
-        timer_period = 0.05  # seconds
+        super().__init__('line_follower_no_cam')
+        self.logger = self.get_logger()
+        self.declare_parameters(
+            namespace="",
+            parameters=[
+                ('timer_period', Parameter.Type.DOUBLE),
+                ('maxU', Parameter.Type.DOUBLE),
+                ('K', Parameter.Type.DOUBLE),
+                ('Ti', Parameter.Type.DOUBLE),
+                ('Td', Parameter.Type.DOUBLE),
+                ('turnOffsetParam', Parameter.Type.DOUBLE),
+                ('linearSpeed', Parameter.Type.DOUBLE)
+            ])
+        self.logger.info("LLL")
+        self.maxU = self.get_parameter("maxU").get_parameter_value().double_value
+        self.minU = -self.maxU
+        self.speed = self.get_parameter("linearSpeed").get_parameter_value().double_value
+        self.turnOffsetParam = self.get_parameter("turnOffsetParam").get_parameter_value().double_value
+        timer_period = self.get_parameter("timer_period").get_parameter_value().double_value 
+        K = self.get_parameter("K").get_parameter_value().double_value
+        Ti = self.get_parameter("Ti").get_parameter_value().double_value
+        Td = self.get_parameter("Td").get_parameter_value().double_value
+
+        self.logger.info(f"timer_period: { timer_period}, maxU: {self.maxU}, K: {K}, Ti:{Ti}")
+        self.logger.info(f"Td: {Td},turnOffsetParam: {self.turnOffsetParam}, speed: {self.speed}")
+
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.thresh = None
+
         self.subscription = self.create_subscription(Image, 'cv_video_frames',
             self.listener_callback, 10)
-        self.pid = PID(0.05,0.011,100,0.02) # dostroić 0.008
+        
+        self.pid = PID(timer_period,K,Ti,Td) 
+
         self.publisher3_ = self.create_publisher(Twist, '/minirys/cmd_vel', 10)
-        #self.picam2.capture_file("test3.jpg")
+
 
     def listener_callback(self, msg):
         br = CvBridge()
@@ -44,7 +70,8 @@ class BinnImg(Node):
             img2 = self.img
             # biggest contour
             areas = [cv2.contourArea(c) for c in contours]
-            #print(areas)
+
+            # getting position where robot should be
             turnOfset = 0
             if not np.size(areas) == 0:
                 max_index = np.argmax(areas)
@@ -65,12 +92,13 @@ class BinnImg(Node):
                         cv2.circle(img2, (int(x_value/i), y_value), radius=5, color=(255, 0, 0), thickness=-1)
                 self.y = sum_dist/len(self.points)
                 
+                # recognizing 90 turn
                 if cv2.pointPolygonTest(cnt, self.leftT, False) >= 0 and cv2.pointPolygonTest(cnt, self.rightT, False) < 0 :
                     print("prawy")
-                    turnOfset = -1.2 #-1
+                    turnOfset = -self.turnOffsetParam #-1
                 elif cv2.pointPolygonTest(cnt, self.leftT, False) < 0 and cv2.pointPolygonTest(cnt, self.rightT, False) >= 0 :
                     print("lewy")
-                    turnOfset = 1.2 #1
+                    turnOfset = self.turnOffsetParam #1
             u = self.pid.pid(self.y,0) + turnOfset
             print(turnOfset)
             if u > self.maxU:
@@ -79,10 +107,9 @@ class BinnImg(Node):
             if u < self.minU:
                 u = self.minU
 
-            print(u)
             # publikowanie u
             cmd = Twist()
-            cmd.linear.y = -1.0
+            cmd.linear.y = self.speed
             cmd.angular.z = u
             self.publisher3_.publish(cmd)
 
