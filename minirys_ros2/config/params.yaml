@@ -86,8 +86,8 @@ minirys:
       maxStandUpSpeed: 7.0 # 2*Pi = 1rps
       maxBalancingAngle: 0.30
       pidSpeedKp: 0.0013 #0.001 0.05 to za duzo 0.01 git
-      pidSpeedKi: 0.06 #0.00000005 0.0005 git 0.5 to zajebiscie duzy uchyb ustalony 5.5 ogromne oscylacje
-      pidSpeedKd: 0.0017 #0.01
+      pidSpeedKi: 0.05 #0.00000005 0.0005 git 0.5 to zajebiscie duzy uchyb ustalony 5.5 ogromne oscylacje
+      pidSpeedKd: 0.0016 #0.01
       pidAngleKp: 43.3   #100.0
       pidAngleKi: 0.5 # 0.8   #1.61
       pidAngleKd: 0.09 #0.00011     #0.00001

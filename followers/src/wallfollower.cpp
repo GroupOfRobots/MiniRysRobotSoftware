@@ -14,11 +14,12 @@ class WallFollower: public rclcpp::Node{
     public:
     WallFollower() : Node("wall_follower") {
 
-        this->declare_parameter("timer_period", rclcpp::ParameterValue(0.0));
+        this->declare_parameter("timer_period", rclcpp::ParameterValue(0.05));
         this->declare_parameter("K", rclcpp::ParameterValue(0.0));
         this->declare_parameter("Ti", rclcpp::ParameterValue(0.0));
         this->declare_parameter("Td", rclcpp::ParameterValue(0.0));
         this->declare_parameter("linearSpeed", rclcpp::ParameterValue(0.0));
+        this->declare_parameter("maxU", rclcpp::ParameterValue(0.9));
 
         // Get and save/use the parameters
         std::this_thread::sleep_for(100ms);
@@ -30,12 +31,14 @@ class WallFollower: public rclcpp::Node{
         double Td = this->get_parameter("Td").as_double();
         this->linearSpeed = this->get_parameter("linearSpeed").as_double();
         this->pid = std::unique_ptr<PID>(new PID((float) timer_period,(float) K,(float) Ti,(float) Td));
+        this->maxU = (float)this->get_parameter("maxU").as_double();
 
         RCLCPP_INFO_STREAM(this->get_logger(), "Got param: Ti " << Ti);
         RCLCPP_INFO_STREAM(this->get_logger(), "Got param: Td " << Td);
         RCLCPP_INFO_STREAM(this->get_logger(), "Got param: K " << K);
-        RCLCPP_INFO_STREAM(this->get_logger(), "Got param: linear speed " << linearSpeed);
+        RCLCPP_INFO_STREAM(this->get_logger(), "Got param: linear speed " << this->linearSpeed);
         RCLCPP_INFO_STREAM(this->get_logger(), "Got param: timer_period " << timer_period);
+        RCLCPP_INFO_STREAM(this->get_logger(), "Got param: maxU " << this->maxU);
 
         publisher_ =
         this->create_publisher<geometry_msgs::msg::Twist>("/minirys/cmd_vel", 10);
@@ -47,13 +50,57 @@ class WallFollower: public rclcpp::Node{
         subscription2_ = this->create_subscription<sensor_msgs::msg::Range>(
         "/minirys/internal/distance_2", 10, std::bind(&WallFollower::right_sensor_callback, this, std::placeholders::_1));
 
+        subscription3_ = this->create_subscription<sensor_msgs::msg::Range>(
+        "/minirys/internal/distance_3", 10, std::bind(&WallFollower::front_sensor_callback, this, std::placeholders::_1));
+
     }
 
     private:
 
     void timer_callback() {
         auto msg = std::make_shared<geometry_msgs::msg::Twist>();
-        float u = this->pid->pid(this->right_sensor-this->left_sensor,0);
+        float u;
+        if (this->flag_ == 1){
+            u = this->pid->pid_aw(this->right_sensor-this->left_sensor,0,20.0f, this->maxU);
+            if (u >this->maxU){
+                u = this->maxU;
+            }
+            else if(u < -this->maxU){
+                u = -this->maxU;
+            }
+            RCLCPP_INFO_STREAM(this->get_logger(), "y:  " << this->right_sensor-this->left_sensor);
+        }
+        else if(this->flag_ == 2){
+            RCLCPP_INFO_STREAM(this->get_logger(), "Left turn  " );
+        }
+        else if(this->flag_ == 3){
+            RCLCPP_INFO_STREAM(this->get_logger(), "Right turn  " );
+        }
+        else if(this->flag_ == 4){
+            RCLCPP_INFO_STREAM(this->get_logger(), "go str  " );
+        }
+
+        if(this->right_sensor > 0.200 && this->left_sensor < 0.200 && this->front_sensor < 0.160){
+            this->flag_ = 2;
+        }
+
+        if(this->right_sensor < 0.200 && this->left_sensor > 0.200 && this->front_sensor < 0.160){
+            this->flag_ = 3;
+        }
+
+        if(this->right_sensor < 0.200 && this->left_sensor > 0.200 && this->front_sensor > 0.260){
+            this->flag_ = 4;
+        }
+
+        if(this->right_sensor > 0.200 && this->left_sensor < 0.200 && this->front_sensor > 0.260){
+            this->flag_ = 4;
+        }
+        if(this->flag_ == 4 &&  this->right_sensor < 0.200 && this->left_sensor < 0.200){
+            this->flag_ = 1;
+        }
+
+        RCLCPP_INFO_STREAM(this->get_logger(), "u:  " << u);
+        RCLCPP_INFO_STREAM(this->get_logger(), "front:  " << this->front_sensor);
         msg->linear.y = this->linearSpeed;
         msg->angular.z = u;
         publisher_->publish(*msg);
@@ -71,16 +118,25 @@ class WallFollower: public rclcpp::Node{
         this->right_sensor = (float) msg->range;
     }
 
+    void front_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
+    {
+        this->front_sensor = (float) msg->range;
+    }
+
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
     rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription1_;
     rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription2_;
+    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription3_;
 
     float left_sensor = 0.0f;
     float right_sensor = 0.0f;
+    float front_sensor = 0.0f;
 
     std::unique_ptr<PID> pid;
     double linearSpeed;
+    float maxU;
+    int flag_ = 1;
 };
 
 int main(int argc, char * argv[])
