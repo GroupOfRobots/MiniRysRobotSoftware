@@ -69,34 +69,48 @@ class WallFollower: public rclcpp::Node{
                 u = -this->maxU;
             }
             RCLCPP_INFO_STREAM(this->get_logger(), "y:  " << this->right_sensor-this->left_sensor);
+            msg->linear.y = this->linearSpeed;
         }
         else if(this->flag_ == 2){
-            RCLCPP_INFO_STREAM(this->get_logger(), "Left turn  " );
+            RCLCPP_INFO_STREAM(this->get_logger(), "Right turn  " );
+            u = -1.2;
+            msg->linear.y = 0;
         }
         else if(this->flag_ == 3){
-            RCLCPP_INFO_STREAM(this->get_logger(), "Right turn  " );
+            RCLCPP_INFO_STREAM(this->get_logger(), "Left turn  " );
+            u = 1.2;
+            msg->linear.y = 0;
         }
         else if(this->flag_ == 4){
-            RCLCPP_INFO_STREAM(this->get_logger(), "go str  " );
+            RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
+            u = -0.1;
+            msg->linear.y = this->linearSpeed;
+        }
+        else if(this->flag_ == 5){
+            RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
+            u = 0.1;
+            msg->linear.y = this->linearSpeed;
         }
 
-        if(this->right_sensor > 0.200 && this->left_sensor < 0.200 && this->front_sensor < 0.160){
+
+        if(this->right_sensor > 0.200 && this->left_sensor < 0.200 && this->front_sensor < 0.220){
             this->flag_ = 2;
         }
 
-        if(this->right_sensor < 0.200 && this->left_sensor > 0.200 && this->front_sensor < 0.160){
+        if(this->right_sensor < 0.200 && this->left_sensor > 0.200 && this->front_sensor < 0.220){
             this->flag_ = 3;
         }
 
-        if(this->right_sensor < 0.200 && this->left_sensor > 0.200 && this->front_sensor > 0.260){
-            this->flag_ = 4;
+        if(this->front_sensor > 0.300 && this->flag_ == 3){
+            this->flag_ = 5;
         }
 
-        if(this->right_sensor > 0.200 && this->left_sensor < 0.200 && this->front_sensor > 0.260){
+        if(this->front_sensor > 0.300 && this->flag_ == 2){
             this->flag_ = 4;
         }
-        if(this->flag_ == 4 &&  this->right_sensor < 0.200 && this->left_sensor < 0.200){
+        if((this->flag_ == 4 || this->flag_ == 5) &&  this->right_sensor < 0.200 && this->left_sensor < 0.200){
             this->flag_ = 1;
+            this->pid->clear();
         }
 
         RCLCPP_INFO_STREAM(this->get_logger(), "u:  " << u);
