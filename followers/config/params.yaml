@@ -16,7 +16,7 @@ wall_follower:
     Ti: 100000.0
     Td: 0.0
     linearSpeed: -1.0
-    maxU: 0.3
+    maxU: 0.30
     
     
 line_follower_no_cam:
