@@ -37,8 +37,16 @@ add_library(pid
 add_executable(wallfollower src/wallfollower.cpp)
 ament_target_dependencies(wallfollower rclcpp std_msgs sensor_msgs geometry_msgs )
 
+add_executable(combinedFollower src/combinedFollower.cpp)
+ament_target_dependencies(combinedFollower rclcpp std_msgs sensor_msgs geometry_msgs )
+
 install(TARGETS
    wallfollower
+   DESTINATION lib/${PROJECT_NAME}
+ )
+ 
+ install(TARGETS
+   combinedFollower
    DESTINATION lib/${PROJECT_NAME}
  )
 

@@ -2,6 +2,7 @@
 #include "sensor_msgs/msg/range.hpp"
 #include "std_msgs/msg/header.hpp"
 #include "geometry_msgs/msg/twist.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include <chrono>
 #include "pid.cpp"
 #include <memory>
@@ -53,76 +54,80 @@ class WallFollower: public rclcpp::Node{
         subscription3_ = this->create_subscription<sensor_msgs::msg::Range>(
         "/minirys/internal/distance_3", 10, std::bind(&WallFollower::front_sensor_callback, this, std::placeholders::_1));
 
+        subscription4_ = this->create_subscription<std_msgs::msg::Bool>(
+        "/is_wall_follower", 10, std::bind(&WallFollower::is_callback, this, std::placeholders::_1));
+
     }
 
     private:
 
     void timer_callback() {
-        auto msg = std::make_shared<geometry_msgs::msg::Twist>();
-        float u;
-        if (this->flag_ == 1){
-            u = this->pid->pid_aw(this->right_sensor-this->left_sensor,0,20.0f, this->maxU);
-            if (u >this->maxU){
-                u = this->maxU;
+        if(this->isWorking){
+            auto msg = std::make_shared<geometry_msgs::msg::Twist>();
+            float u;
+            if (this->flag_ == 1){
+                u = this->pid->pid_aw(this->right_sensor-this->left_sensor,0,20.0f, this->maxU);
+                if (u >this->maxU){
+                    u = this->maxU;
+                }
+                else if(u < -this->maxU){
+                    u = -this->maxU;
+                }
+                RCLCPP_INFO_STREAM(this->get_logger(), "y:  " << this->right_sensor-this->left_sensor);
+                msg->linear.y = this->linearSpeed;
             }
-            else if(u < -this->maxU){
-                u = -this->maxU;
+            else if(this->flag_ == 2){
+                RCLCPP_INFO_STREAM(this->get_logger(), "Right turn  " );
+                u = -1.2;
+                msg->linear.y = 0;
             }
-            RCLCPP_INFO_STREAM(this->get_logger(), "y:  " << this->right_sensor-this->left_sensor);
+            else if(this->flag_ == 3){
+                RCLCPP_INFO_STREAM(this->get_logger(), "Left turn  " );
+                u = 1.2;
+                msg->linear.y = 0;
+            }
+            else if(this->flag_ == 4){
+                RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
+                u = -0.1;
+                msg->linear.y = this->linearSpeed;
+            }
+            else if(this->flag_ == 5){
+                RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
+                u = 0.1;
+                msg->linear.y = this->linearSpeed;
+            }
+
+            if( this->right_sensor <= 0.210 && this->left_sensor <= 0.210){
+                this->flag_ = 1;
+                this->pid->clear();
+            }
+
+            if(this->right_sensor > 0.270 && this->left_sensor < 0.220 && this->front_sensor < 0.270){
+                this->flag_ = 2;
+            }
+
+            if(this->right_sensor < 0.220 && this->left_sensor > 0.270 && this->front_sensor < 0.270){
+                this->flag_ = 3;
+            }
+
+            if(this->front_sensor > 0.300 && this->flag_ == 3){
+                this->flag_ = 5;
+            }
+
+            if(this->front_sensor > 0.300 && this->flag_ == 2){
+                this->flag_ = 4;
+            }
+            // if((this->flag_ == 4 || this->flag_ == 5) &&  this->right_sensor <= 0.210 && this->left_sensor <= 0.210){
+            //     this->flag_ = 1;
+            //     this->pid->clear();
+            // }
+
+            RCLCPP_INFO_STREAM(this->get_logger(), "u:  " << u);
+            RCLCPP_INFO_STREAM(this->get_logger(), "front:  " << this->front_sensor);
             msg->linear.y = this->linearSpeed;
+            msg->angular.z = u;
+            publisher_->publish(*msg);
         }
-        else if(this->flag_ == 2){
-            RCLCPP_INFO_STREAM(this->get_logger(), "Right turn  " );
-            u = -1.2;
-            msg->linear.y = 0;
-        }
-        else if(this->flag_ == 3){
-            RCLCPP_INFO_STREAM(this->get_logger(), "Left turn  " );
-            u = 1.2;
-            msg->linear.y = 0;
-        }
-        else if(this->flag_ == 4){
-            RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
-            u = -0.1;
-            msg->linear.y = this->linearSpeed;
-        }
-        else if(this->flag_ == 5){
-            RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
-            u = 0.1;
-            msg->linear.y = this->linearSpeed;
-        }
-
-        if( this->right_sensor <= 0.210 && this->left_sensor <= 0.210){
-            this->flag_ = 1;
-            this->pid->clear();
-        }
-
-        if(this->right_sensor > 0.270 && this->left_sensor < 0.220 && this->front_sensor < 0.270){
-            this->flag_ = 2;
-        }
-
-        if(this->right_sensor < 0.220 && this->left_sensor > 0.270 && this->front_sensor < 0.270){
-            this->flag_ = 3;
-        }
-
-        if(this->front_sensor > 0.300 && this->flag_ == 3){
-            this->flag_ = 5;
-        }
-
-        if(this->front_sensor > 0.300 && this->flag_ == 2){
-            this->flag_ = 4;
-        }
-        // if((this->flag_ == 4 || this->flag_ == 5) &&  this->right_sensor <= 0.210 && this->left_sensor <= 0.210){
-        //     this->flag_ = 1;
-        //     this->pid->clear();
-        // }
-
-        RCLCPP_INFO_STREAM(this->get_logger(), "u:  " << u);
-        RCLCPP_INFO_STREAM(this->get_logger(), "front:  " << this->front_sensor);
-        msg->linear.y = this->linearSpeed;
-        msg->angular.z = u;
-        publisher_->publish(*msg);
-        
     }
 
     void left_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
@@ -141,11 +146,16 @@ class WallFollower: public rclcpp::Node{
         this->front_sensor = (float) msg->range;
     }
 
+    void is_callback(const std_msgs::msg::Bool::SharedPtr msg){
+        this->isWorking = msg->data;
+    }
+
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
     rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription1_;
     rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription2_;
     rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription3_;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subscription4_;
 
     float left_sensor = 0.0f;
     float right_sensor = 0.0f;
@@ -155,6 +165,7 @@ class WallFollower: public rclcpp::Node{
     double linearSpeed;
     float maxU;
     int flag_ = 1;
+    bool isWorking = true;
 };
 
 int main(int argc, char * argv[])
