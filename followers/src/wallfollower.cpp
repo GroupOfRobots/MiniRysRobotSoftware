@@ -57,12 +57,15 @@ class WallFollower: public rclcpp::Node{
         subscription4_ = this->create_subscription<std_msgs::msg::Bool>(
         "/is_wall_follower", 10, std::bind(&WallFollower::is_callback, this, std::placeholders::_1));
 
+        program_start_ = std::chrono::high_resolution_clock::now();
     }
 
     private:
 
     void timer_callback() {
-        if(this->isWorking){
+        RCLCPP_INFO_STREAM(this->get_logger(), "Enter" );
+        if(this->isWorking && std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - program_start_).count() > 2000){
+            RCLCPP_INFO_STREAM(this->get_logger(), "Enter2" );
             auto msg = std::make_shared<geometry_msgs::msg::Twist>();
             float u;
             if (this->flag_ == 1){
@@ -102,11 +105,11 @@ class WallFollower: public rclcpp::Node{
                 this->pid->clear();
             }
 
-            if(this->right_sensor > 0.270 && this->left_sensor < 0.220 && this->front_sensor < 0.270){
+            if(this->right_sensor > 0.290 && this->left_sensor < 0.260 && this->front_sensor < 0.270){
                 this->flag_ = 2;
             }
 
-            if(this->right_sensor < 0.220 && this->left_sensor > 0.270 && this->front_sensor < 0.270){
+            if(this->right_sensor < 0.260 && this->left_sensor > 0.290 && this->front_sensor < 0.270){
                 this->flag_ = 3;
             }
 
@@ -166,6 +169,8 @@ class WallFollower: public rclcpp::Node{
     float maxU;
     int flag_ = 1;
     bool isWorking = true;
+
+    std::chrono::time_point<std::chrono::high_resolution_clock> program_start_;
 };
 
 int main(int argc, char * argv[])

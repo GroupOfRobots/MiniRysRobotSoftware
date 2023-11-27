@@ -1,6 +1,6 @@
 import os
 from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
+from launch import actions, launch_description_sources, LaunchDescription
 from launch_ros.actions import Node
 
 def generate_launch_description():
@@ -28,8 +28,9 @@ def generate_launch_description():
         executable = 'combinedFollower',
         
     )
+    ld.add_action(line_f)
     ld.add_action(wall_f)
     ld.add_action(node)
-    ld.add_action(line_f)
+
     
     return ld
