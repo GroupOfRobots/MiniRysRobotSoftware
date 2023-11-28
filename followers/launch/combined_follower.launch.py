@@ -29,8 +29,7 @@ def generate_launch_description():
         
     )
     ld.add_action(line_f)
-    ld.add_action(wall_f)
     ld.add_action(node)
-
+    ld.add_action(wall_f)
     
     return ld

@@ -40,7 +40,7 @@ private:
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher2_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher3_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher4_;
-    int flag_ = 0;
+    int flag_ = -1;
     float left_sensor = 400.0f;
     float right_sensor = 400.0f;
     float front_sensor = 400.0f;
@@ -66,7 +66,12 @@ private:
     void timer_callback() {
         auto msg = std::make_shared<std_msgs::msg::Bool>();
         auto msg2 = std::make_shared<geometry_msgs::msg::Twist>();
-        if(flag_ == 0){
+        if(flag_ == -1){
+            start_balancing = std::chrono::high_resolution_clock::now();
+            flag_ = 0;
+        }
+
+        if(flag_ == 0 && std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 500){
             msg->data = true;
             publisher2_->publish(*msg);
             msg->data = false;
@@ -76,6 +81,16 @@ private:
         
         if(right_sensor < 0.200 && left_sensor < 0.2 && flag_ == 1){
             flag_ = 2;
+            // publisher4_->publish(*msg2);
+            // msg->data = false;
+            // publisher2_->publish(*msg);
+            // msg->data = true;
+            // publisher3_->publish(*msg);
+            
+            start_balancing = std::chrono::high_resolution_clock::now();
+        }
+        if(flag_==2 && std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 2000){
+            flag_ = 3;
             publisher4_->publish(*msg2);
             msg->data = false;
             publisher2_->publish(*msg);
@@ -83,13 +98,13 @@ private:
             publisher3_->publish(*msg);
             start_balancing = std::chrono::high_resolution_clock::now();
         }
-        if(std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 5000 && flag_==2){
+        if(std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 5000 && flag_==3){
             msg->data = true;
             publisher1_->publish(*msg);
-            flag_ = 3;
+            flag_ = 4;
         }
 
-        if(right_sensor < 0.200 && left_sensor < 0.2 && front_sensor < 0.2 && flag_==3){
+        if(right_sensor < 0.240 && left_sensor < 0.24 && front_sensor < 0.12 && flag_==4){
             msg->data = false;
             publisher1_->publish(*msg);
             publisher4_->publish(*msg2);
