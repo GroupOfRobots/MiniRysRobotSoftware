@@ -53,7 +53,8 @@ DistanceNode::DistanceNode(rclcpp::NodeOptions options):
 		this->sensors[i]->initialize();
 		
 		this->sensors[i]->setDistanceMode(VL53L1X::DISTANCE_MODE_SHORT);
-		this->sensors[i]->setTimingBudget(VL53L1X::TIMING_BUDGET_50_MS);
+		//this->sensors[i]->setDistanceMode(VL53L1X::DISTANCE_MODE_LONG);
+		//this->sensors[i]->setTimingBudget(VL53L1X::TIMING_BUDGET_50_MS);
 		this->sensors[i]->setTimingBudget(VL53L1X::TIMING_BUDGET_20_MS);
 		this->sensors[i]->setInterMeasurementPeriod(25);
 

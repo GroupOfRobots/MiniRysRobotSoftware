@@ -96,13 +96,13 @@ private:
             publisher4_->publish(*msg2);
             start_balancing = std::chrono::high_resolution_clock::now();
         }
-        if(std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 5000 && flag_==3){
+        if(std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 7000 && flag_==3){
             msg->data = true;
             publisher1_->publish(*msg);
             flag_ = 4;
         }
 
-        if(right_sensor < 0.260 && left_sensor < 0.26 && front_sensor < 0.16 && flag_==4){
+        if(right_sensor < 0.220 && left_sensor < 0.22 && front_sensor < 0.19 && flag_==4){
             msg->data = false;
             publisher1_->publish(*msg);
             publisher4_->publish(*msg2);
