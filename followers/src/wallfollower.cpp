@@ -100,16 +100,16 @@ class WallFollower: public rclcpp::Node{
                 msg->linear.y = this->linearSpeed;
             }
 
-            if( this->right_sensor <= 0.210 && this->left_sensor <= 0.210){
-                this->flag_ = 1;
-                this->pid->clear();
-            }
+            // if( this->right_sensor <= 0.210 && this->left_sensor <= 0.210){
+            //     this->flag_ = 1;
+            //     this->pid->clear();
+            // }
 
-            if(this->right_sensor > 0.350 && this->left_sensor < 0.230 && this->front_sensor < 0.260){
+            if(this->right_sensor > 0.320 && this->left_sensor < 0.260 && this->front_sensor < 0.300){
                 this->flag_ = 2;
             }
 
-            if(this->right_sensor < 0.230 && this->left_sensor > 0.350 && this->front_sensor < 0.260){
+            if(this->right_sensor < 0.260 && this->left_sensor > 0.320 && this->front_sensor < 0.300){
                 this->flag_ = 3;
             }
 
@@ -120,10 +120,10 @@ class WallFollower: public rclcpp::Node{
             if(this->front_sensor > 0.400 && this->flag_ == 2){
                 this->flag_ = 4;
             }
-            // if((this->flag_ == 4 || this->flag_ == 5) &&  this->right_sensor <= 0.210 && this->left_sensor <= 0.210){
-            //     this->flag_ = 1;
-            //     this->pid->clear();
-            // }
+            if((this->flag_ == 4 || this->flag_ == 5) &&  this->right_sensor <= 0.210 && this->left_sensor <= 0.210){
+                this->flag_ = 1;
+                this->pid->clear();
+            }
 
             RCLCPP_INFO_STREAM(this->get_logger(), "u:  " << u);
             RCLCPP_INFO_STREAM(this->get_logger(), "front:  " << this->front_sensor);
