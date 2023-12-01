@@ -69,7 +69,7 @@ class WallFollower: public rclcpp::Node{
             auto msg = std::make_shared<geometry_msgs::msg::Twist>();
             float u;
             if (this->flag_ == 1){
-                u = this->pid->pid_aw(this->right_sensor-this->left_sensor,0,20.0f, this->maxU);
+                u = this->pid->pid_aw(this->right_sensor-this->left_sensor-0.03,0,20.0f, this->maxU);
                 if (u >this->maxU){
                     u = this->maxU;
                 }
@@ -105,11 +105,11 @@ class WallFollower: public rclcpp::Node{
             //     this->pid->clear();
             // }
 
-            if(this->right_sensor > 0.320 && this->left_sensor < 0.260 && this->front_sensor < 0.300){
+            if((this->right_sensor > 0.320 && this->left_sensor < 0.260 && this->front_sensor < 0.300) && this->flag_ == 1){
                 this->flag_ = 2;
             }
 
-            if(this->right_sensor < 0.260 && this->left_sensor > 0.320 && this->front_sensor < 0.300){
+            if((this->right_sensor < 0.260 && this->left_sensor > 0.320 && this->front_sensor < 0.300) && this->flag_ == 1){
                 this->flag_ = 3;
             }
 
