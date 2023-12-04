@@ -105,11 +105,11 @@ class WallFollower: public rclcpp::Node{
             //     this->pid->clear();
             // }
 
-            if((this->right_sensor > 0.320 && this->left_sensor < 0.260 && this->front_sensor < 0.300) && this->flag_ == 1){
+            if(((this->right_sensor > 0.320 && this->left_sensor < 0.260 && this->front_sensor < 0.300) || (this->right_sensor > this->left_sensor && this->right_sensor-this->left_sensor > 0.1 && this->left_sensor > 0.3))){
                 this->flag_ = 2;
             }
 
-            if((this->right_sensor < 0.260 && this->left_sensor > 0.320 && this->front_sensor < 0.300) && this->flag_ == 1){
+            if(((this->right_sensor < 0.260 && this->left_sensor > 0.320 && this->front_sensor < 0.300) || (this->right_sensor < this->left_sensor && this->right_sensor-this->left_sensor < -0.1 && this->right_sensor > 0.3))){
                 this->flag_ = 3;
             }
 
@@ -120,7 +120,7 @@ class WallFollower: public rclcpp::Node{
             if(this->front_sensor > 0.400 && this->flag_ == 2){
                 this->flag_ = 4;
             }
-            if((this->flag_ == 4 || this->flag_ == 5) &&  this->right_sensor <= 0.210 && this->left_sensor <= 0.210){
+            if((this->flag_ == 4 || this->flag_ == 5) &&  this->right_sensor <= 0.260 && this->left_sensor <= 0.240){
                 this->flag_ = 1;
                 this->pid->clear();
             }
