@@ -63,7 +63,6 @@ class WallFollower: public rclcpp::Node{
     private:
 
     void timer_callback() {
-        RCLCPP_INFO_STREAM(this->get_logger(), "Enter" );
         if(this->isWorking && std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - program_start_).count() > 2000){
             RCLCPP_INFO_STREAM(this->get_logger(), "Enter2" );
             auto msg = std::make_shared<geometry_msgs::msg::Twist>();
@@ -76,7 +75,37 @@ class WallFollower: public rclcpp::Node{
                 else if(u < -this->maxU){
                     u = -this->maxU;
                 }
-                RCLCPP_INFO_STREAM(this->get_logger(), "y:  " << this->right_sensor-this->left_sensor);
+                //u = 0.0;
+                // if(this->right_sensor-this->left_sensor-0.03 <= 0.05 && this->right_sensor-this->left_sensor-0.03 >= -0.03){
+                //     u = 0.0;
+                //     RCLCPP_INFO_STREAM(this->get_logger(), "1" );
+                // }
+                // else if(this->right_sensor-this->left_sensor-0.03 <= 0.07 && this->right_sensor-this->left_sensor-0.03 >= 0){
+                //     u = -0.12;
+                //     RCLCPP_INFO_STREAM(this->get_logger(), "2" );
+                // }
+                // else if(this->right_sensor-this->left_sensor-0.03 <= 0.15 && this->right_sensor-this->left_sensor-0.03 >= 0){
+                //     u = -0.2;
+                //     RCLCPP_INFO_STREAM(this->get_logger(), "3" );
+                // }
+                // else if(this->right_sensor-this->left_sensor-0.03 > 0.15) {
+                //     u = -0.4;
+                //     RCLCPP_INFO_STREAM(this->get_logger(), "4" );
+                // }
+                // else if(this->right_sensor-this->left_sensor-0.03 >= -0.07 && this->right_sensor-this->left_sensor-0.03 <= 0){
+                //     u = 0.12;
+                //     RCLCPP_INFO_STREAM(this->get_logger(), "5" );
+                // }
+                // else if(this->right_sensor-this->left_sensor-0.03 >=-0.15 && this->right_sensor-this->left_sensor-0.03 <= 0){
+                //     u = 0.2;
+                //     RCLCPP_INFO_STREAM(this->get_logger(), "6" );
+                // }
+                // else if(this->right_sensor-this->left_sensor-0.03 < -0.15 ){
+                //     u = 0.4;
+                //     RCLCPP_INFO_STREAM(this->get_logger(), "7" );
+                // }
+
+                RCLCPP_INFO_STREAM(this->get_logger(), "y:  " << this->right_sensor-this->left_sensor-0.03);
                 msg->linear.y = this->linearSpeed;
             }
             else if(this->flag_ == 2){
@@ -91,12 +120,12 @@ class WallFollower: public rclcpp::Node{
             }
             else if(this->flag_ == 4){
                 RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
-                u = -0.1;
+                u = -0.0;
                 msg->linear.y = this->linearSpeed;
             }
             else if(this->flag_ == 5){
                 RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
-                u = 0.1;
+                u = 0.0;
                 msg->linear.y = this->linearSpeed;
             }
 
@@ -105,11 +134,11 @@ class WallFollower: public rclcpp::Node{
             //     this->pid->clear();
             // }
 
-            if(((this->right_sensor > 0.320 && this->left_sensor < 0.260 && this->front_sensor < 0.300) || (this->right_sensor > this->left_sensor && this->right_sensor-this->left_sensor > 0.1 && this->left_sensor > 0.3))){
+            if(((this->right_sensor > 0.320 && this->left_sensor +0.03 < 0.260 && this->front_sensor < 0.300) || (this->right_sensor > this->left_sensor + 0.03&& this->right_sensor-this->left_sensor -0.03> 0.1 && this->left_sensor +0.03> 0.35))){
                 this->flag_ = 2;
             }
 
-            if(((this->right_sensor < 0.260 && this->left_sensor > 0.320 && this->front_sensor < 0.300) || (this->right_sensor < this->left_sensor && this->right_sensor-this->left_sensor < -0.1 && this->right_sensor > 0.3))){
+            if(((this->right_sensor < 0.260 && this->left_sensor + 0.03 > 0.320 && this->front_sensor < 0.300) || (this->right_sensor < this->left_sensor + 0.03&& this->right_sensor-this->left_sensor-0.03 < -0.1 && this->right_sensor > 0.35))){
                 this->flag_ = 3;
             }
 

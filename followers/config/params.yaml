@@ -12,10 +12,10 @@ line_follower:
 wall_follower:
   ros__parameters:
     timer_period: 0.05
-    K: 2.5
-    Ti: 100000.0
-    Td: 0.0
-    linearSpeed: -2.0
+    K: 1.5
+    Ti: 100.0
+    Td: 0.013
+    linearSpeed: -1.7
     maxU: 0.30
     
     

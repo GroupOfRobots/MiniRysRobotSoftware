@@ -69,10 +69,12 @@ class BinnImg(Node):
         # PID 
         self.pid = PID(timer_period,K,Ti,Td) 
         self.isWorking = True
+        #self.logger.info(f"end")
         
 
 
     def timer_callback(self):
+        #self.logger.info(f"running{self.isWorking}")
         if self.isWorking:
             yuv = self.picam2.capture_array("lores")
             self.img = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2RGB)[0:450, 100:540]
