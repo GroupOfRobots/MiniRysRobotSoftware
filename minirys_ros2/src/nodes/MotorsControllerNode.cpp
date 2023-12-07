@@ -41,11 +41,11 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 
 	// Regulator settings
 	this->declare_parameter("pidSpeedKp", rclcpp::ParameterValue(0.0));
-	this->declare_parameter("pidSpeedKi", rclcpp::ParameterValue(0.0));
-	this->declare_parameter("pidSpeedKd", rclcpp::ParameterValue(0.0));
+	this->declare_parameter("pidSpeedTi", rclcpp::ParameterValue(0.0));
+	this->declare_parameter("pidSpeedTd", rclcpp::ParameterValue(0.0));
 	this->declare_parameter("pidAngleKp", rclcpp::ParameterValue(0.0));
-	this->declare_parameter("pidAngleKi", rclcpp::ParameterValue(0.0));
-	this->declare_parameter("pidAngleKd", rclcpp::ParameterValue(0.0));
+	this->declare_parameter("pidAngleTi", rclcpp::ParameterValue(0.0));
+	this->declare_parameter("pidAngleTd", rclcpp::ParameterValue(0.0));
 
 	// Get and save/use the parameters
     std::this_thread::sleep_for(100ms);
@@ -61,22 +61,22 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
     this->maxStandUpSpeed = this->get_parameter("maxStandUpSpeed").as_double();
 
 	auto pidSpeedKp = this->get_parameter("pidSpeedKp").as_double();
-	auto pidSpeedKi = this->get_parameter("pidSpeedKi").as_double();
-	auto pidSpeedKd = this->get_parameter("pidSpeedKd").as_double();
+	auto pidSpeedTi = this->get_parameter("pidSpeedTi").as_double();
+	auto pidSpeedTd = this->get_parameter("pidSpeedTd").as_double();
 	auto pidAngleKp = this->get_parameter("pidAngleKp").as_double();
-	auto pidAngleKi = this->get_parameter("pidAngleKi").as_double();
-	auto pidAngleKd = this->get_parameter("pidAngleKd").as_double();
+	auto pidAngleTi = this->get_parameter("pidAngleTi").as_double();
+	auto pidAngleTd = this->get_parameter("pidAngleTd").as_double();
 	//auto pidAngleTi = this->get_parameter("pidAngleTi").as_double();
 	//auto pidAngleTd = this->get_parameter("pidAngleTd").as_double();
 
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKp " << pidSpeedKp);
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKi " << pidSpeedKi);
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKd " << pidSpeedKd);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKi " << pidSpeedTi);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKd " << pidSpeedTd);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKp " << pidAngleKp);
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKi " << pidAngleKi);
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKd " << pidAngleKd);
-	this->anglePid = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidAngleKp, (float) pidAngleKi, (float) pidAngleKd));
-	this->speedPid = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidSpeedKp, (float) pidSpeedKi, (float) pidSpeedKd));
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKi " << pidAngleTi);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKd " << pidAngleTd);
+	this->anglePid = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidAngleKp, (float) pidAngleTi, (float) pidAngleTd));
+	this->speedPid = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidSpeedKp, (float) pidSpeedTi, (float) pidSpeedTd));
 	//this->speedRegulator.setParams(period, pidSpeedKp, pidSpeedKi, pidSpeedKd, this->maxBalancingAngle);
 	//this->angleRegulator.setParams(period, pidAngleKp, pidAngleKi, pidAngleKd, this->maxWheelSpeed);
 
@@ -151,8 +151,10 @@ void MotorsControllerNode::update() {
 
 	if (this->targetBalancing && !this->targetBalancingPrev) {
 		this->standingUpDir = 0;
-		this->angleRegulator.zero();
-		this->speedRegulator.zero();
+		//this->angleRegulator.zero();
+		//this->speedRegulator.zero();
+		this->anglePid->clear();
+       	this->speedPid->clear();
 	}
 	this->targetBalancingPrev = this->targetBalancing;
 
@@ -165,15 +167,17 @@ void MotorsControllerNode::update() {
 		this->balancing = false;
 	}
 	if (!this->balancing) {
-		this->speedRegulator.zero();
-		this->angleRegulator.zero();
+		//this->speedRegulator.zero();
+		//this->angleRegulator.zero();
+		this->anglePid->clear();
+       	this->speedPid->clear();
 	}
 
 	if (this->balancing) {
 		speeds = this->calculateSpeedsBalancing();
 	} else if (this->targetBalancing) {
 		speeds = this->standUp();
-        this->angleRegulator.zero();
+        //this->angleRegulator.zero();
 	} else {
 		speeds = this->calculateSpeedsFlat();
 	}

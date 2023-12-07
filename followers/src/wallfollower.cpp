@@ -120,12 +120,12 @@ class WallFollower: public rclcpp::Node{
             }
             else if(this->flag_ == 4){
                 RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
-                u = -0.0;
+                u = -0.1;
                 msg->linear.y = this->linearSpeed;
             }
             else if(this->flag_ == 5){
                 RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
-                u = 0.0;
+                u = 0.1;
                 msg->linear.y = this->linearSpeed;
             }
 

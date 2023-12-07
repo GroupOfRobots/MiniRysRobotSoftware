@@ -15,7 +15,7 @@ wall_follower:
     K: 1.5
     Ti: 100.0
     Td: 0.013
-    linearSpeed: -1.7
+    linearSpeed: -2.0
     maxU: 0.30
     
     

@@ -1,7 +1,8 @@
 #include "minirys_ros2/helpers/PIDRegulator.hpp"
 #include <algorithm>
 
-PIDRegulator(float T, float K=0.0f, float Ti=10000000.0f, float Td=0.0f): T(T), K(K), Ti(Ti), Td(Td) {};
+PIDRegulator::PIDRegulator(float t, float k=0.0f, float ti=10000000.0f, float td=0.0f): T(t),
+ K(k), Ti(ti), Td(td){}
 
 float PIDRegulator::pid(float y, float y_zad){
 	float e = y_zad - y;
@@ -32,13 +33,13 @@ float PIDRegulator::pid_aw(float y, float y_zad,float Tv, float max){
         //float up = this->K*e;
         float ui = this->u_past + this->K/this->Ti*this->T*(this->e_past + e)/2 +this->T /Tv * (uw - this->u_past);
         //float ud = this->K*this->Td*(e-this->e_past)/this->T;
-        float u = clacUdUp(e) + ui;
+        float u = calcUdUp(e) + ui;
         this->u_past = ui;
         this->e_past = e;
         return u;
     }
 
-float PIDregulator::calcUd(float e){
+float PIDRegulator::calcUdUp(float e){
 	float up = this->K*e;
 	float ud = this->K*this->Td*(e-this->e_past)/this->T;
 	return up + ud;
