@@ -2,7 +2,7 @@
 
 #include "minirys_ros2/helpers/PIDRegulator.hpp"
 #include "minirys_ros2/helpers/TimeMeasure.hpp"
-#include "minirys_ros2/nodes/pid.cpp"
+
 #include <rclcpp/rclcpp.hpp>
 
 #include <geometry_msgs/msg/twist.hpp>
@@ -67,14 +67,12 @@ private:
     // rad?
 	double maxBalancingAngle;
 
-	//PID anglePid = PID(0.5f);
-	//PID speedPid = PID(0.5f);
-	std::unique_ptr<PID> anglePid;
-	std::unique_ptr<PID> speedPid;
+	std::unique_ptr<PIDRegulator> anglePid;
+	std::unique_ptr<PIDRegulator> speedPid;
 
-	PIDRegulator angleRegulator;
+	//PIDRegulator angleRegulator;
 
-	PIDRegulator speedRegulator;
+	//PIDRegulator speedRegulator;
 
 	rclcpp::Clock steadyROSClock;
 

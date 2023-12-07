@@ -4,25 +4,21 @@
 
 class PIDRegulator {
 public:
-	PIDRegulator();
+	PIDRegulator(float T, float K=0.0f, float Ti=10000000.0f, float Td=0.0f);
 
-	~PIDRegulator() = default;
+	float pid(float y, float y_zad);
+	float pid_aw(float y, float y_zad,float Tv, float max);
+	void clear();
+	float pid(float y, float y_zad);
 
-	void setParams(std::chrono::duration<double> looptime, double kp, double ki, double kd, double max);
-
-	double update(double setpoint, double value, double outValue);
-
-	void zero();
 
 private:
-	double looptime;
-	double kp;
-	double ki;
-	double kd;
-	double max;
+	float K;
+    float Ti;
+    float Td;
+    float T;
+    float e_past = 0.0f;
+    float u_past = 0.0f;
+	float calcUdUp(float e);
 
-	double setpoint;
-	double prevError1;
-    double prevError2;
-	double output;
 };

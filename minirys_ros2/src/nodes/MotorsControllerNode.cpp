@@ -75,10 +75,10 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKp " << pidAngleKp);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKi " << pidAngleKi);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKd " << pidAngleKd);
-	this->anglePid = std::unique_ptr<PID>(new PID((float) period.count(), (float) pidAngleKp, (float) pidAngleKi, (float) pidAngleKd));
-	this->speedPid = std::unique_ptr<PID>(new PID((float) period.count(), (float) pidSpeedKp, (float) pidSpeedKi, (float) pidSpeedKd));
-	this->speedRegulator.setParams(period, pidSpeedKp, pidSpeedKi, pidSpeedKd, this->maxBalancingAngle);
-	this->angleRegulator.setParams(period, pidAngleKp, pidAngleKi, pidAngleKd, this->maxWheelSpeed);
+	this->anglePid = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidAngleKp, (float) pidAngleKi, (float) pidAngleKd));
+	this->speedPid = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidSpeedKp, (float) pidSpeedKi, (float) pidSpeedKd));
+	//this->speedRegulator.setParams(period, pidSpeedKp, pidSpeedKi, pidSpeedKd, this->maxBalancingAngle);
+	//this->angleRegulator.setParams(period, pidAngleKp, pidAngleKi, pidAngleKd, this->maxWheelSpeed);
 
 	// Setup the clock (for standing up)
 	this->steadyROSClock = rclcpp::Clock(RCL_STEADY_TIME);

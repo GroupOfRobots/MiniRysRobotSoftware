@@ -1,43 +1,51 @@
 #include "minirys_ros2/helpers/PIDRegulator.hpp"
 #include <algorithm>
 
-PIDRegulator::PIDRegulator():
-	looptime(0.0),
-	kp(0),
-	ki(0),
-	kd(0),
-	max(0),
-	setpoint(0.0),
-	prevError1(0.0),
-    prevError2(0.0),
-    output(0.0) {}
+PIDRegulator(float T, float K=0.0f, float Ti=10000000.0f, float Td=0.0f): T(T), K(K), Ti(Ti), Td(Td) {};
 
-void PIDRegulator::setParams(std::chrono::duration<double> looptime, double kp, double ki, double kd, double max) {
-	this->kp = kp;
-	this->ki = ki;
-	this->kd = kd;
-	this->max = max;
-	this->looptime = looptime.count();
-	this->zero();
+float PIDRegulator::pid(float y, float y_zad){
+	float e = y_zad - y;
+	//float up = this->K*e;
+	float ui = this->u_past + this->K/this->Ti*this->T*(this->e_past + e)/2;
+	//float ud = this->K*this->Td*(e-this->e_past)/this->T;
+	float u = calcUdUp(e) + ui;
+	this->u_past = ui;
+	this->e_past = e;
+	return u;
 }
 
-double PIDRegulator::update(double setpoint, double value, double outValue) {
 
-    double error = -setpoint + value;
-    double Factor0 = this->kp * (1 + this->ki * this->looptime / 2 + this->kd / this->looptime);
-    double Factor1 = this->kp * (this->ki * this->looptime / 2 - 2 * this->kd / this->looptime - 1);
-    double Factor2 = this->kp * this->kd / this->looptime;
+float PIDRegulator::pid_aw(float y, float y_zad,float Tv, float max){
+        float uw;
+        if(this->u_past >max ){
+            uw = 15.0f;
+        }
+        else if (this->u_past < -max)
+        {
+            uw = -15.0f;
+        }
+        else{
+            uw = this->u_past;
+        }
+        
+        float e = y_zad - y;
+        //float up = this->K*e;
+        float ui = this->u_past + this->K/this->Ti*this->T*(this->e_past + e)/2 +this->T /Tv * (uw - this->u_past);
+        //float ud = this->K*this->Td*(e-this->e_past)/this->T;
+        float u = clacUdUp(e) + ui;
+        this->u_past = ui;
+        this->e_past = e;
+        return u;
+    }
 
-    this->output = Factor0 * error + Factor1 * this->prevError1 + Factor2 * this->prevError2 + outValue;
-    this->prevError2 = this->prevError1;
-    this->prevError1 = error;
-
-	return std::min(std::max(output, -this->max), this->max);
+float PIDregulator::calcUd(float e){
+	float up = this->K*e;
+	float ud = this->K*this->Td*(e-this->e_past)/this->T;
+	return up + ud;
 }
 
-void PIDRegulator::zero() {
-	this->setpoint = 0.0;
-	this->prevError1 = 0.0;
-    this->prevError2 = 0.0;
-	this->output = 0.0;
-}
+
+void PIDRegulator::clear(){
+        this->e_past = 0.0f;
+        this->u_past = 0.0f;
+    }
