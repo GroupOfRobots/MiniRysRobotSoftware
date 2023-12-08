@@ -102,12 +102,32 @@ private:
             flag_ = 4;
         }
 
-        if(right_sensor < 0.240 && left_sensor < 0.24 && front_sensor < 0.17 && flag_==4){
+        if(right_sensor < 0.240 && left_sensor < 0.24 && front_sensor < 0.20 && flag_==4){
             msg->data = false;
             publisher1_->publish(*msg);
             publisher4_->publish(*msg2);
+            flag_ = 5;
+            start_balancing = std::chrono::high_resolution_clock::now();
         }
         
+        if(flag_ == 5 && std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 4000){
+            start_balancing = std::chrono::high_resolution_clock::now();
+            flag_ = 6;
+            msg2->angular.z = 1.57;
+            publisher4_->publish(*msg2);
+        }
+        if(flag_ == 6 && std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 1800){
+            flag_ = 7;
+            start_balancing = std::chrono::high_resolution_clock::now();
+            publisher4_->publish(*msg2);
+            
+        }
+
+        if(flag_ == 7 && std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 4000){
+            msg->data = true;
+            flag_ = 8;
+            publisher1_->publish(*msg);
+        }
 
     };
 };

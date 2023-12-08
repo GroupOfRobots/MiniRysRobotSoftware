@@ -134,11 +134,11 @@ class WallFollower: public rclcpp::Node{
             //     this->pid->clear();
             // }
 
-            if(((this->right_sensor > 0.320 && this->left_sensor +0.03 < 0.260 && this->front_sensor < 0.300) || (this->right_sensor > this->left_sensor + 0.03&& this->right_sensor-this->left_sensor -0.03> 0.1 && this->left_sensor +0.03> 0.35))){
+            if(((this->right_sensor > 0.320 && this->left_sensor +0.03 < 0.260 && this->front_sensor < 0.300) || (this->right_sensor > this->left_sensor + 0.03&& this->right_sensor-this->left_sensor -0.03> 0.12 && this->left_sensor +0.03> 0.26))){
                 this->flag_ = 2;
             }
 
-            if(((this->right_sensor < 0.260 && this->left_sensor + 0.03 > 0.320 && this->front_sensor < 0.300) || (this->right_sensor < this->left_sensor + 0.03&& this->right_sensor-this->left_sensor-0.03 < -0.1 && this->right_sensor > 0.35))){
+            if(((this->right_sensor < 0.260 && this->left_sensor + 0.03 > 0.320 && this->front_sensor < 0.300) || (this->right_sensor < this->left_sensor + 0.03&& this->right_sensor-this->left_sensor-0.03 < -0.12 && this->right_sensor > 0.26))){
                 this->flag_ = 3;
             }
 
