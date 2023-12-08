@@ -21,10 +21,12 @@ public:
 
 	~MotorsControllerNode() override;
 
+	OnSetParametersCallbackHandle::SharedPtr parametersCallbackHandle;
+
 private:
 	bool enabledL;
 
-    bool enabledR;
+	bool enabledR;
 
 	bool balancing;
 
@@ -67,12 +69,8 @@ private:
     // rad?
 	double maxBalancingAngle;
 
-	std::unique_ptr<PIDRegulator> anglePid;
-	std::unique_ptr<PIDRegulator> speedPid;
-
-	//PIDRegulator angleRegulator;
-
-	//PIDRegulator speedRegulator;
+	std::unique_ptr<PIDRegulator> anglePidRegulator;
+	std::unique_ptr<PIDRegulator> speedPidRegulator;
 
 	rclcpp::Clock steadyROSClock;
 
@@ -118,4 +116,9 @@ private:
 	std::pair<double, double> calculateSpeedsBalancing();
 
 	std::pair<double, double> standUp();
+
+    RCLCPP_PUBLIC
+    rcl_interfaces::msg::SetParametersResult
+    setParametersAtomically(
+    const std::vector<rclcpp::Parameter> & parameters);
 };

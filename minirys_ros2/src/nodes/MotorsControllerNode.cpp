@@ -47,6 +47,9 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 	this->declare_parameter("pidAngleTi", rclcpp::ParameterValue(0.0));
 	this->declare_parameter("pidAngleTd", rclcpp::ParameterValue(0.0));
 
+	parametersCallbackHandle = this->add_on_set_parameters_callback(
+		std::bind(&MotorsControllerNode::setParametersAtomically, this, std::placeholders::_1));
+
 	// Get and save/use the parameters
     std::this_thread::sleep_for(100ms);
 	auto period = std::chrono::duration<double>(1.0 / this->get_parameter("updateFrequency").as_double());
@@ -66,8 +69,6 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 	auto pidAngleKp = this->get_parameter("pidAngleKp").as_double();
 	auto pidAngleTi = this->get_parameter("pidAngleTi").as_double();
 	auto pidAngleTd = this->get_parameter("pidAngleTd").as_double();
-	//auto pidAngleTi = this->get_parameter("pidAngleTi").as_double();
-	//auto pidAngleTd = this->get_parameter("pidAngleTd").as_double();
 
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKp " << pidSpeedKp);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKi " << pidSpeedTi);
@@ -75,10 +76,8 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKp " << pidAngleKp);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKi " << pidAngleTi);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKd " << pidAngleTd);
-	this->anglePid = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidAngleKp, (float) pidAngleTi, (float) pidAngleTd));
-	this->speedPid = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidSpeedKp, (float) pidSpeedTi, (float) pidSpeedTd));
-	//this->speedRegulator.setParams(period, pidSpeedKp, pidSpeedKi, pidSpeedKd, this->maxBalancingAngle);
-	//this->angleRegulator.setParams(period, pidAngleKp, pidAngleKi, pidAngleKd, this->maxWheelSpeed);
+	this->anglePidRegulator = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidAngleKp, (float) pidAngleTi, (float) pidAngleTd));
+	this->speedPidRegulator = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidSpeedKp, (float) pidSpeedTi, (float) pidSpeedTd));
 
 	// Setup the clock (for standing up)
 	this->steadyROSClock = rclcpp::Clock(RCL_STEADY_TIME);
@@ -151,10 +150,8 @@ void MotorsControllerNode::update() {
 
 	if (this->targetBalancing && !this->targetBalancingPrev) {
 		this->standingUpDir = 0;
-		//this->angleRegulator.zero();
-		//this->speedRegulator.zero();
-		this->anglePid->clear();
-       	this->speedPid->clear();
+		this->anglePidRegulator->clear();
+       	this->speedPidRegulator->clear();
 	}
 	this->targetBalancingPrev = this->targetBalancing;
 
@@ -167,10 +164,8 @@ void MotorsControllerNode::update() {
 		this->balancing = false;
 	}
 	if (!this->balancing) {
-		//this->speedRegulator.zero();
-		//this->angleRegulator.zero();
-		this->anglePid->clear();
-       	this->speedPid->clear();
+		this->anglePidRegulator->clear();
+       	this->speedPidRegulator->clear();
 	}
 
 	if (this->balancing) {
@@ -265,21 +260,14 @@ std::pair<double, double> MotorsControllerNode::calculateSpeedsFlat() const {
 
 std::pair<double, double> MotorsControllerNode::calculateSpeedsBalancing() {
 	double outputTargetAngle = 0.0f;
-	//std::cout<<this->robotAngularPosition<<std::endl;
     double currentSpeed = (this->motorSpeedL + this->motorSpeedR) / 2;
-    //RCLCPP_INFO_STREAM(this->get_logger(), "CurrentSpeed: " << currentSpeed);
 	if (this->enableSpeedRegulator) {
-		//outputTargetAngle = this->speedRegulator.update(this->targetForwardSpeed, currentSpeed, -this->robotAngularPosition);
-        //outputTargetAngle = this->speedRegulator.update(this->targetForwardSpeed, currentSpeed,0.0f);
-	outputTargetAngle = this->speedPid->pid_aw(currentSpeed, this->targetForwardSpeed, 10.0f, 0.25);
-	//RCLCPP_INFO_STREAM(this->get_logger(), "pid angle: "<<outputTargetAngle);
+	outputTargetAngle = this->speedPidRegulator->pid_aw(currentSpeed, this->targetForwardSpeed, 10.0f, 0.25);
+	RCLCPP_INFO_STREAM(this->get_logger(), "pid angle: "<<outputTargetAngle);
 	outputTargetAngle = std::min(std::max(-outputTargetAngle, -0.25), 0.25);
 	}
-	//double outputWheelSpeed = this->angleRegulator.update(outputTargetAngle, -this->robotAngularPosition,currentSpeed );
-    	double outputWheelSpeed = this->anglePid->pid_aw(this->robotAngularPosition,outputTargetAngle, 10.0f, this->maxWheelSpeed);
-//double outputWheelSpeed = this->angleRegulator.update(outputTargetAngle, this->robotAngularPosition);
+    	double outputWheelSpeed = this->anglePidRegulator->pid_aw(this->robotAngularPosition,outputTargetAngle, 10.0f, this->maxWheelSpeed);
 	RCLCPP_INFO_STREAM(this->get_logger(), "pid speed: "<<currentSpeed);
-	//RCLCPP_INFO_STREAM(this->get_logger(), "pid angle: "<<outputTargetAngle);
 	return {
 	
 		std::min(std::max(outputWheelSpeed + this->targetRotationSpeed, -this->maxWheelSpeed), this->maxWheelSpeed),
@@ -291,8 +279,8 @@ std::pair<double, double> MotorsControllerNode::standUp() {
 	if (this->standingUpDir == 0) {
 		this->standingUpDir = this->robotAngularPosition < 0 ? -1 : 1;
 		this->standingUpPhase = 0;
-		this->anglePid->clear();
-       	this->speedPid->clear();
+		this->anglePidRegulator->clear();
+       	this->speedPidRegulator->clear();
 		this->standingUpStart = this->steadyROSClock.now();
 	}
 
@@ -319,4 +307,38 @@ std::pair<double, double> MotorsControllerNode::standUp() {
 		this->standingUpDir * this->maxStandUpSpeed,
 		this->standingUpDir * this->maxStandUpSpeed
 	};
+}
+
+rcl_interfaces::msg::SetParametersResult
+MotorsControllerNode::setParametersAtomically(const std::vector<rclcpp::Parameter> &parameters) {
+	for (const auto &parameter : parameters)
+	{
+		const std::string &name = parameter.get_name();
+		const rclcpp::ParameterValue parameter1 = parameter.get_parameter_value();
+		const double value = parameter1.get<double>();
+
+		RCLCPP_INFO_STREAM(this->get_logger(), "Got param from service: " << name << "  " << value);
+
+		if (name == "pidSpeedKp") {
+			this->speedPidRegulator->K = value;
+        } else if (name == "pidSpeedKi") {
+			this->speedPidRegulator->Ti = value;
+        } else if (name == "pidSpeedKd") {
+			this->speedPidRegulator->Td = value;
+		} else if (name == "pidAngleKp") {
+			this->anglePidRegulator->K = value;
+		} else if (name == "pidAngleKi") {
+			this->anglePidRegulator->Ti = value;
+		} else if (name == "pidAngleKd") {
+			this->anglePidRegulator->Td = value;
+		} else {
+			RCLCPP_INFO_STREAM(this->get_logger(), "Unknown param");
+        }
+		
+	}
+
+	rcl_interfaces::msg::SetParametersResult result;
+	result.successful = true;
+	result.reason = "success";
+	return result;
 }
