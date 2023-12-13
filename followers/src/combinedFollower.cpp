@@ -44,7 +44,12 @@ private:
     float left_sensor = 400.0f;
     float right_sensor = 400.0f;
     float front_sensor = 400.0f;
-    std::chrono::time_point<std::chrono::high_resolution_clock> start_balancing;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_measure_;
+
+    int getTimeToNow(std::chrono::time_point<std::chrono::high_resolution_clock> start_measure_time){
+        auto now = std::chrono::high_resolution_clock::now();
+        return std::chrono::duration_cast<std::chrono::milliseconds>(now - start_measure_time).count();
+    }
 
 
     void left_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
@@ -67,11 +72,11 @@ private:
         auto msg = std::make_shared<std_msgs::msg::Bool>();
         auto msg2 = std::make_shared<geometry_msgs::msg::Twist>();
         if(flag_ == -1){
-            start_balancing = std::chrono::high_resolution_clock::now();
+            start_measure_ = std::chrono::high_resolution_clock::now();
             flag_ = 0;
         }
 
-        if(flag_ == 0 && std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 500){
+        if(flag_ == 0 && getTimeToNow(start_measure_) > 500){
             msg->data = true;
             publisher2_->publish(*msg);
             msg->data = false;
@@ -85,18 +90,17 @@ private:
             msg->data = false;
             publisher2_->publish(*msg);
             
-            start_balancing = std::chrono::high_resolution_clock::now();
+            start_measure_ = std::chrono::high_resolution_clock::now();
         }
-        if(flag_==2 && std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 1500){
+        if(flag_==2 && getTimeToNow(start_measure_) > 1500){
             flag_ = 3;
 
             msg->data = true;
             publisher4_->publish(*msg2);
             publisher3_->publish(*msg);
-            publisher4_->publish(*msg2);
-            start_balancing = std::chrono::high_resolution_clock::now();
+            start_measure_ = std::chrono::high_resolution_clock::now();
         }
-        if(std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 7000 && flag_==3){
+        if(getTimeToNow(start_measure_) > 7000 && flag_==3){
             msg->data = true;
             publisher1_->publish(*msg);
             flag_ = 4;
@@ -107,29 +111,29 @@ private:
             publisher1_->publish(*msg);
             publisher4_->publish(*msg2);
             flag_ = 5;
-            start_balancing = std::chrono::high_resolution_clock::now();
+            start_measure_ = std::chrono::high_resolution_clock::now();
         }
         
-        if(flag_ == 5 && std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 4000){
-            start_balancing = std::chrono::high_resolution_clock::now();
+        if(flag_ == 5 && getTimeToNow(start_measure_) > 4000){
+            start_measure_ = std::chrono::high_resolution_clock::now();
             flag_ = 6;
             msg2->angular.z = 1.57;
             publisher4_->publish(*msg2);
         }
-        if(flag_ == 6 && std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 1800){
+        if(flag_ == 6 && getTimeToNow(start_measure_) > 1800){
             flag_ = 7;
-            start_balancing = std::chrono::high_resolution_clock::now();
+            start_measure_ = std::chrono::high_resolution_clock::now();
             publisher4_->publish(*msg2);
             
         }
 
-        if(flag_ == 7 && std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now()- start_balancing).count() > 4000){
+        if(flag_ == 7 && getTimeToNow(start_measure_) > 4000){
             msg->data = true;
             flag_ = 8;
             publisher1_->publish(*msg);
         }
 
-    };
+    }
 };
 
 int main(int argc, char * argv[])
