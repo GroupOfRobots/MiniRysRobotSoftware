@@ -68,7 +68,7 @@ class WallFollower: public rclcpp::Node{
             float u;
             msg->linear.y = this->linearSpeed;
             if (this->flag_ == 1){
-                u = this->pid->pid_aw(this->right_sensor-this->left_sensor-0.03,0,20.0f, this->maxU);
+                u = this->pid->pid_aw(this->right_sensor-this->left_sensor,0,20.0f, this->maxU);
                 if (u >this->maxU){
                     u = this->maxU;
                 }
@@ -79,12 +79,12 @@ class WallFollower: public rclcpp::Node{
             else if(this->flag_ == 2){
                 RCLCPP_INFO_STREAM(this->get_logger(), "Right turn  " );
                 u = -1.2;
-                msg->linear.y = 0;
+                msg->linear.y = -1;
             }
             else if(this->flag_ == 3){
                 RCLCPP_INFO_STREAM(this->get_logger(), "Left turn  " );
                 u = 1.2;
-                msg->linear.y = 0;
+                msg->linear.y = -1;
             }
             else if(this->flag_ == 4){
                 RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
