@@ -7,9 +7,10 @@ from cv_bridge import CvBridge
 import numpy as np
 from rclpy.parameter import Parameter
 from pid import PID
+from std_msgs.msg import Bool
 from geometry_msgs.msg import Twist
 
-class BinnImg(Node):
+class LineFollowerNoCamm(Node):
     img = None
     pid = None
     #minU = -5.14
@@ -56,6 +57,9 @@ class BinnImg(Node):
         self.pid = PID(timer_period,K,Ti,Td) 
 
         self.publisher3_ = self.create_publisher(Twist, '/minirys/cmd_vel', 10)
+        self.subscriber = self.create_subscription(Bool,'/is_line_follower', self.subscr_callback, 10)
+
+        self.is_working = True
 
 
     def listener_callback(self, msg):
@@ -63,7 +67,7 @@ class BinnImg(Node):
         self.thresh = br.imgmsg_to_cv2(msg)
 
     def timer_callback(self):
-        if self.thresh is not None:
+        if self.thresh is not None and self.is_working:
             thresh = self.thresh
             # contours
             contours, hierarchy = cv2.findContours(image=thresh, mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_NONE)
@@ -113,12 +117,13 @@ class BinnImg(Node):
             cmd.angular.z = u
             self.publisher3_.publish(cmd)
 
-    
+    def subscr_callback(self, msg):
+        self.is_working = msg.data
 
 
 def main(args=None):
     rclpy.init(args=args)
-    minimal_publisher = BinnImg()
+    minimal_publisher = LineFollowerNoCamm()
     rclpy.spin(minimal_publisher)
     rclpy.shutdown()
 

@@ -11,7 +11,7 @@ from std_msgs.msg import Bool
 from geometry_msgs.msg import Twist
 from rclpy.parameter import Parameter
 
-class BinnImg(Node):
+class LineFollower(Node):
 
     img = None
     picam2 = None
@@ -68,14 +68,14 @@ class BinnImg(Node):
         self.picam2.start()
         # PID 
         self.pid = PID(timer_period,K,Ti,Td) 
-        self.isWorking = True
+        self.is_working = True
         #self.logger.info(f"end")
         
 
 
     def timer_callback(self):
         #self.logger.info(f"running{self.isWorking}")
-        if self.isWorking:
+        if self.is_working:
             yuv = self.picam2.capture_array("lores")
             self.img = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2RGB)[0:450, 100:540]
             gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
@@ -141,13 +141,13 @@ class BinnImg(Node):
             self.publisher2_.publish(msg)
 
     def subscr_callback(self, msg):
-        self.isWorking = msg.data
+        self.is_working = msg.data
     
 
 
 def main(args=None):
     rclpy.init(args=args)
-    minimal_publisher = BinnImg()
+    minimal_publisher = LineFollower()
     rclpy.spin(minimal_publisher)
     rclpy.shutdown()
 
