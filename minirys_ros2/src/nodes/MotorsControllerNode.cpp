@@ -71,11 +71,11 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 	auto pidAngleTd = this->get_parameter("pidAngleTd").as_double();
 
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKp " << pidSpeedKp);
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKi " << pidSpeedTi);
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKd " << pidSpeedTd);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedTi " << pidSpeedTi);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedTd " << pidSpeedTd);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKp " << pidAngleKp);
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKi " << pidAngleTi);
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKd " << pidAngleTd);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleTi " << pidAngleTi);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleTd " << pidAngleTd);
 	this->anglePidRegulator = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidAngleKp, (float) pidAngleTi, (float) pidAngleTd));
 	this->speedPidRegulator = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidSpeedKp, (float) pidSpeedTi, (float) pidSpeedTd));
 

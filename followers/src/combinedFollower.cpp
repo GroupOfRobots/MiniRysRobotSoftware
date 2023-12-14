@@ -106,7 +106,7 @@ private:
             flag_ = 4;
         }
 
-        if(right_sensor < 0.240 && left_sensor < 0.24 && front_sensor < 0.20 && flag_==4){
+        if(right_sensor < 0.3 && left_sensor < 0.3 && front_sensor < 0.20 && flag_==4){
             msg->data = false;
             publisher1_->publish(*msg);
             publisher4_->publish(*msg2);
@@ -131,6 +131,14 @@ private:
             msg->data = true;
             flag_ = 8;
             publisher1_->publish(*msg);
+        }
+
+        if(flag_ == 8 && ((left_sensor > 0.4 && right_sensor > 0.23) ||
+        (left_sensor > 0.23 && right_sensor > 0.4)) && front_sensor > 0.7){
+            msg->data = false;
+            publisher1_->publish(*msg);
+            flag_ = 9;
+            publisher4_->publish(*msg2);
         }
 
     }
