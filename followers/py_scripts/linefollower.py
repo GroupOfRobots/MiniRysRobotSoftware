@@ -116,10 +116,8 @@ class LineFollower(Node):
                 
                 # recognizing 90 turn
                 if cv2.pointPolygonTest(cnt, self.leftT, False) >= 0 and cv2.pointPolygonTest(cnt, self.rightT, False) < 0 :
-                    print("prawy")
                     turnOfset = -self.turnOffsetParam#-1.0 #-1
                 elif cv2.pointPolygonTest(cnt, self.leftT, False) < 0 and cv2.pointPolygonTest(cnt, self.rightT, False) >= 0 :
-                    print("lewy")
                     turnOfset = self.turnOffsetParam#1.0 #1
             u = self.pid.pid(self.y,0) + turnOfset
 
