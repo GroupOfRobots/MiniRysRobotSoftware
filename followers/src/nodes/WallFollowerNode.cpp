@@ -1,19 +1,10 @@
-#include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/range.hpp"
-#include "std_msgs/msg/header.hpp"
-#include "geometry_msgs/msg/twist.hpp"
-#include "std_msgs/msg/bool.hpp"
-#include <chrono>
-#include "pid.cpp"
-#include <memory>
-
+#include "nodes/WallFollowerNode.hpp"
 
 
 using namespace std::chrono_literals;
 
-class WallFollower: public rclcpp::Node{
-    public:
-    WallFollower() : Node("wall_follower") {
+
+WallFollower::WallFollower() : Node("wall_follower") {
         //declare parameters
         this->declare_parameter("timer_period", rclcpp::ParameterValue(0.05));
         this->declare_parameter("K", rclcpp::ParameterValue(0.0));
@@ -29,7 +20,7 @@ class WallFollower: public rclcpp::Node{
         double Ti = this->get_parameter("Ti").as_double();
         double Td = this->get_parameter("Td").as_double();
         this->linearSpeed = this->get_parameter("linearSpeed").as_double();
-        this->pid = std::unique_ptr<PID>(new PID((float) timer_period,(float) K,(float) Ti,(float) Td));
+        this->pid = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) timer_period,(float) K,(float) Ti,(float) Td));
         this->maxU = (float)this->get_parameter("maxU").as_double();
 
         RCLCPP_INFO_STREAM(this->get_logger(), "Got param: Ti " << Ti);
@@ -53,16 +44,16 @@ class WallFollower: public rclcpp::Node{
         "/is_wall_follower", 10, std::bind(&WallFollower::is_callback, this, std::placeholders::_1));
 
         program_start_ = std::chrono::high_resolution_clock::now();
+        
     }
 
-    private:
     
-    int getTimeToNow(std::chrono::time_point<std::chrono::high_resolution_clock> start_measure_time){
+    int WallFollower::getTimeToNow(std::chrono::time_point<std::chrono::high_resolution_clock> start_measure_time){
         auto now = std::chrono::high_resolution_clock::now();
         return std::chrono::duration_cast<std::chrono::milliseconds>(now - start_measure_time).count();
     }
 
-    void timer_callback() {
+    void WallFollower::timer_callback() {
         if(this->is_working_ && getTimeToNow(program_start_) > 2000){
             auto msg = std::make_shared<geometry_msgs::msg::Twist>();
             float u;
@@ -126,50 +117,30 @@ class WallFollower: public rclcpp::Node{
         }
     }
 
-    void left_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
+WallFollower::~WallFollower(){
+	auto msg = std::make_shared<geometry_msgs::msg::Twist>();
+	publisher_->publish(*msg);
+
+}
+
+    void WallFollower::left_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
     {
         this->left_sensor = (float) msg->range + 0.03;
 
     }
 
-    void right_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
+    void WallFollower::right_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
     {
         this->right_sensor = (float) msg->range;
     }
 
-    void front_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
+    void WallFollower::front_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
     {
         this->front_sensor = (float) msg->range;
     }
 
-    void is_callback(const std_msgs::msg::Bool::SharedPtr msg){
+    void WallFollower::is_callback(const std_msgs::msg::Bool::SharedPtr msg){
         this->is_working_ = msg->data;
     }
 
-    rclcpp::TimerBase::SharedPtr timer_;
-    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
-    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription1_;
-    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription2_;
-    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription3_;
-    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subscription4_;
-
-    float left_sensor = 0.0f;
-    float right_sensor = 0.0f;
-    float front_sensor = 0.0f;
-
-    std::unique_ptr<PID> pid;
-    double linearSpeed;
-    float maxU;
-    int flag_ = 1;
-    bool is_working_ = true;
-
-    std::chrono::time_point<std::chrono::high_resolution_clock> program_start_;
-};
-
-int main(int argc, char * argv[])
-{
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<WallFollower>());
-  rclcpp::shutdown();
-  return 0;
-}
+    

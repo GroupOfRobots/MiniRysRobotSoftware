@@ -1,17 +1,10 @@
-#include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/range.hpp"
-#include "std_msgs/msg/header.hpp"
-#include "geometry_msgs/msg/twist.hpp"
-#include "std_msgs/msg/bool.hpp"
-#include "geometry_msgs/msg/twist.hpp"
-#include <chrono>
+#include "nodes/CombinedFollowerNode.hpp"
 
 
 using namespace std::chrono_literals;
 
-class CombinedFollower: public rclcpp::Node{
-public:
-    CombinedFollower() : Node("combined_follower") {
+
+CombinedFollower::CombinedFollower() : Node("combined_follower") {
 
         subscription1_ = this->create_subscription<sensor_msgs::msg::Range>(
         "/minirys/internal/distance_5", 10, std::bind(&CombinedFollower::left_sensor_callback, this, std::placeholders::_1));
@@ -29,46 +22,38 @@ public:
 
         timer_ = this->create_wall_timer(std::chrono::duration<double>(0.5), std::bind(&CombinedFollower::timer_callback, this));
         
+        
+        
     }
 
-private:
-    rclcpp::TimerBase::SharedPtr timer_;
-    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription1_;
-    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription2_;
-    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription3_;
-    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher1_;
-    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher2_;
-    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher3_;
-    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher4_;
-    int flag_ = -1;
-    float left_sensor = 400.0f;
-    float right_sensor = 400.0f;
-    float front_sensor = 400.0f;
-    std::chrono::time_point<std::chrono::high_resolution_clock> start_measure_;
+CombinedFollower::~CombinedFollower(){
+	auto msg2 = std::make_shared<geometry_msgs::msg::Twist>();
+	publisher4_->publish(*msg2);
+}
 
-    int getTimeToNow(std::chrono::time_point<std::chrono::high_resolution_clock> start_measure_time){
+    int CombinedFollower::getTimeToNow(std::chrono::time_point<std::chrono::high_resolution_clock> start_measure_time){
         auto now = std::chrono::high_resolution_clock::now();
         return std::chrono::duration_cast<std::chrono::milliseconds>(now - start_measure_time).count();
     }
 
 
-    void left_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
+    void CombinedFollower::left_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
     {
         this->left_sensor = (float) msg->range;
 
     }
 
-    void right_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
+    void CombinedFollower::right_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
     {
         this->right_sensor = (float) msg->range;
     }
 
-    void front_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
+    void CombinedFollower::front_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
     {
         this->front_sensor = (float) msg->range;
     }
 
-    void timer_callback() {
+    void CombinedFollower::timer_callback() {
         auto msg = std::make_shared<std_msgs::msg::Bool>();
         auto msg2 = std::make_shared<geometry_msgs::msg::Twist>();
         if(flag_ == -1){
@@ -142,12 +127,6 @@ private:
         }
 
     }
-};
 
-int main(int argc, char * argv[])
-{
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<CombinedFollower>());
-  rclcpp::shutdown();
-  return 0;
-}
+
+
