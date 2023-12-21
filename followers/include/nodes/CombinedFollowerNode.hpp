@@ -33,15 +33,9 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> start_measure_;
 
     int getTimeToNow(std::chrono::time_point<std::chrono::high_resolution_clock> start_measure_time);
-
     void left_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg);
-    
     void right_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg);
-    
-
     void front_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg);
-    
-
     void timer_callback();
 };
 
