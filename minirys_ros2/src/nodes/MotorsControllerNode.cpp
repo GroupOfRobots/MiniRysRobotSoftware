@@ -263,11 +263,11 @@ std::pair<double, double> MotorsControllerNode::calculateSpeedsBalancing() {
     double currentSpeed = (this->motorSpeedL + this->motorSpeedR) / 2;
 	if (this->enableSpeedRegulator) {
 	outputTargetAngle = this->speedPidRegulator->pid_aw(currentSpeed, this->targetForwardSpeed, 10.0f, 0.25);
-	RCLCPP_INFO_STREAM(this->get_logger(), "pid angle: "<<outputTargetAngle);
+	//RCLCPP_INFO_STREAM(this->get_logger(), "pid angle: "<<outputTargetAngle);
 	outputTargetAngle = std::min(std::max(-outputTargetAngle, -0.25), 0.25);
 	}
     	double outputWheelSpeed = this->anglePidRegulator->pid_aw(this->robotAngularPosition,outputTargetAngle, 10.0f, this->maxWheelSpeed);
-	RCLCPP_INFO_STREAM(this->get_logger(), "pid speed: "<<currentSpeed);
+	//RCLCPP_INFO_STREAM(this->get_logger(), "pid speed: "<<currentSpeed);
 	return {
 	
 		std::min(std::max(outputWheelSpeed + this->targetRotationSpeed, -this->maxWheelSpeed), this->maxWheelSpeed),
