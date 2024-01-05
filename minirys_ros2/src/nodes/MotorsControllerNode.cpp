@@ -76,8 +76,9 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKp " << pidAngleKp);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleTi " << pidAngleTi);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleTd " << pidAngleTd);
-	this->anglePidRegulator = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidAngleKp, (float) pidAngleTi, (float) pidAngleTd));
+	
 	this->speedPidRegulator = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidSpeedKp, (float) pidSpeedTi, (float) pidSpeedTd));
+	this->anglePidRegulator = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidAngleKp, (float) pidAngleTi, (float) pidAngleTd));
 
 	// Setup the clock (for standing up)
 	this->steadyROSClock = rclcpp::Clock(RCL_STEADY_TIME);
@@ -321,15 +322,15 @@ MotorsControllerNode::setParametersAtomically(const std::vector<rclcpp::Paramete
 
 		if (name == "pidSpeedKp") {
 			this->speedPidRegulator->K = value;
-        } else if (name == "pidSpeedKi") {
+        } else if (name == "pidSpeedTi") {
 			this->speedPidRegulator->Ti = value;
-        } else if (name == "pidSpeedKd") {
+        } else if (name == "pidSpeedTd") {
 			this->speedPidRegulator->Td = value;
 		} else if (name == "pidAngleKp") {
 			this->anglePidRegulator->K = value;
-		} else if (name == "pidAngleKi") {
+		} else if (name == "pidAngleTi") {
 			this->anglePidRegulator->Ti = value;
-		} else if (name == "pidAngleKd") {
+		} else if (name == "pidAngleTd") {
 			this->anglePidRegulator->Td = value;
 		} else {
 			RCLCPP_INFO_STREAM(this->get_logger(), "Unknown param");
