@@ -7,7 +7,7 @@ line_follower:
     Ti: 100.0
     Td: 0.03
     turnOffsetParam: 1.5
-    linearSpeed: -1.5
+    linearSpeed: -1.0
   
 wall_follower:
   ros__parameters:

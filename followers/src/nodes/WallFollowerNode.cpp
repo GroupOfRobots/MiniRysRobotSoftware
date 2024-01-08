@@ -68,22 +68,22 @@ void WallFollower::timer_callback() {
             }
         }
         else if(this->flag_ == 2){
-            RCLCPP_INFO_STREAM(this->get_logger(), "Right turn  " );
+            //RCLCPP_INFO_STREAM(this->get_logger(), "Right turn  " );
             u = -1.2;
             msg->linear.y = -1;
         }
         else if(this->flag_ == 3){
-            RCLCPP_INFO_STREAM(this->get_logger(), "Left turn  " );
+            //RCLCPP_INFO_STREAM(this->get_logger(), "Left turn  " );
             u = 1.2;
             msg->linear.y = -1;
         }
         else if(this->flag_ == 4){
-            RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
+            //RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
             u = -0.1;
             
         }
         else if(this->flag_ == 5){
-            RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
+            //RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
             u = 0.1;
             
         }
@@ -109,8 +109,8 @@ void WallFollower::timer_callback() {
             this->pid->clear();
         }
 
-        RCLCPP_INFO_STREAM(this->get_logger(), "u:  " << u);
-        RCLCPP_INFO_STREAM(this->get_logger(), "front:  " << this->front_sensor);
+        //RCLCPP_INFO_STREAM(this->get_logger(), "u:  " << u);
+        //RCLCPP_INFO_STREAM(this->get_logger(), "front:  " << this->front_sensor);
         //msg->linear.y = this->linearSpeed;
         msg->angular.z = u;
         publisher_->publish(*msg);
