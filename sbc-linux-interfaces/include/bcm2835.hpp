@@ -555,7 +555,7 @@
 // Define this if you want to use libcap2 to determine if you have the cap_sys_rawio capability
 // and therefore the capability of opening /dev/mem, even if you are not root.
 // See the comments above in the documentation for 'Running As Root'
-// #define BCM2835_HAVE_LIBCAP
+#define BCM2835_HAVE_LIBCAP
 
 /* RPi 2 is ARM v7, and has DMB instruction for memory barriers.
    Older RPis are ARM v6 and don't, so a coprocessor instruction must be used instead.

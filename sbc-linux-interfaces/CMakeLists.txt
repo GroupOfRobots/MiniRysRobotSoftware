@@ -31,6 +31,7 @@ add_library(${PROJECT_NAME} SHARED
   src/bcm2835.cpp
 
 )
+target_compile_definitions(${PROJECT_NAME} PRIVATE -DBCM2835_HAVE_LIBCAP)
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

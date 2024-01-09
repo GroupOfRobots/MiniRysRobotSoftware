@@ -8,11 +8,11 @@ using std::placeholders::_1;
 
 ServoControllerNode::ServoControllerNode(rclcpp::NodeOptions options):
 	Node("servo_controller_cs", options),
-	servoStatus(false),
+	servoStatus(true),
 	balanceMode(false) {
-	this->declare_parameter("updateFrequency", rclcpp::ParameterValue(1.0));
-	this->declare_parameter("servoDutyUp", rclcpp::ParameterValue(0.134));
-	this->declare_parameter("servoDutyDown", rclcpp::ParameterValue(0.015));
+	this->declare_parameter("updateFrequency", rclcpp::ParameterValue(10.0));
+	this->declare_parameter("servoDutyUp", rclcpp::ParameterValue(0.015));
+	this->declare_parameter("servoDutyDown", rclcpp::ParameterValue(0.116));
 	
 
 	auto period = std::chrono::duration<double>(1.0 / this->get_parameter("updateFrequency").as_double());
@@ -44,7 +44,7 @@ ServoControllerNode::ServoControllerNode(rclcpp::NodeOptions options):
 void ServoControllerNode::update() {
 
 	double duty = this->servoDutyDown;
-	if (this->servoStatus && !this->balanceMode && this->robotAngularPosition > 0.0) {
+	if (this->servoStatus && !this->balanceMode && this->robotAngularPosition < -1.0) {
 		duty = this->servoDutyUp;
 	} else {
 		duty = this->servoDutyDown;
