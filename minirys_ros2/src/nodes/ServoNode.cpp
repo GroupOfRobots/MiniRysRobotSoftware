@@ -10,9 +10,8 @@ using std::placeholders::_1;
 
 ServoNode::ServoNode(rclcpp::NodeOptions options):
 	Node("servo_ve", options),
-	output(0.015f) {
-	// bcm2835_init();
-	this->declare_parameter("updateFrequency", rclcpp::ParameterValue(2.0));
+	output(0.134f) {
+	this->declare_parameter("updateFrequency", rclcpp::ParameterValue(10.0));
 	this->declare_parameter("pwmFrequency", rclcpp::ParameterValue(50.0));
 
 	auto period = std::chrono::duration<double>(1.0 / this->get_parameter("updateFrequency").as_double());
@@ -22,9 +21,7 @@ ServoNode::ServoNode(rclcpp::NodeOptions options):
 
 	RCLCPP_INFO_STREAM(this->get_logger(), "PWM: initializing");
 	this->pin = 13;
-	// bcm2835_gpio_fsel(13, BCM2835_GPIO_FSEL_ALT0);
 	this->pwm = PWMPin::makeShared(0, 1);
-	// RCLCPP_INFO_STREAM(this->get_logger(), "PWM: initialized");
 	this->pwm->setFrequency(pwmFrequency);
 	this->pwm->setDuty(0.2);
 	this->pwm->enable();
@@ -36,39 +33,29 @@ ServoNode::ServoNode(rclcpp::NodeOptions options):
 		std::bind(&ServoNode::receiveServoOutput, this, _1)
 	);
 	this->updateTimer = this->create_wall_timer(period, std::bind(&ServoNode::update, this));
-
-	// this->setDownPosition();
-    // std::this_thread::sleep_for(1s);
-	// this->setUpPosition();
 }
 
 ServoNode::~ServoNode() {
+	this->setDownPosition();
+	std::this_thread::sleep_for(500ms);
 	this->pwm->disable();
-	// bcm2835_close();
 	RCLCPP_INFO_STREAM(this->get_logger(), "PWM: disabled");
 }
 
 void ServoNode::update() {
 	// This might throw a std::runtime_error - but we DO want to abort if it does
 	this->pwm->setDuty(this->output);
-	// this->setUpPosition();
-	// std::this_thread::sleep_for(1s);
-	// this->setUpPosition();
 }
 
 void ServoNode::receiveServoOutput(const std_msgs::msg::Float32::SharedPtr message) {
 	this->output = message->data;
-	// Move servo to down position
-	// this->setDownPosition();
-    // std::this_thread::sleep_for(1s);
-	// this->setUpPosition();
 
 }
 
 void ServoNode::setUpPosition() {
-	this->pwm->setDuty(0.134);
+	this->pwm->setDuty(0.015);
 }
 
 void ServoNode::setDownPosition() {
-	this->pwm->setDuty(0.015);
+	this->pwm->setDuty(0.134);
 }
