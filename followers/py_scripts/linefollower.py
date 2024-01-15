@@ -16,8 +16,6 @@ class LineFollower(Node):
     img = None
     picam2 = None
     pid = None
-    #minU = -5.14
-    #maxU = 5.14
     #points = [(220, 270),(220, 230),(220, 200),(220, 170)]
     points = [(220, 200)]
     leftT = (435, 270)
