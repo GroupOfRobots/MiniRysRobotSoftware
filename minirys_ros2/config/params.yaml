@@ -1,4 +1,4 @@
-minirys:
+/**:
   # Virtual Receptors configs
   battery_vr:
     ros__parameters:
@@ -92,7 +92,7 @@ minirys:
       pidAngleTi: 0.5 # 0.8   #1.61
       pidAngleTd: 0.09 #0.00011     #0.00001
       #pidAngleTi: 1000000000000.0
-     # pidAngleTd: 0.0
+      # pidAngleTd: 0.0
 
   odometry_cs:
     ros__parameters:
