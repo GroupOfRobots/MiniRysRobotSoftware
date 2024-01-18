@@ -1,10 +1,10 @@
 import os
 from ament_index_python.packages import get_package_share_directory
-from launch import actions, launch_description_sources, LaunchDescription
+from launch import actions, launch_description_sources, LaunchDescription,  substitutions
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    ld = LaunchDescription()
+
     wall_f = actions.IncludeLaunchDescription(
 		launch_description_sources.PythonLaunchDescriptionSource(
 			os.path.join(
@@ -21,15 +21,15 @@ def generate_launch_description():
 		)
 	)
         
-        
+    namespace_value = substitutions.LaunchConfiguration('minirys_namespace')
+    arg_namespace = actions.DeclareLaunchArgument('minirys_namespace', default_value='minirys')
     node=Node(
         package = 'followers',
         name = 'combined_follower',
         executable = 'combinedFollower',
+        parameters = [{'minirys_namespace': namespace_value}],
         
     )
-    ld.add_action(line_f)
-    ld.add_action(node)
-    ld.add_action(wall_f)
-    
+
+    ld = LaunchDescription([arg_namespace, line_f, node, wall_f])
     return ld
