@@ -4,7 +4,7 @@ from launch import actions, launch_description_sources, LaunchDescription,  subs
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    ld = LaunchDescription()
+
     config = os.path.join(
         get_package_share_directory('followers'),
         'config',
