@@ -34,7 +34,7 @@ WallFollower::WallFollower() : Node("wall_follower") {
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: minirys_namespace " << minirys_namespace);
     //publishers
     publisher_ =
-    this->create_publisher<geometry_msgs::msg::Twist>("/minirys/cmd_vel", 10);
+    this->create_publisher<geometry_msgs::msg::Twist>("/"+minirys_namespace+"/cmd_vel", 10);
     timer_ = this->create_wall_timer(std::chrono::duration<double>(timer_period), std::bind(&WallFollower::timer_callback, this));
     //subscribers
     subscription1_ = this->create_subscription<sensor_msgs::msg::Range>(
