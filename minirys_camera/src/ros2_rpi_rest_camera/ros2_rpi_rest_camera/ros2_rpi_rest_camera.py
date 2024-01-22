@@ -36,6 +36,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/continuous-stream.mjpg':
             self.setResponse()
+            self.end_headers()
             try:
                 while True:
                     with output.condition:
@@ -51,11 +52,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                 logging.warning(
                     'Removed streaming client %s: %s',
                     self.client_address, str(e))
-            except Exception as e:
-                logging.warning(
-                    'Removed streaming client %s: %s',
-                    self.client_address, str(e))
-
         elif self.path == '/stream.mjpg':
             self.setResponse()
             try:
