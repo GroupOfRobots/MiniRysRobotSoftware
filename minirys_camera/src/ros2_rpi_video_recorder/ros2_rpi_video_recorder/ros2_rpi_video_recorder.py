@@ -21,19 +21,25 @@ class VideoRecorder(Node):
         self.create_service(RecordVideoStart, 'start_video_recording', self.start_video_recording)
 
     def start_video_recording(self, request, response):
-        if self.picam2.started:
-            response.started = False
-            response.message = "Camera is already working, can not start recording"
+        try:
+            if self.picam2.started:
+                response.started = False
+                response.message = "Camera is already working, can not start recording"
+                return response
+            width = request.width or 640
+            height = request.height or 480
+            quality = self.getQuality(request.quality)
+            print(width, height, quality)
+            self.picam2.configure(self.picam2.create_video_configuration(main={"size": (int(width), int(height))}))
+            self.picam2.start_recording(encoder=self.encoder, output=self.output, quality=quality)
+            response.started = True
             return response
-        print(request)
-        width = request.width or 640
-        height = request.height or 480
-        quality = self.getQuality(request.quality)
-        print("quality", quality)
-        self.picam2.configure(self.picam2.create_video_configuration(main={"size": (width, height)}))
-        self.picam2.start_recording(encoder=self.encoder, output=self.output, quality=quality)
-        response.started = True
-        return response
+        except Exception as exception:
+            print(exception)
+            response.message = str(exception)
+            response.started = False
+            return response
+            
 
     def getQuality(self, quality):
         if quality == '':

@@ -3,8 +3,8 @@
 <package format="3">
   <name>ros2_rpi_rest_camera</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="pawel.rawicki@gmail.com">pablo</maintainer>
+  <description>package responsible for transmitting the image from the camera via the REST protocol</description>
+  <maintainer email="pawel.rawicki@gmail.com">Paweł Rawicki</maintainer>
   <license>TODO: License declaration</license>
 
   <depend>rclcpp</depend>
