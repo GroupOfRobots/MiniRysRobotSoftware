@@ -1,6 +1,6 @@
 #include "minirys_ros2/helpers/RTTExecutor.hpp"
 #include "minirys_ros2/nodes/BatteryNode.hpp"
-#include "minirys_ros2/nodes/DistanceNode.hpp"
+// #include "minirys_ros2/nodes/DistanceNode.hpp"
 #include "minirys_ros2/nodes/IMUNode.hpp"
 #include "minirys_ros2/nodes/TemperatureNode.hpp"
 
