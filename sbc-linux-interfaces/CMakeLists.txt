@@ -12,13 +12,15 @@ include(CMakePackageConfigHelpers)
 ###
 # Project options
 ###
-option(BUILD_EXAMPLES "Whether to build examples library" ON)
+# option(BUILD_EXAMPLES "Whether to build examples library" ON)
 
 # Set C++17, with GNU extensions
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wl,--no-as-needed -lcap")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wl,--no-as-needed -lcap")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+
 
 ###
 # Setup library target
@@ -28,10 +30,8 @@ add_library(${PROJECT_NAME} SHARED
   src/I2CBus.cpp
   src/PWMPin.cpp
   src/SPIBus.cpp
-  src/bcm2835.cpp
-
 )
-target_compile_definitions(${PROJECT_NAME} PRIVATE -DBCM2835_HAVE_LIBCAP)
+
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

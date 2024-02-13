@@ -7,6 +7,8 @@ project(minirys_ros2
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
+# set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# set(CMAKE_INSTALL_RPATH "$/home/minirys/minirys_ws/install/sbc-linux-interfaces/lib")
 # set(CMAKE_CXX_FLAGS "-L/home/minirys/minirys_ws/install/lib/l6470-linux -Wl,-rpath=/home/minirys/minirys_ws/install/lib/l6470-linux -lcap")/
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -280,100 +282,100 @@ target_link_options(motors PRIVATE
   # -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib
   # -Wl,-rpath=/opt/ros/humble/lib
   # -Wl,-rpath=/home/minirys/minirys_ws/install/sbc-linux-interfaces/lib
-  -Wl,-rpath=/opt/ros/humble/lib
-  -Wl,-rpath=/home/minirys/minirys_ws/install/l6470-linux/lib
-  -Wl,-rpath=/home/minirys/minirys_ws/install/sbc-linux-interfaces/lib
-  -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib
-  -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_fastrtps_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_fastrtps_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_introspection_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_introspection_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_generator_py.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_generator_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_cpp.so 
-  -Wl,-rpath=/home/minirys/minirys_ws/install/l6470-linux/lib/libl6470-linux.so.0.2.1 
-  -Wl,-rpath=/home/minirys/minirys_ws/install/sbc-linux-interfaces/lib/libsbc-linux-interfaces.so.0.1.4 
-  -Wl,-rpath=/opt/ros/humble/lib/librclcpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/liblibstatistics_collector.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcl.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librmw_implementation.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libament_index_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcl_logging_spdlog.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcl_logging_interface.so -lpthread 
-  -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_fastrtps_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_introspection_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_fastrtps_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_introspection_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_generator_py.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_generator_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcl_yaml_param_parser.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libyaml.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_fastrtps_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_fastrtps_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_introspection_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_introspection_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_generator_py.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_generator_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_fastrtps_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_fastrtps_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_introspection_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_introspection_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_generator_py.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_generator_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libtracetools.so 
-  -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_typesupport_fastrtps_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_fastrtps_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_fastrtps_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_fastrtps_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosidl_typesupport_fastrtps_c.so 
-  -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_typesupport_introspection_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_introspection_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_introspection_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_introspection_c.so 
-  -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_typesupport_fastrtps_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_fastrtps_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_fastrtps_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_fastrtps_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosidl_typesupport_fastrtps_cpp.so /opt/ros/humble/lib/libfastcdr.so.1.0.24 
-  -Wl,-rpath=/opt/ros/humble/lib/librmw.so 
-  -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_typesupport_introspection_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_introspection_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_introspection_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_introspection_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosidl_typesupport_introspection_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosidl_typesupport_introspection_c.so 
-  -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_typesupport_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_cpp.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosidl_typesupport_cpp.so 
-  -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_generator_py.so 
-  -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_typesupport_c.so 
-  -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_generator_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_py.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_generator_py.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_generator_py.so 
-  -Wl,-rpath=/usr/lib/aarch64-linux-gnu/libpython3.9.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_generator_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_generator_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosidl_typesupport_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcpputils.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librosidl_runtime_c.so 
-  -Wl,-rpath=/opt/ros/humble/lib/librcutils.so
-  -Wl,-rpath=/opt/ros/humble/lib/librttest.so 
-  -Wl,-rpath=/opt/ros/humble/lib/libtlsf.a 
-  -Wl,-rpath=/opt/ros/humble/lib 
+  # -Wl,-rpath=/opt/ros/humble/lib
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/l6470-linux/lib
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/sbc-linux-interfaces/lib
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib
+  # -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_fastrtps_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_fastrtps_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_introspection_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_introspection_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_generator_py.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_generator_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libsensor_msgs__rosidl_typesupport_cpp.so 
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/l6470-linux/lib/libl6470-linux.so.0.2.1 
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/sbc-linux-interfaces/lib/libsbc-linux-interfaces.so.0.1.4 
+  # -Wl,-rpath=/opt/ros/humble/lib/librclcpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/liblibstatistics_collector.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcl.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librmw_implementation.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libament_index_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcl_logging_spdlog.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcl_logging_interface.so -lpthread 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_fastrtps_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_introspection_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_fastrtps_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_introspection_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_generator_py.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_typesupport_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcl_interfaces__rosidl_generator_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcl_yaml_param_parser.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libyaml.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_fastrtps_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_fastrtps_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_introspection_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_introspection_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_generator_py.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_typesupport_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosgraph_msgs__rosidl_generator_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_fastrtps_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_fastrtps_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_introspection_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_introspection_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_generator_py.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_typesupport_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstatistics_msgs__rosidl_generator_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libtracetools.so 
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_typesupport_fastrtps_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_fastrtps_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_fastrtps_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_fastrtps_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosidl_typesupport_fastrtps_c.so 
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_typesupport_introspection_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_introspection_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_introspection_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_introspection_c.so 
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_typesupport_fastrtps_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_fastrtps_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_fastrtps_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_fastrtps_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosidl_typesupport_fastrtps_cpp.so /opt/ros/humble/lib/libfastcdr.so.1.0.24 
+  # -Wl,-rpath=/opt/ros/humble/lib/librmw.so 
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_typesupport_introspection_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_introspection_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_introspection_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_introspection_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosidl_typesupport_introspection_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosidl_typesupport_introspection_c.so 
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_typesupport_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_cpp.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosidl_typesupport_cpp.so 
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_generator_py.so 
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_typesupport_c.so 
+  # -Wl,-rpath=/home/minirys/minirys_ws/install/minirys_msgs/lib/libminirys_msgs__rosidl_generator_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_py.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_generator_py.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_generator_py.so 
+  # -Wl,-rpath=/usr/lib/aarch64-linux-gnu/libpython3.9.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_typesupport_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_typesupport_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libgeometry_msgs__rosidl_generator_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libstd_msgs__rosidl_generator_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libbuiltin_interfaces__rosidl_generator_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosidl_typesupport_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcpputils.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librosidl_runtime_c.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/librcutils.so
+  # -Wl,-rpath=/opt/ros/humble/lib/librttest.so 
+  # -Wl,-rpath=/opt/ros/humble/lib/libtlsf.a 
+  # -Wl,-rpath=/opt/ros/humble/lib 
   )
 
 add_executable(fan
@@ -492,6 +494,16 @@ install(
   DIRECTORY config
   DESTINATION share/${PROJECT_NAME}
 )
+
+# install(
+#   DIRECTORY lib/
+#   DESTINATION lib
+# )
+
+# set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# set(CMAKE_INSTALL_RPATH "$/home/minirys/minirys_ws/install/sbc-linux-interfaces/lib")
+# set(CMAKE_INSTALL_RPATH "$/home/minirys/minirys_ws/install/minirys_ros2/lib")
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

@@ -6,8 +6,6 @@
 
 #include <PWMPin.hpp>
 
-#include <bcm2835.hpp>
-
 class ServoNode: public rclcpp::Node {
 public:
 	RCLCPP_SMART_PTR_DEFINITIONS(ServoNode);

@@ -31,38 +31,76 @@
 #include <assert.h>
 #include <iostream>
 
+
 #include "motorsclass.h"
 
 #define BUSY_PIN_NOT_USED	0xFF
 
+Motors::Motors(uint8_t nSpiChipSelect, uint8_t nResetPin) : l_bIsBusy(false), l_bIsConnected(false), r_bIsBusy(false), r_bIsConnected(false) {
+    assert(nSpiChipSelect <= 1);
+    assert(nResetPin <= 31);
 
-Motors::Motors(uint8_t nSpiChipSelect, uint8_t nResetPin) : l_bIsBusy(false), l_bIsConnected(false),r_bIsBusy(false), r_bIsConnected(false) {
-	assert(nSpiChipSelect <= BCM2835_SPI_CS1);
-	assert(nResetPin <= 31);
-
-	m_nSpiChipSelect = nSpiChipSelect;
-	m_nPosition = 0;
-	m_nResetPin = nResetPin;
-	m_nBusyPin = BUSY_PIN_NOT_USED;
+    m_nSpiChipSelect = nSpiChipSelect;
+    m_nPosition = 0;
+    m_nSpiChannel = 0;
+    m_nResetPin = nResetPin;
+    m_nBusyPin = BUSY_PIN_NOT_USED;
     m_nCount = 2;
+    m_nSpiSpeed = 1000000;
 
-	bcm2835_spi_begin();
-	bcm2835_gpio_fsel(GPIO_RESET_OUT, BCM2835_GPIO_FSEL_OUTP);
-	bcm2835_gpio_set(GPIO_RESET_OUT);
-	bcm2835_gpio_fsel(GPIO_BUSY_IN, BCM2835_GPIO_FSEL_INPT);
-	bcm2835_gpio_clr(GPIO_RESET_OUT);
-	bcm2835_delayMicroseconds(10000);
-	bcm2835_gpio_set(GPIO_RESET_OUT);
-	bcm2835_delayMicroseconds(10000);
+    // Initialize WiringPi
+    wiringPiSetup();
 
-	if (getParam(L6470_PARAM_CONFIG) == 0x2e88) {
-		l_bIsConnected = true;
-	}
-	m_nPosition =1;
-	if (getParam(L6470_PARAM_CONFIG) == 0x2e88) {
-		r_bIsConnected = true;
-	}
+    // Begin SPI
+    // wiringPiSPISetup(m_nSpiChipSelect, m_nSpiSpeed);
+    wiringPiSPISetupMode(m_nSpiChipSelect, m_nSpiSpeed, SPI_MODE_3);
+
+    // Reset procedure
+    // resetDevice();
+    pinMode(GPIO_RESET_OUT, OUTPUT);
+    digitalWrite(GPIO_RESET_OUT, HIGH); // Set reset pin high
+    pinMode(GPIO_BUSY_IN, INPUT);
+    digitalWrite(GPIO_RESET_OUT, LOW);
+    delayMicroseconds(10000);
+    digitalWrite(GPIO_RESET_OUT, HIGH);
+    delayMicroseconds(10000);
+
+    // Check if motors are connected
+    if (getParam(L6470_PARAM_CONFIG) == 0x2e88) {
+        l_bIsConnected = true;
+    }
+    m_nPosition = 1;
+    if (getParam(L6470_PARAM_CONFIG) == 0x2e88) {
+        r_bIsConnected = true;
+    }
 }
+// Motors::Motors(uint8_t nSpiChipSelect, uint8_t nResetPin) : l_bIsBusy(false), l_bIsConnected(false),r_bIsBusy(false), r_bIsConnected(false) {
+// 	assert(nSpiChipSelect <= BCM2835_SPI_CS1);
+// 	assert(nResetPin <= 31);
+
+// 	m_nSpiChipSelect = nSpiChipSelect;
+// 	m_nPosition = 0;
+// 	m_nResetPin = nResetPin;
+// 	m_nBusyPin = BUSY_PIN_NOT_USED;
+//     m_nCount = 2;
+
+// 	bcm2835_spi_begin();
+// 	bcm2835_gpio_fsel(GPIO_RESET_OUT, BCM2835_GPIO_FSEL_OUTP);
+// 	bcm2835_gpio_set(GPIO_RESET_OUT);
+// 	bcm2835_gpio_fsel(GPIO_BUSY_IN, BCM2835_GPIO_FSEL_INPT);
+// 	bcm2835_gpio_clr(GPIO_RESET_OUT);
+// 	bcm2835_delayMicroseconds(10000);
+// 	bcm2835_gpio_set(GPIO_RESET_OUT);
+// 	bcm2835_delayMicroseconds(10000);
+
+// 	if (getParam(L6470_PARAM_CONFIG) == 0x2e88) {
+// 		l_bIsConnected = true;
+// 	}
+// 	m_nPosition =1;
+// 	if (getParam(L6470_PARAM_CONFIG) == 0x2e88) {
+// 		r_bIsConnected = true;
+// 	}
+// }
 
 Motors::~Motors(void) {
 	hardHiZ();
@@ -374,21 +412,40 @@ int Motors::busyCheck(void) {
 	}
 }
 
+// uint8_t Motors::SPIXfer(uint8_t data) {
+// 	uint8_t dataPacket[2];
+
+// 	for (int i = 0; i < 2; i++) {
+// 		dataPacket[i] = 0;
+// 	}
+
+// 	dataPacket[m_nPosition] = data;
+
+// 	bcm2835_spi_chipSelect(m_nSpiChipSelect);
+// 	bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_64);
+// 	bcm2835_spi_setDataMode(BCM2835_SPI_MODE3);
+// 	bcm2835_spi_transfern((char *) dataPacket, 2);
+
+// 	return dataPacket[m_nPosition];
+// }
+
 uint8_t Motors::SPIXfer(uint8_t data) {
-	uint8_t dataPacket[2];
+    uint8_t dataPacket[2];
 
-	for (int i = 0; i < 2; i++) {
-		dataPacket[i] = 0;
-	}
+    for (int i = 0; i < 2; i++) {
+        dataPacket[i] = 0;
+    }
 
-	dataPacket[m_nPosition] = data;
+    dataPacket[m_nPosition] = data;
 
-	bcm2835_spi_chipSelect(m_nSpiChipSelect);
-	bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_64);
-	bcm2835_spi_setDataMode(BCM2835_SPI_MODE3);
-	bcm2835_spi_transfern((char *) dataPacket, 2);
+    // Set SPI channel and speed
+    // wiringPiSPISetup(m_nSpiChannel, m_nSpiSpeed);
 
-	return dataPacket[m_nPosition];
+    // Transfer data
+    // wiringPiSPISetupMode(m_nSpiChipSelect,m_nSpiSpeed,3);
+    wiringPiSPIDataRW(m_nSpiChannel,static_cast<unsigned char*>(dataPacket), 2);
+
+    return dataPacket[m_nPosition];
 }
 
 bool Motors::IsConnected(int position){

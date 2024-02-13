@@ -50,6 +50,8 @@ else()
   message(STATUS "Ament not found, linking against submodule")
   add_subdirectory(libs/sbc-linux-interfaces)
 endif()
+find_library(wiringPi_LIB wiringPi)
+target_link_libraries(${PROJECT_NAME} ${wiringPi_LIB})
 target_link_libraries(${PROJECT_NAME} sbc-linux-interfaces)
 
 # Set the library object version

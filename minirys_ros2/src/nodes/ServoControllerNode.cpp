@@ -8,7 +8,7 @@ using std::placeholders::_1;
 
 ServoControllerNode::ServoControllerNode(rclcpp::NodeOptions options):
 	Node("servo_controller_cs", options),
-	servoStatus(true),
+	servoStatus(false),
 	balanceMode(false) {
 	this->declare_parameter("updateFrequency", rclcpp::ParameterValue(10.0));
 	this->declare_parameter("servoDutyUp", rclcpp::ParameterValue(0.015));
