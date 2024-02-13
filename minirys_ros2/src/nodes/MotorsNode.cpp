@@ -34,7 +34,7 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: wheel radius " << this->wheelRadius);
 
     RCLCPP_INFO_STREAM(this->get_logger(), "L6470: initializing");
-    this->motors = std::make_shared<Motors>(BCM2835_SPI_CS0, GPIO_RESET_OUT);
+    this->motors = std::make_shared<Motors>(0, 22);
 
 	RCLCPP_INFO_STREAM(this->get_logger(), "L6470: resetting");
 	this->motors->resetDevice();
@@ -42,7 +42,7 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 
 	RCLCPP_INFO_STREAM(this->get_logger(), "L6470: configuring");
 	// Set 62.5kHz PWM frequency
-    this->motors->setOscillatorMode(L6470_CONFIG_OSC_EXT_16MHZ_XTAL_DRIVE, LEFT_MOTOR); //OSCIN pin of right stepper motor driver is physically connected to OSCOUT left motor driver
+    this->motors->setOscillatorMode(L6470_CONFIG_OSC_EXT_16MHZ_XTAL_DRIVE, LEFT_MOTOR); //OSCIN pin of right stepper motor driver is physically connected to OSCOUT of left motor driver
     this->motors->setOscillatorMode(L6470_CONFIG_OSC_INT_16MHZ_OSCOUT_16MHZ, RIGHT_MOTOR); // in order to synchronize clocks
 	this->motors->setPWMFrequency(L6470_CONFIG_PWM_INT_DIV_1, L6470_CONFIG_PWM_DEC_MUL_2);
 	// Other CONFIG register values

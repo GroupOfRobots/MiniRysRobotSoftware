@@ -32,12 +32,14 @@
 #include <vector>
 #include <cmath>
 #include <array>
+#include <wiringPi.h>
+#include <wiringPiSPI.h>
+#include <linux/spi/spi.h>
 #include "l6470.h"
 #include "l6470constants.h"
-#include "bcm2835.hpp"
 
-#define GPIO_BUSY_IN	RPI_V2_GPIO_P1_13
-#define GPIO_RESET_OUT 	RPI_V2_GPIO_P1_15
+#define GPIO_BUSY_IN	27
+#define GPIO_RESET_OUT 	22
 
 class Motors: public L6470 {
 public:
@@ -94,10 +96,12 @@ public:
 private:
 	uint8_t SPIXfer(uint8_t);
 	uint8_t m_nPosition; //0-left 1-right
-	uint8_t m_nSpiChipSelect;
+	int m_nSpiChipSelect;
 	uint8_t m_nResetPin;
 	uint8_t m_nBusyPin;
     uint8_t m_nCount;
+    uint8_t m_nSpiChannel;
+    int m_nSpiSpeed;
 	bool l_bIsBusy;
 	bool l_bIsConnected;
 	bool r_bIsBusy;
