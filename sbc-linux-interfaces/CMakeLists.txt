@@ -12,13 +12,12 @@ include(CMakePackageConfigHelpers)
 ###
 # Project options
 ###
-# option(BUILD_EXAMPLES "Whether to build examples library" ON)
+option(BUILD_EXAMPLES "Whether to build examples library" ON)
 
 # Set C++17, with GNU extensions
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wl,--no-as-needed -lcap")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
 
@@ -66,7 +65,8 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-# Install the headers and package.xml
+# Install the headers and package.xmls
+
 install(
   DIRECTORY ${PROJECT_SOURCE_DIR}/include/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
