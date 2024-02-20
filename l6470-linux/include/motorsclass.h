@@ -38,8 +38,8 @@
 #include "l6470.h"
 #include "l6470constants.h"
 
-#define GPIO_BUSY_IN	27
-#define GPIO_RESET_OUT 	22
+#define GPIO_BUSY_IN	2
+#define GPIO_RESET_OUT 	3
 
 class Motors: public L6470 {
 public:
