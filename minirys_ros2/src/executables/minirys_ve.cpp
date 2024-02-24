@@ -1,6 +1,6 @@
 #include "minirys_ros2/helpers/RTTExecutor.hpp"
 #include "minirys_ros2/nodes/FanNode.hpp"
-//#include "minirys_ros2/nodes/MotorsNode.hpp"
+#include "minirys_ros2/nodes/MotorsNode.hpp"
 
 int main(int argc, char const* argv[]) {
 	RTTExecutor::setupRT(3, 98, SCHED_RR);
@@ -11,10 +11,10 @@ int main(int argc, char const* argv[]) {
 	options.use_intra_process_comms(true);
 
 	auto fanNode = FanNode::make_shared(options);
-	//auto motorsNode = MotorsNode::make_shared(options);
+	auto motorsNode = MotorsNode::make_shared(options);
 
 	executor.add_node(fanNode);
-	//executor.add_node(motorsNode);
+	executor.add_node(motorsNode);
 
 	executor.spin();
 	rclcpp::shutdown();

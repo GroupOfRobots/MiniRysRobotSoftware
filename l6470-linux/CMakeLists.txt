@@ -25,6 +25,12 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 ###
 add_library(${PROJECT_NAME} SHARED
   src/L6470.cpp
+  src/l6470.cpp
+  src/l6470commands.cpp
+  src/l6470config.cpp
+  src/l6470dump.cpp
+  src/l6470support.cpp
+  src/motorsclass.cpp
 )
 target_include_directories(${PROJECT_NAME}
   PUBLIC
@@ -44,6 +50,8 @@ else()
   message(STATUS "Ament not found, linking against submodule")
   add_subdirectory(libs/sbc-linux-interfaces)
 endif()
+find_library(wiringPi_LIB wiringPi)
+target_link_libraries(${PROJECT_NAME} ${wiringPi_LIB})
 target_link_libraries(${PROJECT_NAME} sbc-linux-interfaces)
 
 # Set the library object version

@@ -8,7 +8,7 @@ def generate_launch_description():
 		launch_description_sources.PythonLaunchDescriptionSource(
 			os.path.join(
 				get_package_share_directory('minirys_ros2'),
-				'launch/minirys_cs.launch.py')
+				'launch/minirys_cs_lidar.launch.py')
 			)
 	)
 
@@ -16,20 +16,20 @@ def generate_launch_description():
 		launch_description_sources.PythonLaunchDescriptionSource(
 			os.path.join(
 				get_package_share_directory('minirys_ros2'),
-				'launch/minirys_ve.launch.py')
+				'launch/minirys_ve_lidar.launch.py')
 			)
 	)
 
-	minirys_vr = actions.IncludeLaunchDescription(
+	minirys_vr_lidar = actions.IncludeLaunchDescription(
 		launch_description_sources.PythonLaunchDescriptionSource(
 			os.path.join(
 				get_package_share_directory('minirys_ros2'),
-				'launch/minirys_vr.launch.py')
+				'launch/minirys_vr_lidar.launch.py')
 		)
 	)
 
 	return LaunchDescription([
 		minirys_cs,
 		minirys_ve,
-		minirys_vr,
+		minirys_vr_lidar,
 	])

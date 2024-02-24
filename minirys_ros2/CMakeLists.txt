@@ -29,6 +29,8 @@ find_package(minirys_msgs REQUIRED)
 find_package(minirys_sensors REQUIRED)
 find_package(vl53l1x-linux REQUIRED)
 find_package(l6470-linux REQUIRED)
+find_package(ldlidar_stl_ros2 REQUIRED)
+
 
 include_directories(include)
 
@@ -109,6 +111,18 @@ ament_target_dependencies(FanNode
 target_link_libraries(FanNode
   sbc-linux-interfaces
 )
+# Servo
+add_library(ServoNode
+  src/nodes/ServoNode.cpp
+)
+ament_target_dependencies(ServoNode
+  rclcpp
+  sbc-linux-interfaces
+  std_msgs
+)
+target_link_libraries(ServoNode
+  sbc-linux-interfaces
+)
 # Motors
 add_library(MotorsNode
   src/nodes/MotorsNode.cpp
@@ -119,6 +133,7 @@ ament_target_dependencies(MotorsNode
   l6470-linux
   std_msgs
   minirys_msgs
+  sensor_msgs
 )
 target_link_libraries(MotorsNode
   sbc-linux-interfaces
@@ -144,6 +159,23 @@ ament_target_dependencies(FanRegulatorNode
   std_msgs
   minirys_msgs
 )
+# Servo controller
+add_library(ServoControllerNode
+  src/nodes/ServoControllerNode.cpp
+)
+ament_target_dependencies(ServoControllerNode
+  rclcpp
+  std_msgs
+  minirys_msgs
+)
+# Joystick controller
+add_library(JoyconReceiverNode
+        src/nodes/JoyconReceiverNode.cpp
+        )
+ament_target_dependencies(JoyconReceiverNode
+        rclcpp
+        geometry_msgs
+        )
 # Motors controller
 add_library(MotorsControllerNode
   src/nodes/MotorsControllerNode.cpp
@@ -244,10 +276,26 @@ target_link_libraries(motors
 add_executable(fan
   src/executables/fan.cpp
 )
+
+add_executable(servo
+  src/executables/servo.cpp
+)
+target_link_libraries(servo
+  ServoNode
+  RTTExecutor
+)
 target_link_libraries(fan
   FanNode
   RTTExecutor
 )
+
+add_executable(joycon_receiver_node
+        src/executables/joycon_receiver_node.cpp
+        )
+target_link_libraries(joycon_receiver_node
+        JoyconReceiverNode
+        RTTExecutor
+        )
 
 # Main virtual effectors executable
 add_executable(minirys_ve
@@ -255,6 +303,7 @@ add_executable(minirys_ve
 )
 target_link_libraries(minirys_ve
   FanNode
+  ServoNode
   MotorsNode
   RTTExecutor
 )
@@ -282,6 +331,18 @@ target_link_libraries(minirys_cs
   OdometryNode
   RTTExecutor
 )
+# Additional control subsystems executable - for LiDAR version of MiniRyś robot
+add_executable(minirys_cs_lidar
+  src/executables/minirys_cs_lidar.cpp
+)
+target_link_libraries(minirys_cs_lidar
+  CommunicationNode
+  FanRegulatorNode
+  ServoControllerNode
+  MotorsControllerNode
+  OdometryNode
+  RTTExecutor
+)
 # Additional control subsystems executables - for RT testing
 add_executable(minirys_cs_rttest
   src/executables/minirys_cs_rttest.cpp
@@ -289,6 +350,7 @@ add_executable(minirys_cs_rttest
 target_link_libraries(minirys_cs_rttest
   CommunicationNode
   FanRegulatorNode
+  ServoControllerNode
   MotorsControllerNode
   OdometryNode
   RTTExecutor
@@ -299,6 +361,7 @@ add_executable(minirys_cs_rttest_rt
 target_link_libraries(minirys_cs_rttest_rt
   CommunicationNode
   FanRegulatorNode
+  ServoControllerNode
   MotorsControllerNode
   OdometryNode
   RTTExecutor
@@ -310,6 +373,8 @@ install(
     battery
     distance
     fan
+    servo
+    joycon_receiver_node
     imu
     motors
     odometry
@@ -318,6 +383,7 @@ install(
     minirys_ve
     minirys_vr
     minirys_cs
+    minirys_cs_lidar
     minirys_cs_rttest
     minirys_cs_rttest_rt
   EXPORT export_${PROJECT_NAME}
@@ -335,6 +401,16 @@ install(
   DIRECTORY config
   DESTINATION share/${PROJECT_NAME}
 )
+
+# install(
+#   DIRECTORY lib/
+#   DESTINATION lib
+# )
+
+# set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# set(CMAKE_INSTALL_RPATH "$/home/minirys/minirys_ws/install/sbc-linux-interfaces/lib")
+# set(CMAKE_INSTALL_RPATH "$/home/minirys/minirys_ws/install/minirys_ros2/lib")
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

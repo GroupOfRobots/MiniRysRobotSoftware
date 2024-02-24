@@ -34,24 +34,37 @@ minirys:
       image_size: [1920, 1080]
       white_balance_automatic: true
 
+  lidar_vr:
+    ros__parameters:
+      product_name: "LDLiDAR_LD06"
+      topic_name: "internal/scan"
+      frame_id: "laser_scan"
+      port_name: "/dev/serial0"
+      port_baudrate: 230400
+      laser_scan_dir: true
+      enable_angle_crop_func: false
+      angle_crop_min: 135.0
+      angle_crop_max: 225.0
+
   # Virtual Effectors configs
   fan_ve:
     ros__parameters:
       updateFrequency: 2.0
-      pwmFrequency: 10.0
+      pwmFrequency: 50.0 # 10.0
 
   motors_ve:
     ros__parameters:
       updateFrequency: 100.0
       stepsPerRevolution: 200.0
-      maxSpeed: 12.56 #12.56 # 2*Pi = 1rps
-      acceleration: 300.0 # 2*Pi = 1rps
+      maxSpeed: 620.8318530718 # 2*Pi = 1rps
+      acceleration: 62.8 #z 251.327 na pocz 2*Pi = 1rps
+      wheelRadius: 0.055
 
   # Control Subsystem
   fan_regulator_cs:
     ros__parameters:
       updateFrequency: 2.0
-      fanLevelLow: 0.4
+      fanLevelLow: 0.6
       fanLevelMedium: 0.8
       fanLevelHigh: 1.0
       thresholdCPUWarning: 50.0
@@ -65,10 +78,12 @@ minirys:
       invertLeftMotor: true
       invertRightMotor: false
       enableSpeedRegulator: false
-      maxLinearSpeed: 10.5
-      maxRotationSpeed: 10.5
-      maxWheelSpeed: 10.5
-      maxStandUpSpeed: 8.0
+      wheelRadius: 0.055
+      wheelSeparation: 0.134
+      maxLinearSpeed: 12.0 #18.8495559215 # 2*Pi = 1rps
+      maxRotationSpeed: 12.0 #18.8495559215 # 2*Pi = 1rps
+      maxWheelSpeed: 12.0 # 18.8495559215 # 2*Pi = 1rps
+      maxStandUpSpeed: 11.0 # 2*Pi = 1rps
       maxBalancingAngle: 0.25
       pidSpeedKp: 0.001 #0.05 to za duzo 0.01 git
       pidSpeedKi: 0.00000005 #0.0005 git #0.5 to zajebiscie duzy uchyb ustalony 5.5 ogromne oscylacje
@@ -83,7 +98,7 @@ minirys:
       invertLeftMotor: true
       invertRightMotor: false
       wheelRadius: 0.055
-      wheelSeparation: 0.139
+      wheelSeparation: 0.134
       wheelRadiusCorrection: 1.00
       wheelSeparationCorrection: 1.00
 

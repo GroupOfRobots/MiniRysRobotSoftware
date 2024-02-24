@@ -1,6 +1,5 @@
 #include "minirys_ros2/helpers/RTTExecutor.hpp"
 #include "minirys_ros2/nodes/BatteryNode.hpp"
-#include "minirys_ros2/nodes/DistanceNode.hpp"
 #include "minirys_ros2/nodes/IMUNode.hpp"
 #include "minirys_ros2/nodes/TemperatureNode.hpp"
 
@@ -17,12 +16,10 @@ int main(int argc, char const* argv[]) {
 	auto i2c = I2CBus::makeShared("/dev/i2c-1");
 
 	auto batteryNode = std::make_shared<BatteryNode>(i2c, options);
-	auto distanceNode = std::make_shared<DistanceNode>(options);
 	auto imuNode = std::make_shared<IMUNode>(i2c, options);
 	auto tempNode = std::make_shared<TemperatureNode>(i2c, options);
 
 	executor.add_node(batteryNode);
-	executor.add_node(distanceNode);
 	executor.add_node(imuNode);
 	executor.add_node(tempNode);
 

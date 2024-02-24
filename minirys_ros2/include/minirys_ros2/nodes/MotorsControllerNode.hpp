@@ -55,6 +55,9 @@ private:
 
 	bool invertRightMotor;
 
+    double wheelRadius;
+
+    double wheelSeparation;
 	// m/s?, TODO: get from maxWheelSpeed
 	double maxLinearSpeed;
 	// rps, TODO: get from maxWheelSpeed
