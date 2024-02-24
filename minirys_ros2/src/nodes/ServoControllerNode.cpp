@@ -13,7 +13,7 @@ ServoControllerNode::ServoControllerNode(rclcpp::NodeOptions options):
 	this->declare_parameter("updateFrequency", rclcpp::ParameterValue(10.0));
 	this->declare_parameter("servoDutyUp", rclcpp::ParameterValue(0.015));
 	this->declare_parameter("servoDutyDown", rclcpp::ParameterValue(0.116));
-	
+
 
 	auto period = std::chrono::duration<double>(1.0 / this->get_parameter("updateFrequency").as_double());
 	this->servoDutyUp = this->get_parameter("servoDutyUp").as_double();
@@ -35,7 +35,7 @@ ServoControllerNode::ServoControllerNode(rclcpp::NodeOptions options):
 		10,
 		std::bind(&ServoControllerNode::receiveAngularPose, this, _1)
 	);
-	
+
 	this->servoOutputPublisher = this->create_publisher<std_msgs::msg::Float32>("internal/pwm_servo_output", 10);
 
 	this->updateTimer = this->create_wall_timer(period, std::bind(&ServoControllerNode::update, this));

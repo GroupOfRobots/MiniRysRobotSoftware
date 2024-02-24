@@ -32,8 +32,6 @@ private:
 
     rclcpp::Subscription<minirys_msgs::msg::AngularPose>::SharedPtr angularPoseSubscriber;
 
-
-
 	void update();
 
 	void receiveBalanceMode(const std_msgs::msg::Bool::SharedPtr message);

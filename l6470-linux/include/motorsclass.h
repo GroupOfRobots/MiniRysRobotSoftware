@@ -63,7 +63,7 @@ public:
 
 	~Motors(void);
 
-	int busyCheck(void);
+	int busyCheck(void) override;
 	void setSpeeds(const std::vector<float>&, std::optional<u_int8_t> index = std::nullopt);
     unsigned long spdCalc(float);
     std::vector<unsigned long> getSpeeds(std::optional<u_int8_t> index = std::nullopt);
@@ -94,7 +94,7 @@ public:
     bool IsConnected(int);
 
 private:
-	uint8_t SPIXfer(uint8_t);
+	uint8_t SPIXfer(uint8_t) override;
 	uint8_t m_nPosition; //0-left 1-right
 	int m_nSpiChipSelect;
 	uint8_t m_nResetPin;

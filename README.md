@@ -1,3 +1,3 @@
-# MiniRysPhysicalSoftware
+# MiniRysRobotSoftware
 
 supervisor: @Kuba Ostrysz

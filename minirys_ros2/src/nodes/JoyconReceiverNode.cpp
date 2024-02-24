@@ -21,7 +21,7 @@ JoyconReceiverNode::JoyconReceiverNode(rclcpp::NodeOptions options): Node("joyco
 	, num_of_axis
 	, num_of_buttons );
 	if (num_of_buttons < 50 && num_of_axis < 50) {
-	
+
 		axis = (int *) calloc( num_of_axis, sizeof( int ) );
 		axisPast = (int *) calloc( num_of_axis, sizeof( int ) );
 		for(int i = 0; i < num_of_axis; i++){

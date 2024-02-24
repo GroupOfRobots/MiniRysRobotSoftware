@@ -71,7 +71,7 @@ Motors::Motors(uint8_t nSpiChipSelect, uint8_t nResetPin) : l_bIsBusy(false), l_
     }
 }
 
-Motors::~Motors(void) {
+Motors::~Motors() {
 	hardHiZ();
     for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
         this->softStop();
@@ -319,10 +319,10 @@ void Motors::setSpeeds(const std::vector<float>& speeds, std::optional<u_int8_t>
 
 unsigned long Motors::spdCalc(float stepsPerSec) {
     unsigned long temp = stepsPerSec / 67.103864;
-    if (temp > 0x000FFFFF)
+    if (temp > 0x000FFFFF){
         return 0x000FFFFF;
-    else
-        return temp;
+    }
+    return temp;
 }
 
 std::vector<unsigned long> Motors::getSpeeds(std::optional<u_int8_t> index){
@@ -350,41 +350,33 @@ std::vector<unsigned long> Motors::getSpeeds(std::optional<u_int8_t> index){
 }
 
 void Motors::stop(){
-	m_nPosition=0;
+	m_nPosition = 0;
 	this->softStop();
-	m_nPosition=1;
+	m_nPosition = 1;
 	this->softStop();
-	m_nPosition=0;
-	while (this->busyCheck());
-	m_nPosition=1;
-	while (this->busyCheck());
-	m_nPosition=0;
+	m_nPosition = 0;
+	while (this->busyCheck()){
+	    m_nPosition = 1;
+    }
+	while (this->busyCheck()){
+	    m_nPosition = 0;
+    }
 	this->hardHiZ();
-	m_nPosition=1;
+	m_nPosition = 1;
 	this->hardHiZ();
 }
 
-int Motors::busyCheck(void) {
-	if (m_nPosition==0) {
-		if (getParam(L6470_PARAM_STATUS) & L6470_STATUS_BUSY) {
-			return 0;
-		} else {
-			return 1;
-		}
-	}
-    else{
-		if (getParam(L6470_PARAM_STATUS) & L6470_STATUS_BUSY) {
-			return 0;
-		} else {
-			return 1;
-		}
-	}
+int Motors::busyCheck() {
+    if (getParam(L6470_PARAM_STATUS) & L6470_STATUS_BUSY) {
+        return 0;
+    }
+    return 1;
 }
 
 uint8_t Motors::SPIXfer(uint8_t data) {
     uint8_t dataPacket[2];
-    for (int i = 0; i < 2; i++) {
-        dataPacket[i] = 0;
+    for (auto& packet : dataPacket) {
+        packet = 0;
     }
     dataPacket[m_nPosition] = data;
     wiringPiSPIDataRW(m_nSpiChannel,static_cast<unsigned char*>(dataPacket), 2);
@@ -395,9 +387,9 @@ uint8_t Motors::SPIXfer(uint8_t data) {
 bool Motors::IsConnected(int position){
 	if (position) {
 		return r_bIsConnected;
-	}else{
-		return l_bIsConnected;
 	}
+	return l_bIsConnected;
+
 }
 
 std::vector<int32_t> Motors::getPosition(std::optional<u_int8_t> index){
@@ -457,7 +449,7 @@ std::vector<Motors::motorStatus> Motors::getMotorStatus(std::optional<u_int8_t> 
     if(index == std::nullopt){
         for(m_nPosition = 0; m_nPosition < m_nCount; m_nPosition++){
             const long rawStatus = this->getStatus();
-            Motors::motorStatus status;
+            Motors::motorStatus status{};
             status.stepLossA = ~rawStatus & L6470_STATUS_STEP_LOSS_A;
             status.stepLossB = ~rawStatus & L6470_STATUS_STEP_LOSS_B;
             status.overCurrent = rawStatus & L6470_STATUS_OCD;

@@ -6,7 +6,6 @@
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
-#define PWM_CHANNEL 1
 
 ServoNode::ServoNode(rclcpp::NodeOptions options):
 	Node("servo_ve", options),

@@ -127,8 +127,8 @@ void MotorsNode::update() {
 
 	positionMessageL.data = static_cast<double>(motorPositions[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[LEFT_MOTOR])));
 	positionMessageR.data = static_cast<double>(motorPositions[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[RIGHT_MOTOR])));
-	speedMessageL.data = static_cast<double>(motorSpeeds[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * (motorStatuses[LEFT_MOTOR].direction == 0 ? 1 : -1));
-	speedMessageR.data = static_cast<double>(motorSpeeds[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * (motorStatuses[RIGHT_MOTOR].direction == 0 ? 1 : -1));
+	speedMessageL.data = static_cast<double>(motorSpeeds[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * (!motorStatuses[LEFT_MOTOR].direction ? 1 : -1));
+	speedMessageR.data = static_cast<double>(motorSpeeds[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * (!motorStatuses[RIGHT_MOTOR].direction ? 1 : -1));
     statusMessageL.hi_z = motorStatuses[LEFT_MOTOR].hiZ;
     statusMessageL.busy = motorStatuses[LEFT_MOTOR].busy;
     statusMessageL.direction = motorStatuses[LEFT_MOTOR].direction;
