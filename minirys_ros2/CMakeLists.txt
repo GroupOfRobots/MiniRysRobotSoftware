@@ -327,6 +327,17 @@ add_executable(minirys_cs
 target_link_libraries(minirys_cs
   CommunicationNode
   FanRegulatorNode
+  MotorsControllerNode
+  OdometryNode
+  RTTExecutor
+)
+# Additional control subsystems executable - for LiDAR version of MiniRyś robot
+add_executable(minirys_cs_lidar
+  src/executables/minirys_cs_lidar.cpp
+)
+target_link_libraries(minirys_cs_lidar
+  CommunicationNode
+  FanRegulatorNode
   ServoControllerNode
   MotorsControllerNode
   OdometryNode
@@ -372,6 +383,7 @@ install(
     minirys_ve
     minirys_vr
     minirys_cs
+    minirys_cs_lidar
     minirys_cs_rttest
     minirys_cs_rttest_rt
   EXPORT export_${PROJECT_NAME}

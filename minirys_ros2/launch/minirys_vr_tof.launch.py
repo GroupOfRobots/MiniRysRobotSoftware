@@ -20,15 +20,24 @@ def generate_launch_description():
 	)
 
 	arg_namespace = actions.DeclareLaunchArgument('namespace', default_value='minirys')
-	node_cs = launch_ros.actions.Node(
+	node_vr = launch_ros.actions.Node(
 		package="minirys_ros2",
-		executable="minirys_cs",
+		executable="minirys_vr",
 		namespace=namespace_value,
-		parameters=[params_path],
+		parameters=[params_path]
+	)
+
+	distance_node = launch_ros.actions.Node(
+		package="minirys_ros2",
+		executable="distance",
+		namespace=namespace_value,
+		parameters=[params_path]
 	)
 
 	return LaunchDescription([
 		arg_namespace,
-		node_cs,
-		get_shutdown_on_exit(node_cs),
+		node_vr,
+		distance_node,
+		get_shutdown_on_exit(node_vr),
+		get_shutdown_on_exit(distance_node),
 	])

@@ -22,9 +22,10 @@ def generate_launch_description():
 	arg_namespace = actions.DeclareLaunchArgument('namespace', default_value='minirys')
 	node_cs = launch_ros.actions.Node(
 		package="minirys_ros2",
-		executable="minirys_cs",
+		executable="minirys_cs_lidar",
 		namespace=namespace_value,
 		parameters=[params_path],
+		remappings=[('/minirys/cmd_vel', '/cmd_vel')]
 	)
 
 	return LaunchDescription([

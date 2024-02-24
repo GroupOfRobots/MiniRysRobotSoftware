@@ -20,15 +20,25 @@ def generate_launch_description():
 	)
 
 	arg_namespace = actions.DeclareLaunchArgument('namespace', default_value='minirys')
-	node_cs = launch_ros.actions.Node(
+	debug_arg = actions.DeclareLaunchArgument('debug', default_value='false')
+	node_ve = launch_ros.actions.Node(
 		package="minirys_ros2",
-		executable="minirys_cs",
+		executable="minirys_ve",
 		namespace=namespace_value,
-		parameters=[params_path],
+		parameters=[params_path]
+	)
+
+	node_servo = launch_ros.actions.Node(
+		package="minirys_ros2",
+		executable="servo",
+		namespace=namespace_value,
+		parameters=[params_path]
 	)
 
 	return LaunchDescription([
 		arg_namespace,
-		node_cs,
-		get_shutdown_on_exit(node_cs),
+		node_ve,
+		node_servo,
+		get_shutdown_on_exit(node_ve),
+		get_shutdown_on_exit(node_servo),
 	])

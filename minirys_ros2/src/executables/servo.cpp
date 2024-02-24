@@ -3,7 +3,7 @@
 
 int main(int argc, char const* argv[]) {
 	RTTExecutor::setupRT(3, 98, SCHED_RR);
-	
+
 	rclcpp::init(argc, argv);
 
 	rclcpp::executors::SingleThreadedExecutor executor;
