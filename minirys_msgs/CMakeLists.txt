@@ -20,6 +20,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   msg/MotorCommand.msg
   msg/MotorDriverStatus.msg
   msg/RTTestResult.msg
+  srv/RecordVideoStart.srv
+  srv/RecordVideoStop.srv
   srv/SetPose.srv
   DEPENDENCIES std_msgs geometry_msgs
 )
