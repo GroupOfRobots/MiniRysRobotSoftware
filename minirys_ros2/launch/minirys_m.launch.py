@@ -11,7 +11,7 @@ def get_shutdown_on_exit(action):
     ))
 
 def generate_launch_description():
-    namespace_value = substitutions.LaunchConfiguration('namespace')
+    namespace_value = os.environ.get('NAMESPACE')
 
     params_path = os.path.join(
         get_package_share_directory('minirys_ros2'),
@@ -26,7 +26,7 @@ def generate_launch_description():
         executable="motors",
         namespace=namespace_value,
         parameters=[params_path],
-        remappings=[('/minirys/joint_states', '/joint_states')]
+        remappings=[('/' + namespace_value + '/joint_states', '/joint_states')]
     )
 
     return LaunchDescription([

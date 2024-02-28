@@ -1,4 +1,4 @@
-minirys:
+/**:
   # Virtual Receptors configs
   battery_vr:
     ros__parameters:
