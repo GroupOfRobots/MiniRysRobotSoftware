@@ -93,7 +93,7 @@ void CombinedFollower::timer_callback() {
         flag_ = 4;
     }
 
-    if(right_sensor < 0.3 && left_sensor < 0.3 && front_sensor < 0.20 && flag_==4){
+    if(right_sensor < 0.3 && left_sensor < 0.3 && front_sensor < 0.21 && flag_==4){
         msg->data = false;
         publisher1_->publish(*msg);
         publisher4_->publish(*msg2);
@@ -107,7 +107,7 @@ void CombinedFollower::timer_callback() {
         msg2->angular.z = 1.57;
         publisher4_->publish(*msg2);
     }
-    if(flag_ == 6 && getTimeToNow(start_measure_) > 1900){
+    if(flag_ == 6 && getTimeToNow(start_measure_) > 2000){
         flag_ = 7;
         start_measure_ = std::chrono::high_resolution_clock::now();
         publisher4_->publish(*msg2);

@@ -59,7 +59,7 @@ int WallFollower::getTimeToNow(std::chrono::time_point<std::chrono::high_resolut
 void WallFollower::timer_callback() {
     if(this->is_working_ && getTimeToNow(program_start_) > 2000){
         auto msg = std::make_shared<geometry_msgs::msg::Twist>();
-        float u;
+        float u = 0.0f;
         msg->linear.y = this->linearSpeed;
         if (this->flag_ == 1){
             u = this->pid->pid_aw(this->right_sensor-this->left_sensor,0,20.0f, this->maxU);
@@ -71,22 +71,18 @@ void WallFollower::timer_callback() {
             }
         }
         else if(this->flag_ == 2){
-            //RCLCPP_INFO_STREAM(this->get_logger(), "Right turn  " );
             u = -1.2;
             msg->linear.y = -1;
         }
         else if(this->flag_ == 3){
-            //RCLCPP_INFO_STREAM(this->get_logger(), "Left turn  " );
             u = 1.2;
             msg->linear.y = -1;
         }
         else if(this->flag_ == 4){
-            //RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
             u = -0.1;
             
         }
         else if(this->flag_ == 5){
-            //RCLCPP_INFO_STREAM(this->get_logger(), "Go str  " );
             u = 0.1;
             
         }
@@ -112,9 +108,6 @@ void WallFollower::timer_callback() {
             this->pid->clear();
         }
 
-        //RCLCPP_INFO_STREAM(this->get_logger(), "u:  " << u);
-        //RCLCPP_INFO_STREAM(this->get_logger(), "front:  " << this->front_sensor);
-        //msg->linear.y = this->linearSpeed;
         msg->angular.z = u;
         publisher_->publish(*msg);
     }
@@ -128,7 +121,7 @@ WallFollower::~WallFollower(){
 
 void WallFollower::left_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg) 
 {
-    this->left_sensor = (float) msg->range + 0.03;
+    this->left_sensor = (float) msg->range + 0.02;
 
 }
 

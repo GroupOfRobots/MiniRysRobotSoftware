@@ -18,8 +18,8 @@ int main(int argc, char const* argv[]) {
 
 	auto batteryNode = std::make_shared<BatteryNode>(i2c, options);
 	executor.add_node(batteryNode);
-	auto distanceNode = std::make_shared<DistanceNode>(options);
-	executor.add_node(distanceNode);
+	// auto distanceNode = std::make_shared<DistanceNode>(options);
+	// executor.add_node(distanceNode);
 	auto imuNode = std::make_shared<IMUNode>(i2c, options);
 	executor.add_node(imuNode);
 	auto tempNode = std::make_shared<TemperatureNode>(i2c, options);

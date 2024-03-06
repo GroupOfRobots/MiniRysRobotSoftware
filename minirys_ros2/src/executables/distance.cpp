@@ -9,8 +9,8 @@ int main(int argc, char const* argv[]) {
 	rclcpp::NodeOptions options;
 	options.use_intra_process_comms(true);
 
-	auto distanceNode = std::make_shared<DistanceNode>(options);
-	executor.add_node(distanceNode);
+	// auto distanceNode = std::make_shared<DistanceNode>(options);
+	// executor.add_node(distanceNode);
 
 	executor.spin();
 	rclcpp::shutdown();

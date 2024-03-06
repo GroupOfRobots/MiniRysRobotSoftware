@@ -319,17 +319,17 @@ MotorsControllerNode::setParametersAtomically(const std::vector<rclcpp::Paramete
 		RCLCPP_INFO_STREAM(this->get_logger(), "Got param from service: " << name << "  " << value);
 
 		if (name == "pidSpeedKp") {
-			this->speedPidRegulator->K = value;
+			this->speedPidRegulator->setK(value);
         } else if (name == "pidSpeedTi") {
-			this->speedPidRegulator->Ti = value;
+			this->speedPidRegulator->setTi(value);
         } else if (name == "pidSpeedTd") {
-			this->speedPidRegulator->Td = value;
+			this->speedPidRegulator->setTd(value);
 		} else if (name == "pidAngleKp") {
-			this->anglePidRegulator->K = value;
+			this->anglePidRegulator->setK(value);
 		} else if (name == "pidAngleTi") {
-			this->anglePidRegulator->Ti = value;
+			this->anglePidRegulator->setTi(value);
 		} else if (name == "pidAngleTd") {
-			this->anglePidRegulator->Td = value;
+			this->anglePidRegulator->setTd(value);
 		} else {
 			RCLCPP_INFO_STREAM(this->get_logger(), "Unknown param");
         }
