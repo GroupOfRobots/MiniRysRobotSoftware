@@ -36,17 +36,14 @@ DistanceNode::DistanceNode(rclcpp::NodeOptions options):
 	RCLCPP_INFO_STREAM(this->get_logger(), "Got param: update period (s) " << period.count());
 
 	for (int i = 0; i < 6; i++) {
-		if(i != 7){
 		std::string topicName = "internal/distance_" + std::to_string(i);
 		this->distancePublishers[i] = this->create_publisher<sensor_msgs::msg::Range>(topicName, 10);
 
 		this->sensors[i]->powerOff();
-		}
 		
 	}
 
 	for (int i = 0; i < 6; i++) {
-		if(i != 7){
 		this->sensors[i]->powerOn();
 		this->sensors[i]->setAddress(0x29 + i + 1);
 		
@@ -59,7 +56,6 @@ DistanceNode::DistanceNode(rclcpp::NodeOptions options):
 		this->sensors[i]->setInterMeasurementPeriod(25);
 
 		this->sensors[i]->startRanging();
-		}
 		
 	}
 	RCLCPP_INFO_STREAM(this->get_logger(), "VL53L1X: initialized");
@@ -84,7 +80,6 @@ void DistanceNode::update() {
 	message.radiation_type = sensor_msgs::msg::Range::INFRARED;
 
 	for (int i = 0; i < 6; i++) {
-		if(i != 7){
 		auto distance = this->sensors[i]->getDistance();
 		if (distance == 65535) {
 			RCLCPP_WARN_STREAM(this->get_logger(), "VL53L1X: timeout on sensor " << i);
@@ -93,6 +88,5 @@ void DistanceNode::update() {
 		message.header.frame_id = "distance_" + std::to_string(i);
 		message.range = static_cast<float>(distance) / 1000.0f;
 		this->distancePublishers[i]->publish(message);
-		}
 	}
 }
