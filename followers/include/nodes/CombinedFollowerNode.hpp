@@ -11,6 +11,21 @@
 
 using namespace std::chrono_literals;
 
+enum CombinedFollowerStates{
+    INITIAL_STATE,
+    START_FOLLOWING_LINE,
+    CORRIDOR_BEGIN,
+    GO_STRAIGHT,
+    STANDING_UP,
+    START_FOLLOWING_WALL,
+    STOP,
+    TURN_BACK,
+    STABILISE,
+    CONTINUE_FOLLOWING_WALL,
+    END_OF_CORRIDOR
+
+};
+
 class CombinedFollower: public rclcpp::Node{
 public:
     CombinedFollower();
@@ -26,7 +41,7 @@ private:
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher2_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher3_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher4_;
-    int flag_ = -1;
+    CombinedFollowerStates flag_ = INITIAL_STATE;
     float left_sensor = 400.0f;
     float right_sensor = 400.0f;
     float front_sensor = 400.0f;
@@ -38,5 +53,3 @@ private:
     void front_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg);
     void timer_callback();
 };
-
-

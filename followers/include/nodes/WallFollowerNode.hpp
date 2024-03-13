@@ -13,6 +13,14 @@
 
 using namespace std::chrono_literals;
 
+enum WallFollowerStates{
+    PID_WALL_FOLLOWING,
+    TURNING_LEFT,
+    TURNING_RIGHT,
+    POSITIONING_AFTER_LEFT_TURN,
+    POSITIONING_AFTER_RIGHT_TURN    
+};
+
 class WallFollower: public rclcpp::Node{
     public:
     WallFollower();
@@ -42,10 +50,8 @@ class WallFollower: public rclcpp::Node{
     std::unique_ptr<PIDRegulator> pid;
     double linearSpeed;
     float maxU;
-    int flag_ = 1;
+    WallFollowerStates flag_ = PID_WALL_FOLLOWING;
     bool is_working_ = true;
 
     std::chrono::time_point<std::chrono::high_resolution_clock> program_start_;
 };
-
-

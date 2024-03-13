@@ -58,73 +58,73 @@ void CombinedFollower::front_sensor_callback(const sensor_msgs::msg::Range::Shar
 void CombinedFollower::timer_callback() {
     auto msg = std::make_shared<std_msgs::msg::Bool>();
     auto msg2 = std::make_shared<geometry_msgs::msg::Twist>();
-    if(flag_ == -1){
+    if(flag_ == INITIAL_STATE){
         start_measure_ = std::chrono::high_resolution_clock::now();
-        flag_ = 0;
+        flag_ = START_FOLLOWING_LINE;
     }
 
-    if(flag_ == 0 && getTimeToNow(start_measure_) > 500){
+    if(flag_ == START_FOLLOWING_LINE && getTimeToNow(start_measure_) > 500){
         msg->data = true;
         publisher2_->publish(*msg);
         msg->data = false;
         publisher1_->publish(*msg);
-        flag_ = 1;
+        flag_ = CORRIDOR_BEGIN;
     }
     
-    if(right_sensor < 0.200 && left_sensor < 0.2 && flag_ == 1){
-        flag_ = 2;
+    if(right_sensor < 0.200 && left_sensor < 0.2 && flag_ == CORRIDOR_BEGIN){
+        flag_ = GO_STRAIGHT;
 
         msg->data = false;
         publisher2_->publish(*msg);
         
         start_measure_ = std::chrono::high_resolution_clock::now();
     }
-    if(flag_==2 && getTimeToNow(start_measure_) > 1500){
-        flag_ = 3;
+    if(flag_== GO_STRAIGHT && getTimeToNow(start_measure_) > 1500){
+        flag_ = STANDING_UP;
 
         msg->data = true;
         publisher4_->publish(*msg2);
         publisher3_->publish(*msg);
         start_measure_ = std::chrono::high_resolution_clock::now();
     }
-    if(getTimeToNow(start_measure_) > 7000 && flag_==3){
+    if(getTimeToNow(start_measure_) > 7000 && flag_== STANDING_UP){
         msg->data = true;
         publisher1_->publish(*msg);
-        flag_ = 4;
+        flag_ = START_FOLLOWING_WALL;
     }
 
-    if(right_sensor < 0.3 && left_sensor < 0.3 && front_sensor < 0.21 && flag_==4){
+    if(right_sensor < 0.3 && left_sensor < 0.3 && front_sensor < 0.21 && flag_== START_FOLLOWING_WALL){
         msg->data = false;
         publisher1_->publish(*msg);
         publisher4_->publish(*msg2);
-        flag_ = 5;
+        flag_ = STOP;
         start_measure_ = std::chrono::high_resolution_clock::now();
     }
     
-    if(flag_ == 5 && getTimeToNow(start_measure_) > 4000){
+    if(flag_ == STOP && getTimeToNow(start_measure_) > 4000){
         start_measure_ = std::chrono::high_resolution_clock::now();
-        flag_ = 6;
+        flag_ = TURN_BACK;
         msg2->angular.z = 1.57;
         publisher4_->publish(*msg2);
     }
-    if(flag_ == 6 && getTimeToNow(start_measure_) > 2000){
-        flag_ = 7;
+    if(flag_ == TURN_BACK && getTimeToNow(start_measure_) > 2000){
+        flag_ = STABILISE;
         start_measure_ = std::chrono::high_resolution_clock::now();
         publisher4_->publish(*msg2);
         
     }
 
-    if(flag_ == 7 && getTimeToNow(start_measure_) > 4000){
+    if(flag_ == STABILISE && getTimeToNow(start_measure_) > 4000){
         msg->data = true;
-        flag_ = 8;
+        flag_ = CONTINUE_FOLLOWING_WALL;
         publisher1_->publish(*msg);
     }
 
-    if(flag_ == 8 && ((left_sensor > 0.4 && right_sensor > 0.23) ||
+    if(flag_ == CONTINUE_FOLLOWING_WALL && ((left_sensor > 0.4 && right_sensor > 0.23) ||
     (left_sensor > 0.23 && right_sensor > 0.4)) && front_sensor > 0.7){
         msg->data = false;
         publisher1_->publish(*msg);
-        flag_ = 9;
+        flag_ = END_OF_CORRIDOR;
         publisher4_->publish(*msg2);
     }
 

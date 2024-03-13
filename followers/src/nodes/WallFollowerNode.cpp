@@ -61,7 +61,7 @@ void WallFollower::timer_callback() {
         auto msg = std::make_shared<geometry_msgs::msg::Twist>();
         float u = 0.0f;
         msg->linear.y = this->linearSpeed;
-        if (this->flag_ == 1){
+        if (this->flag_ == PID_WALL_FOLLOWING){
             u = this->pid->pid_aw(this->right_sensor-this->left_sensor,0,20.0f, this->maxU);
             if (u >this->maxU){
                 u = this->maxU;
@@ -70,41 +70,46 @@ void WallFollower::timer_callback() {
                 u = -this->maxU;
             }
         }
-        else if(this->flag_ == 2){
+        else if(this->flag_ == TURNING_RIGHT){
             u = -1.2;
             msg->linear.y = -1;
         }
-        else if(this->flag_ == 3){
+        else if(this->flag_ == TURNING_LEFT){
             u = 1.2;
             msg->linear.y = -1;
         }
-        else if(this->flag_ == 4){
+        else if(this->flag_ == POSITIONING_AFTER_RIGHT_TURN){
             u = -0.1;
             
         }
-        else if(this->flag_ == 5){
+        else if(this->flag_ == POSITIONING_AFTER_LEFT_TURN){
             u = 0.1;
             
         }
 
-        if(((this->right_sensor > 0.320 && this->left_sensor < 0.260 && this->front_sensor < 0.300) || (this->right_sensor > this->left_sensor && this->right_sensor-this->left_sensor > 0.12 && this->left_sensor> 0.26))){
-            this->flag_ = 2;
+        if(((this->right_sensor > 0.320 && this->left_sensor < 0.260 && this->front_sensor < 0.300)
+         || (this->right_sensor > this->left_sensor && this->right_sensor-this->left_sensor > 0.12 
+         && this->left_sensor> 0.26))){
+            this->flag_ = TURNING_RIGHT;
         }
 
-        if(((this->right_sensor < 0.260 && this->left_sensor > 0.320 && this->front_sensor < 0.300) || (this->right_sensor < this->left_sensor && this->right_sensor-this->left_sensor < -0.12 && this->right_sensor > 0.26))){
-            this->flag_ = 3;
+        if(((this->right_sensor < 0.260 && this->left_sensor > 0.320 && this->front_sensor < 0.300)
+         || (this->right_sensor < this->left_sensor && this->right_sensor-this->left_sensor < -0.12
+          && this->right_sensor > 0.26))){
+            this->flag_ = TURNING_LEFT;
         }
 
-        if(this->front_sensor > 0.400 && this->flag_ == 3){
-            this->flag_ = 5;
+        if(this->front_sensor > 0.400 && this->flag_ == TURNING_LEFT){
+            this->flag_ = POSITIONING_AFTER_LEFT_TURN;
         }
 
-        if(this->front_sensor > 0.400 && this->flag_ == 2){
-            this->flag_ = 4;
+        if(this->front_sensor > 0.400 && this->flag_ == TURNING_RIGHT){
+            this->flag_ = POSITIONING_AFTER_RIGHT_TURN;
         }
 
-        if((this->flag_ == 4 || this->flag_ == 5) &&  this->right_sensor <= 0.260 && this->left_sensor <= 0.260){
-            this->flag_ = 1;
+        if((this->flag_ == POSITIONING_AFTER_RIGHT_TURN || this->flag_ == POSITIONING_AFTER_LEFT_TURN) 
+         &&  this->right_sensor <= 0.260 && this->left_sensor <= 0.260){
+            this->flag_ = PID_WALL_FOLLOWING;
             this->pid->clear();
         }
 
@@ -138,5 +143,3 @@ void WallFollower::front_sensor_callback(const sensor_msgs::msg::Range::SharedPt
 void WallFollower::is_callback(const std_msgs::msg::Bool::SharedPtr msg){
     this->is_working_ = msg->data;
 }
-
-
