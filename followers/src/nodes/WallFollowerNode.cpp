@@ -72,11 +72,11 @@ void WallFollower::timer_callback() {
         }
         else if(this->flag_ == TURNING_RIGHT){
             u = -1.2;
-            msg->linear.y = -1;
+            msg->linear.y = this->linearSpeed/2;
         }
         else if(this->flag_ == TURNING_LEFT){
             u = 1.2;
-            msg->linear.y = -1;
+            msg->linear.y = this->linearSpeed/2;
         }
         else if(this->flag_ == POSITIONING_AFTER_RIGHT_TURN){
             u = -0.1;
