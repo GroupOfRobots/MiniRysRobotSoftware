@@ -34,13 +34,13 @@ public:
 private:
 
     rclcpp::TimerBase::SharedPtr timer_;
-    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription1_;
-    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription2_;
-    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription3_;
-    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher1_;
-    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher2_;
-    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher3_;
-    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher4_;
+    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription_dist5_;
+    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription_dist3_;
+    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription_dist2_;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_bool_wallf_;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_bool_linef_;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_bool_balance_;
+    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_velocity_;
     CombinedFollowerStates flag_ = INITIAL_STATE;
     float left_sensor = 400.0f;
     float right_sensor = 400.0f;
@@ -52,4 +52,15 @@ private:
     void right_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg);
     void front_sensor_callback(const sensor_msgs::msg::Range::SharedPtr msg);
     void timer_callback();
+    float corridor_recogniton_dist = 0.0f;
+    float end_side_dist = 0.0f;
+    float end_front_dist = 0.0f;
+    float corridor_out_front_dist = 0.0f;
+    float corridor_out_side_dist = 0.0f;
+    int stabilization_time = 0;
+    int standing_up_time = 0;
+    int turning_time = 0;
+    int positioning_time = 0;
+    const int INIT_TIME = 500;
+    const float TURN_VAL = 1.57;
 };

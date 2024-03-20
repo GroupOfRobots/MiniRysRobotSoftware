@@ -37,11 +37,11 @@ class WallFollower: public rclcpp::Node{
     void is_callback(const std_msgs::msg::Bool::SharedPtr msg);
     
     rclcpp::TimerBase::SharedPtr timer_;
-    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
-    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription1_;
-    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription2_;
-    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription3_;
-    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subscription4_;
+    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_vocity_;
+    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription_dist5_;
+    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription_dist2_;
+    rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr subscription_dist3_;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subscription_bool_wallf_;
 
     float left_sensor = 0.0f;
     float right_sensor = 0.0f;
@@ -53,5 +53,16 @@ class WallFollower: public rclcpp::Node{
     WallFollowerStates flag_ = PID_WALL_FOLLOWING;
     bool is_working_ = true;
 
+    float left_sensor_offset = 0.0f;
+    float pid_start_side_dist = 0.0f;
+    float front_sensor_turn_end = 0.0f;
+    float turning_side_dist = 0.0f;
+    float not_turning_side_dist = 0.0f;
+    float dist_difference = 0.0f;
+
+    const float TURN = 1.2;
+    const float SLIGHT_TURN = 0.1; 
+    const float NO_TURN = 0.0;
+    const int INIT_TIME = 2000;
     std::chrono::time_point<std::chrono::high_resolution_clock> program_start_;
 };
