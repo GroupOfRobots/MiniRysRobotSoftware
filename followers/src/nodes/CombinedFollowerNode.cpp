@@ -12,10 +12,10 @@ CombinedFollower::CombinedFollower() : Node("combined_follower") {
     this->declare_parameter("end_front_dist", rclcpp::ParameterValue(0.0));
     this->declare_parameter("corridor_out_front_dist", rclcpp::ParameterValue(0.0));
     this->declare_parameter("corridor_out_side_dist", rclcpp::ParameterValue(0.0));
-    this->declare_parameter("stabilization_time", rclcpp::ParameterValue(0.0));
-    this->declare_parameter("standing_up_time", rclcpp::ParameterValue(0.0));
-    this->declare_parameter("turning_time", rclcpp::ParameterValue(0.0));
-    this->declare_parameter("positioning_time", rclcpp::ParameterValue(0.0));
+    this->declare_parameter("stabilization_time", rclcpp::ParameterValue(0));
+    this->declare_parameter("standing_up_time", rclcpp::ParameterValue(0));
+    this->declare_parameter("turning_time", rclcpp::ParameterValue(0));
+    this->declare_parameter("positioning_time", rclcpp::ParameterValue(0));
     std::this_thread::sleep_for(100ms);
 
     corridor_recogniton_dist = this->get_parameter("corridor_recogniton_dist").as_double();
@@ -81,6 +81,7 @@ void CombinedFollower::timer_callback() {
     if(flag_ == INITIAL_STATE){
         start_measure_ = std::chrono::high_resolution_clock::now();
         flag_ = START_FOLLOWING_LINE;
+        RCLCPP_INFO_STREAM(this->get_logger(), "1" );
     }
 
     if(flag_ == START_FOLLOWING_LINE && getTimeToNow(start_measure_) > INIT_TIME){
@@ -89,11 +90,12 @@ void CombinedFollower::timer_callback() {
         msg_bool->data = false;
         publisher_bool_wallf_->publish(*msg_bool);
         flag_ = CORRIDOR_BEGIN;
+        RCLCPP_INFO_STREAM(this->get_logger(), "Line" << corridor_recogniton_dist );
     }
     
     if(right_sensor < corridor_recogniton_dist && left_sensor < corridor_recogniton_dist && flag_ == CORRIDOR_BEGIN){
         flag_ = GO_STRAIGHT;
-
+        RCLCPP_INFO_STREAM(this->get_logger(), "CC" );
         msg_bool->data = false;
         publisher_bool_linef_->publish(*msg_bool);
         

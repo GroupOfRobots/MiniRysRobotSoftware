@@ -24,7 +24,6 @@ wall_follower:
     not_turning_side_dist: 0.26
     dist_difference: 0.12
     
-    
 line_follower_no_cam:
   ros__parameters:
     timer_period: 0.05
@@ -35,8 +34,8 @@ line_follower_no_cam:
     turnOffsetParam: 1.0
     linearSpeed: -1.0
 
-combine_follower:
-  ros_parameters:
+combined_follower:
+  ros__parameters:
     corridor_recogniton_dist: 0.2
     end_side_dist: 0.3
     end_front_dist: 0.21

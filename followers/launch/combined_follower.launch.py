@@ -5,6 +5,12 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
+    config = os.path.join(
+        get_package_share_directory('followers'),
+        'config',
+        'params.yaml'
+        )
+
     wall_f = actions.IncludeLaunchDescription(
 		launch_description_sources.PythonLaunchDescriptionSource(
 			os.path.join(
@@ -27,7 +33,7 @@ def generate_launch_description():
         package = 'followers',
         name = 'combined_follower',
         executable = 'combinedFollower',
-        parameters = [{'minirys_namespace': namespace_value}],
+        parameters = [config, {'minirys_namespace': namespace_value}],
         
     )
 
