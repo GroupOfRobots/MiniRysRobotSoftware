@@ -25,7 +25,6 @@ def generate_launch_description():
 		executable="minirys_cs_lidar",
 		namespace=namespace_value,
 		parameters=[params_path],
-		remappings=[('/' + namespace_value +'/cmd_vel', '/cmd_vel')]
 	)
 
 	return LaunchDescription([

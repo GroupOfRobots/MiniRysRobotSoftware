@@ -60,6 +60,11 @@
       acceleration: 62.8 #z 251.327 na pocz 2*Pi = 1rps
       wheelRadius: 0.055
 
+  servo_ve:
+    ros__parameters:
+      updateFrequency: 10.0
+      pwmFrequency: 50.0
+
   # Control Subsystem
   fan_regulator_cs:
     ros__parameters:
@@ -101,6 +106,12 @@
       wheelSeparation: 0.134
       wheelRadiusCorrection: 1.00
       wheelSeparationCorrection: 1.00
+
+  servo_controller_cs:
+    ros__parameters:
+      updateFrequency: 10.0
+      servoDutyUp: 0.016
+      servoDutyDown: 0.127
 
   minirys_rttest:
     ros__parameters:

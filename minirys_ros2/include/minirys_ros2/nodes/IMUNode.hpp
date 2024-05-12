@@ -5,6 +5,8 @@
 #include <minirys_msgs/msg/angular_pose.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <tf2_ros/transform_broadcaster.h>
+#include <string>
+#include <cstdlib>
 
 #include <I2CBus.hpp>
 #include <LSM6.hpp>
@@ -23,6 +25,7 @@ private:
 	std::list<double> angleRawHistory;
 	double angleFilteredPrev;
 
+	std::string envNamespace = std::getenv("NAMESPACE");
 	std::chrono::duration<double> updatePeriod;
 	double filterFactor;
 	double angleCorrection;

@@ -9,7 +9,7 @@ using std::placeholders::_1;
 
 ServoNode::ServoNode(rclcpp::NodeOptions options):
 	Node("servo_ve", options),
-	output(0.134f) {
+	output(0.125f) {
 	this->declare_parameter("updateFrequency", rclcpp::ParameterValue(10.0));
 	this->declare_parameter("pwmFrequency", rclcpp::ParameterValue(50.0));
 
@@ -52,9 +52,9 @@ void ServoNode::receiveServoOutput(const std_msgs::msg::Float32::SharedPtr messa
 }
 
 void ServoNode::setUpPosition() {
-	this->pwm->setDuty(0.015);
+	this->pwm->setDuty(0.017);
 }
 
 void ServoNode::setDownPosition() {
-	this->pwm->setDuty(0.134);
+	this->pwm->setDuty(0.125);
 }
