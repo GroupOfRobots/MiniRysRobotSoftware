@@ -130,8 +130,6 @@ void OdometryNode::update() {
     odom_trans.transform.rotation.z = q.z();
     odom_trans.transform.rotation.w = q.w();
 
-    //RCLCPP_INFO_STREAM(this->get_logger(), "Theta: " << this->poseTheta);
-
     //send the transform
     odom_broadcaster->sendTransform(odom_trans);
 

@@ -9,7 +9,7 @@ int main(int argc, char const* argv[]) {
 	RTTExecutor::setupRT(2, 98, SCHED_RR);
 	rclcpp::init(argc, argv);
 
-	rclcpp::executors::SingleThreadedExecutor executor;
+	rclcpp::executors::MultiThreadedExecutor executor;
 	rclcpp::NodeOptions options;
 	options.use_intra_process_comms(true);
 
@@ -21,6 +21,7 @@ int main(int argc, char const* argv[]) {
 
 	executor.add_node(batteryNode);
 	executor.add_node(imuNode);
+	auto tempNode = std::make_shared<TemperatureNode>(i2c, options);
 	executor.add_node(tempNode);
 
 	executor.spin();

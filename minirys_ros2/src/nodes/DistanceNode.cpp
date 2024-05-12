@@ -40,20 +40,24 @@ DistanceNode::DistanceNode(rclcpp::NodeOptions options):
 		this->distancePublishers[i] = this->create_publisher<sensor_msgs::msg::Range>(topicName, 10);
 
 		this->sensors[i]->powerOff();
+		
 	}
     this->scanPublisher = this->create_publisher<sensor_msgs::msg::LaserScan>("internal/laser_scan", 10);
 
 	for (int i = 0; i < 6; i++) {
 		this->sensors[i]->powerOn();
 		this->sensors[i]->setAddress(0x29 + i + 1);
+		
 		this->sensors[i]->initialize();
-
+		
 		this->sensors[i]->setDistanceMode(VL53L1X::DISTANCE_MODE_SHORT);
+		//this->sensors[i]->setDistanceMode(VL53L1X::DISTANCE_MODE_LONG);
 		//this->sensors[i]->setTimingBudget(VL53L1X::TIMING_BUDGET_50_MS);
 		this->sensors[i]->setTimingBudget(VL53L1X::TIMING_BUDGET_20_MS);
 		this->sensors[i]->setInterMeasurementPeriod(25);
 
 		this->sensors[i]->startRanging();
+		
 	}
 	RCLCPP_INFO_STREAM(this->get_logger(), "VL53L1X: initialized");
 
@@ -96,17 +100,20 @@ void DistanceNode::update() {
 		this->distancePublishers[i]->publish(message);
 
 	}
-    auto distance0 = this->sensors[0]->getDistance();
-    auto distance1 = this->sensors[1]->getDistance();
-    auto distance2 = this->sensors[2]->getDistance();
-    auto distance5 = this->sensors[5]->getDistance();
-    auto range0 = (static_cast<float>(distance0) / 1000.0f) + 0.033f; //adding offsets to ranges in order to make laser scan in centre of robot
-    auto range1 = (static_cast<float>(distance1) / 1000.0f) + 0.082f;
-    auto range2 = (static_cast<float>(distance2) / 1000.0f) + 0.05f;
-    auto range5 = (static_cast<float>(distance5) / 1000.0f) + 0.05f;
-    std::vector<float> scan_ranges = {range0, range2, range1, range5};
-    scan.ranges = scan_ranges;
-    scan.header.stamp = this->get_clock()->now();
-    scan.header.frame_id = "laser_scan";
-    this->scanPublisher->publish(scan);
+
+//     Scan message for tof version
+//
+//     auto distance0 = this->sensors[0]->getDistance();
+//     auto distance1 = this->sensors[1]->getDistance();
+//     auto distance2 = this->sensors[2]->getDistance();
+//     auto distance5 = this->sensors[5]->getDistance();
+//     auto range0 = (static_cast<float>(distance0) / 1000.0f) + 0.033f; //adding offsets to ranges in order to make laser scan in centre of robot
+//     auto range1 = (static_cast<float>(distance1) / 1000.0f) + 0.082f;
+//     auto range2 = (static_cast<float>(distance2) / 1000.0f) + 0.05f;
+//     auto range5 = (static_cast<float>(distance5) / 1000.0f) + 0.05f;
+//     std::vector<float> scan_ranges = {range0, range2, range1, range5};
+//     scan.ranges = scan_ranges;
+//     scan.header.stamp = this->get_clock()->now();
+//     scan.header.frame_id = "laser_scan";
+//     this->scanPublisher->publish(scan);
 }

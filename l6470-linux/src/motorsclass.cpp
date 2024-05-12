@@ -31,7 +31,6 @@
 #include <assert.h>
 #include <iostream>
 
-
 #include "motorsclass.h"
 
 #define BUSY_PIN_NOT_USED	0xFF

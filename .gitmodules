@@ -1,3 +1,10 @@
 [submodule "minirys_msgs"]
 	path = minirys_msgs
 	url = https://github.com/GroupOfRobots/MiniRysMsgs.git
+[submodule "vision_opencv"]
+	path = vision_opencv
+	url = https://github.com/ros-perception/vision_opencv.git
+	branch = humble
+[submodule "MiniRysMsgs"]
+	path = minirys_msgs
+	url = https://github.com/GroupOfRobots/MiniRysMsgs.git

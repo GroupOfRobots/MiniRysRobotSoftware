@@ -80,7 +80,6 @@ void BatteryNode::update() {
 			return v < uvError;
 		}
 	);
-
 	auto message = minirys_msgs::msg::BatteryStatus();
 	message.header.frame_id = "battery";
 	message.header.stamp = this->get_clock()->now();
