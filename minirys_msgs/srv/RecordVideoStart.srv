@@ -1,6 +1,0 @@
-uint64 width
-uint64 height
-string quality
----
-bool started
-string message
