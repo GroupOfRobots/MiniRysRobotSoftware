@@ -78,7 +78,7 @@ void IMUNode::update() {
 
 	// Prepare the messages
 	auto imuMessage = sensor_msgs::msg::Imu();
-	imuMessage.header.frame_id = "imu";
+	imuMessage.header.frame_id = this->envNamespace + "/imu";
 	imuMessage.header.stamp = now;
 	imuMessage.angular_velocity.x = gyroX;
 	imuMessage.angular_velocity.y = gyroY;
@@ -88,7 +88,7 @@ void IMUNode::update() {
 	imuMessage.linear_acceleration.z = accelZ;
 
 	auto poseMessage = minirys_msgs::msg::AngularPose();
-	poseMessage.header.frame_id = "imu";
+	poseMessage.header.frame_id = this->envNamespace + "/imu";
 	poseMessage.header.stamp = now;
 	poseMessage.angular_position = angleFiltered;
 	poseMessage.angular_velocity = angularVelocity;
@@ -96,8 +96,8 @@ void IMUNode::update() {
     // Transform broadcaster
     auto angle_trans = geometry_msgs::msg::TransformStamped();
     angle_trans.header.stamp = this->get_clock()->now();
-    angle_trans.header.frame_id = "base_link";
-    angle_trans.child_frame_id = "robot_base";
+    angle_trans.header.frame_id = this->envNamespace + "/base_link";
+    angle_trans.child_frame_id = this->envNamespace + "/robot_base";
 
     angle_trans.transform.translation.x = 0.0;
     angle_trans.transform.translation.y = 0.0;

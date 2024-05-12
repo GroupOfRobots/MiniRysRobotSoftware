@@ -11,8 +11,8 @@ ServoControllerNode::ServoControllerNode(rclcpp::NodeOptions options):
 	servoStatus(false),
 	balanceMode(false) {
 	this->declare_parameter("updateFrequency", rclcpp::ParameterValue(10.0));
-	this->declare_parameter("servoDutyUp", rclcpp::ParameterValue(0.015));
-	this->declare_parameter("servoDutyDown", rclcpp::ParameterValue(0.116));
+	this->declare_parameter("servoDutyUp", rclcpp::ParameterValue(0.016));
+	this->declare_parameter("servoDutyDown", rclcpp::ParameterValue(0.131));
 
 
 	auto period = std::chrono::duration<double>(1.0 / this->get_parameter("updateFrequency").as_double());

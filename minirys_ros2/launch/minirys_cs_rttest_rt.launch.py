@@ -11,7 +11,7 @@ def get_shutdown_on_exit(action):
 	))
 
 def generate_launch_description():
-	namespace_value = substitutions.LaunchConfiguration('namespace')
+	namespace_value = os.environ.get('NAMESPACE')
 
 	params_path = os.path.join(
 		get_package_share_directory('minirys_ros2'),

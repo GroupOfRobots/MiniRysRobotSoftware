@@ -13,7 +13,7 @@ void signalHandler(int signalNumber) {
 }
 
 int main() {
-	auto i2c = I2CBus::makeShared("/dev/i2c-5");
+	auto i2c = I2CBus::makeShared("/dev/i2c-3");
 	VL53L1X sensor(i2c);
 
 	std::signal(SIGINT, signalHandler);

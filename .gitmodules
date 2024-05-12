@@ -1,0 +1,3 @@
+[submodule "minirys_msgs"]
+	path = minirys_msgs
+	url = https://github.com/GroupOfRobots/MiniRysMsgs.git

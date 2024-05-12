@@ -8,6 +8,8 @@
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <tf2_ros/transform_broadcaster.h>
+#include <string>
+#include <cstdlib>
 
 class OdometryNode: public rclcpp::Node {
 public:
@@ -18,6 +20,7 @@ public:
 	~OdometryNode() override = default;
 
 private:
+	std::string envNamespace = std::getenv("NAMESPACE");
 	double poseX;
 	double poseY;
 	double poseTheta;

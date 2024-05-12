@@ -117,8 +117,8 @@ void OdometryNode::update() {
 
     auto odom_trans = geometry_msgs::msg::TransformStamped();
     odom_trans.header.stamp = this->get_clock()->now();
-    odom_trans.header.frame_id = "odom";
-    odom_trans.child_frame_id = "base_link";
+    odom_trans.header.frame_id = this->envNamespace + "/odom";
+    odom_trans.child_frame_id = this->envNamespace + "/base_footprint";
 
     odom_trans.transform.translation.x = this->poseX;
     odom_trans.transform.translation.y = this->poseY;
@@ -137,8 +137,8 @@ void OdometryNode::update() {
 
 	auto messageOdom = nav_msgs::msg::Odometry();
 	messageOdom.header.stamp = this->get_clock()->now();
-	messageOdom.header.frame_id = "odom";
-    messageOdom.child_frame_id = "base_link";
+	messageOdom.header.frame_id = this->envNamespace + "/odom";
+    messageOdom.child_frame_id = this->envNamespace + "/base_link";
 	messageOdom.pose.pose.position.x = this->poseX;
 	messageOdom.pose.pose.position.y = this->poseY;
 	messageOdom.pose.pose.orientation.w = cos(this->poseTheta / 2);
