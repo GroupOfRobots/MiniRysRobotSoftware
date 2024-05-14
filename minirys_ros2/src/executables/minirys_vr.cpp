@@ -21,7 +21,6 @@ int main(int argc, char const* argv[]) {
 
 	executor.add_node(batteryNode);
 	executor.add_node(imuNode);
-	auto tempNode = std::make_shared<TemperatureNode>(i2c, options);
 	executor.add_node(tempNode);
 
 	executor.spin();
