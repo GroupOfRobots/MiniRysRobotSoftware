@@ -1,10 +1,8 @@
+import rclpy
+from builtin_interfaces.msg import Time
+from picamera2 import Picamera2
 from rclpy.node import Node  # Handles the creation of nodes
 from sensor_msgs.msg import Image
-
-import rclpy
-
-from picamera2 import Picamera2
-from builtin_interfaces.msg import Time
 
 FRAME_INTERVAL = 0.1
 ENCODING = "rgba8"  # http://docs.ros.org/en/jade/api/sensor_msgs/html/image__encodings_8h_source.html
@@ -17,8 +15,10 @@ HEIGHT_START_PIXEL = 100
 HEIGHT_END_PIXEL = 400
 HEIGHT_INTERVAL = 2
 
-WIDTH = 640
-HEIGHT = 480
+DEFAULT_WIDTH = 640
+DEFAULT_HEIGHT = 480
+
+DEFAULT_FRAME_INTERVAL = 0.1
 
 
 class ImagePublisher(Node):
@@ -27,19 +27,32 @@ class ImagePublisher(Node):
 
         self.publisher = self.create_publisher(Image, 'video_frames', 10)
 
-        self.picam2 = Picamera2()
-        self.picam2.configure(self.picam2.create_video_configuration(main={"size": (HEIGHT, WIDTH)}))
+        self.declareParameters()
 
-        self.picam2.start()
+        self.configure_picamera()
 
         self.frame_id = 0
         self.imageMsg = Image()
 
         self.imageMsg.encoding = ENCODING
-        self.imageMsg.width = WIDTH
-        self.imageMsg.height = HEIGHT
 
         self.create_timer(FRAME_INTERVAL, self.image_callback)
+
+    def declareParameters(self):
+        self.declare_parameter('width', DEFAULT_WIDTH)
+        self.width = self.get_parameter('width').value
+
+        self.declare_parameter('height', DEFAULT_HEIGHT)
+        self.height = self.get_parameter('height').value
+
+        self.declare_parameter('frame_interval', DEFAULT_FRAME_INTERVAL)
+        self.frame_interval = self.get_parameter('frame_interval').value
+
+    def configure_picamera(self):
+        self.picam2 = Picamera2()
+        config = self.picam2.create_preview_configuration(lores={"size": (self.width, self.height)})
+        self.picam2.configure(config)
+        self.picam2.start()
 
     def get_time_msg(self):
         time_msg = Time()

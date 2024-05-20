@@ -5,7 +5,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
-            package='ros2_rpi_cv_camera',
+            package='minirys_camera',
             executable='ros2_rpi_cv_camera',
             name='cv_camera',
             parameters=[
