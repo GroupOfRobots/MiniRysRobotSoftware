@@ -1,14 +1,11 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>ros2_rpi_camera</name>
+  <name>minirys_camera</name>
   <version>0.0.0</version>
-  <description>package responsible for transmitting the image from the camera on ros2 topic</description>
-  <maintainer email="pawel.rawicki@gmail.com">Paweł Rawicki</maintainer>
-  <license>TODO: License declaration</license>
-
-  <depend>rclcpp</depend>
-
+  <description>TODO: Package description</description>
+  <maintainer email="pawel.rawicki@gmail.com">pablo</maintainer>
+  <license>MIT</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

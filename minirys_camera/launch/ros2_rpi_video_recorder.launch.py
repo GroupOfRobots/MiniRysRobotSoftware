@@ -8,7 +8,7 @@ def generate_launch_description():
     arg_namespace = actions.DeclareLaunchArgument('namespace', default_value='minirys')
 
     node=Node(
-    package='ros2_rpi_video_recorder',
+    package='minirys_camera',
     executable='ros2_rpi_video_recorder',
     name='video_recorder',
     namespace=namespace_value,

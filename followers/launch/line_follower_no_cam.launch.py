@@ -22,7 +22,7 @@ def generate_launch_description():
     camera = actions.IncludeLaunchDescription(
 		launch_description_sources.PythonLaunchDescriptionSource(
 			os.path.join(
-				get_package_share_directory('ros2_rpi_cv_camera'),
+				get_package_share_directory('minirys_camera'),
 				'ros2_rpi_cv_camera.launch.py')
 		)
 	)

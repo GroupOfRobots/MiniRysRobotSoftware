@@ -7,6 +7,8 @@ from picamera2.encoders import MJPEGEncoder, Quality
 from picamera2.outputs import FfmpegOutput
 from rclpy.node import Node  # Handles the creation of nodes
 
+DEFAULT_WIDTH = 640
+DEFAULT_HEIGHT = 480
 
 class VideoRecorder(Node):
     def __init__(self):
@@ -26,8 +28,8 @@ class VideoRecorder(Node):
                 response.started = False
                 response.message = "Camera is already working, can not start recording"
                 return response
-            width = request.width or 640
-            height = request.height or 480
+            width = request.width or DEFAULT_WIDTH
+            height = request.height or DEFAULT_HEIGHT
             quality = self.getQuality(request.quality)
             print(width, height, quality)
             self.picam2.configure(self.picam2.create_video_configuration(main={"size": (int(width), int(height))}))
