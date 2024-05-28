@@ -68,7 +68,7 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 	this->motors->setAccCurrentKVAL(0x70);  //80
 	this->motors->setDecCurrentKVAL(0x70);  //80
 	this->motors->setRunCurrentKVAL(0x70);  //B4 70
-	this->motors->setHoldCurrentKVAL(0x70);  //40
+	this->motors->setHoldCurrentKVAL(0x16);  //40
 	// Disable BEMF compensation and the FLAG (alarm) pin
 	this->motors->setBackEMF();
 	RCLCPP_INFO_STREAM(this->get_logger(), "L6470: setup done");
