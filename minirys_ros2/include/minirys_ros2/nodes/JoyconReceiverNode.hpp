@@ -3,9 +3,9 @@
 #include <sys/ioctl.h>
 #include <linux/joystick.h>
 #include "rclcpp/rclcpp.hpp"
-//#include "../FrequencyCounter/FrequencyCounter.hpp"
-//#include "minirys_interfaces/msg/minirys_input.hpp"
 #include <geometry_msgs/msg/twist.hpp>
+#include <std_msgs/msg/bool.hpp>
+
 
 #define JOY_DEV "/dev/input/js0"
 
@@ -24,15 +24,16 @@ class JoyconReceiverNode : public rclcpp::Node{
 		int forwardAxis, rotationAxis, forwardSpeedFactor, rotationSpeedFactor;
 		bool forwardAxisInverted, rotationAxisInverted;
 
-		int standUpButton, layDownButton, shutdownButton;//, printStatusButton, printLocationButton;
-
-		//FrequencyCounter *counter;
+		int standUpButton, layDownButton;
+		int servoUpButton, servoDownButton;
 
 		rclcpp::TimerBase::SharedPtr get_joycon_state_timer;
         rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr joycon_control_publisher;
+		rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr balance_control_publisher;
+		rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr servo_control_publisher;
         geometry_msgs::msg::Twist msg;
-		//rclcpp::Publisher<minirys_interfaces::msg::MinirysInput>::SharedPtr joycon_control_publisher;
-		//minirys_interfaces::msg::MinirysInput msg;
+		std_msgs::msg::Bool balance_msg;
+		std_msgs::msg::Bool servo_msg;
 
 		void get_joycon_state();
 };

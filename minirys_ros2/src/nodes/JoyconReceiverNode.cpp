@@ -1,12 +1,9 @@
 #include "minirys_ros2/nodes/JoyconReceiverNode.hpp"
 
 JoyconReceiverNode::JoyconReceiverNode(rclcpp::NodeOptions options): Node("joycon_receiver", options) {
-	//counter = new FrequencyCounter("joycon");
-	//initialize joycon
 	if( ( joy_fd = open( JOY_DEV , O_RDONLY)) == -1 )
 	{
 		RCLCPP_ERROR(this->get_logger(), "Couldn't open joystick" );
-		// endProcess = true;
 		return;
 	}
 
@@ -44,9 +41,9 @@ JoyconReceiverNode::JoyconReceiverNode(rclcpp::NodeOptions options): Node("joyco
 	forwardAxis = this->get_parameter("forwardAxis").get_value<int>();
 	this->declare_parameter("rotationAxis", rclcpp::ParameterValue(2));
 	rotationAxis = this->get_parameter("rotationAxis").get_value<int>();
-	this->declare_parameter("forwardSpeedFactor", rclcpp::ParameterValue(48000)); //80
+	this->declare_parameter("forwardSpeedFactor", rclcpp::ParameterValue(400000)); //48000
 	forwardSpeedFactor = this->get_parameter("forwardSpeedFactor").get_value<int>();
-	this->declare_parameter("rotationSpeedFactor", rclcpp::ParameterValue(16000)); //200
+	this->declare_parameter("rotationSpeedFactor", rclcpp::ParameterValue(48000)); //16000
 	rotationSpeedFactor = this->get_parameter("rotationSpeedFactor").get_value<int>();
 	this->declare_parameter("forwardAxisInverted", rclcpp::ParameterValue(true));
 	forwardAxisInverted = this->get_parameter("forwardAxisInverted").get_value<bool>();
@@ -54,22 +51,20 @@ JoyconReceiverNode::JoyconReceiverNode(rclcpp::NodeOptions options): Node("joyco
 	rotationAxisInverted = this->get_parameter("rotationAxisInverted").get_value<bool>();
 
 	// Get button parameters
-	this->declare_parameter("standUpButton", rclcpp::ParameterValue(1));
+	this->declare_parameter("standUpButton", rclcpp::ParameterValue(3));
 	standUpButton = this->get_parameter("standUpButton").get_value<int>();
-	this->declare_parameter("layDownButton", rclcpp::ParameterValue(3));
+	this->declare_parameter("layDownButton", rclcpp::ParameterValue(1));
 	layDownButton = this->get_parameter("layDownButton").get_value<int>();
-	this->declare_parameter("shutdownButton", rclcpp::ParameterValue(9));
-	shutdownButton = this->get_parameter("shutdownButton").get_value<int>();
-	// this->declare_parameter("printStatusButton", rclcpp::ParameterValue(2));
-	// printStatusButton = this->get_parameter("printStatusButton").get_value<int>();
-	// this->declare_parameter("printLocationButton", rclcpp::ParameterValue(0));
-	// printLocationButton = this->get_parameter("printLocationButton").get_value<int>();
+	this->declare_parameter("servoUpButton", rclcpp::ParameterValue(2));
+	servoUpButton = this->get_parameter("servoUpButton").get_value<int>();
+	this->declare_parameter("servoDownButton", rclcpp::ParameterValue(0));
+	servoDownButton = this->get_parameter("servoDownButton").get_value<int>();
 
+    joycon_control_publisher = this->create_publisher<geometry_msgs::msg::Twist>("/minirys3/cmd_vel", 10);
+	balance_control_publisher = this->create_publisher<std_msgs::msg::Bool>("/minirys3/balance_mode", 10);
+	servo_control_publisher = this->create_publisher<std_msgs::msg::Bool>("/minirys3/servo_status", 10);
 
-    joycon_control_publisher = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
     msg = geometry_msgs::msg::Twist();
-//	joycon_control_publisher = this->create_publisher<minirys_interfaces::msg::MinirysInput>("minirys_input", 10);
-//	msg = minirys_interfaces::msg::MinirysInput();
 
 	this->declare_parameter("period", rclcpp::ParameterValue(200));
 	get_joycon_state_timer = this->create_wall_timer(
@@ -79,11 +74,9 @@ JoyconReceiverNode::JoyconReceiverNode(rclcpp::NodeOptions options): Node("joyco
 
 JoyconReceiverNode::~JoyconReceiverNode(){
 	close( joy_fd );
-	//delete counter;
 }
 
 void JoyconReceiverNode::get_joycon_state() {
-	//counter->count();
 	/* read the joystick state */
 	/* see what to do with the event */
 	while(read(joy_fd, &js, sizeof(struct js_event)) == sizeof(struct js_event)){
@@ -102,7 +95,6 @@ void JoyconReceiverNode::get_joycon_state() {
 		}
 	}
 
-	//msg.header.stamp = this->get_clock()->now();
     msg.linear.y = 0;
     msg.linear.z = 0;
     msg.angular.x = 0;
@@ -120,10 +112,28 @@ void JoyconReceiverNode::get_joycon_state() {
         msg.angular.z = axis[rotationAxis]/(rotationSpeedFactor*1.0);
 	}
 
-//	if (button[standUpButton] == 1) msg.motor_control.enable_balancing = true;
-//	if (button[layDownButton] == 1) msg.motor_control.enable_balancing = false;
-//
-//	if (button[shutdownButton] == 1) msg.emergency_shutdown = true;
+	balance_msg = std_msgs::msg::Bool();
+	servo_msg = std_msgs::msg::Bool();
+	if (button[standUpButton] == 1)
+	{
+		balance_msg.data = true;
+		balance_control_publisher->publish(balance_msg);
+	}
+	if (button[layDownButton] == 1)
+	{
+		balance_msg.data = false;
+		balance_control_publisher->publish(balance_msg);
+	}
+	if (button[servoUpButton] == 1)
+	{
+		servo_msg.data = true;
+		servo_control_publisher->publish(servo_msg);
+	}
+	if (button[servoDownButton] == 1)
+	{
+		servo_msg.data = false;
+		servo_control_publisher->publish(servo_msg);
+	}
 
 	joycon_control_publisher->publish(msg);
 }
