@@ -88,7 +88,7 @@
       maxLinearSpeed: 15.8495559215 # 2*Pi = 1rps
       maxRotationSpeed: 15.8495559215 # 2*Pi = 1rps
       maxWheelSpeed: 15.8495559215 # 2*Pi = 1rps
-      maxStandUpSpeed: 7.0 # 2*Pi = 1rps
+      maxStandUpSpeed: 8.0 # 2*Pi = 1rps
       maxBalancingAngle: 0.30
       pidSpeedKp: 0.0013 #0.001 0.05 to za duzo 0.01 git
       pidSpeedTi: 0.05 #0.00000005 0.0005 git 0.5 to zajebiscie duzy uchyb ustalony 5.5 ogromne oscylacje
@@ -101,7 +101,7 @@
 
   odometry_cs:
     ros__parameters:
-      updateFrequency: 10.0
+      updateFrequency: 100.0
       invertLeftMotor: true
       invertRightMotor: false
       wheelRadius: 0.055

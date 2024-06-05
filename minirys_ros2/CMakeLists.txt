@@ -212,6 +212,15 @@ ament_target_dependencies(RTTExecutor
   tlsf_cpp
 )
 
+add_library(LinearTestNode
+  src/test/LinearTestNode.cpp
+)
+ament_target_dependencies(LinearTestNode
+  rclcpp
+  nav_msgs
+  geometry_msgs
+)
+
 ######
 # Executables
 ######
@@ -367,6 +376,14 @@ target_link_libraries(minirys_cs_rttest_rt
   RTTExecutor
 )
 
+add_executable(linear_test
+  src/executables/linear_test.cpp
+)
+target_link_libraries(linear_test
+  LinearTestNode
+  RTTExecutor
+)
+
 # Install executables
 install(
   TARGETS
@@ -386,6 +403,7 @@ install(
     minirys_cs_lidar
     minirys_cs_rttest
     minirys_cs_rttest_rt
+    linear_test
   EXPORT export_${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME}
 )
