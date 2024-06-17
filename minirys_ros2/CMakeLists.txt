@@ -14,6 +14,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system filesystem)
 
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -144,6 +145,12 @@ target_link_libraries(MotorsNode
 add_library(CommunicationNode
   src/nodes/CommunicationNode.cpp
 )
+
+target_link_libraries(CommunicationNode
+  Boost::system 
+  Boost::filesystem
+)
+
 ament_target_dependencies(CommunicationNode
   rclcpp
   std_msgs
@@ -334,7 +341,9 @@ add_executable(minirys_cs
   src/executables/minirys_cs.cpp
 )
 target_link_libraries(minirys_cs
-  CommunicationNode
+  Boost::system 
+  Boost::filesystem
+  CommunicationNode 
   FanRegulatorNode
   MotorsControllerNode
   OdometryNode

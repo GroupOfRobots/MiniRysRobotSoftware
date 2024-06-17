@@ -41,7 +41,7 @@ JoyconReceiverNode::JoyconReceiverNode(rclcpp::NodeOptions options): Node("joyco
 	forwardAxis = this->get_parameter("forwardAxis").get_value<int>();
 	this->declare_parameter("rotationAxis", rclcpp::ParameterValue(2));
 	rotationAxis = this->get_parameter("rotationAxis").get_value<int>();
-	this->declare_parameter("forwardSpeedFactor", rclcpp::ParameterValue(400000)); //48000
+	this->declare_parameter("forwardSpeedFactor", rclcpp::ParameterValue(300000)); //48000
 	forwardSpeedFactor = this->get_parameter("forwardSpeedFactor").get_value<int>();
 	this->declare_parameter("rotationSpeedFactor", rclcpp::ParameterValue(48000)); //16000
 	rotationSpeedFactor = this->get_parameter("rotationSpeedFactor").get_value<int>();

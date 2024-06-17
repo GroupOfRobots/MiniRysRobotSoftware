@@ -1,6 +1,10 @@
 #include "minirys_ros2/nodes/CommunicationNode.hpp"
 
 #include <functional>
+#include <set>
+#include <sstream>
+#include <boost/process.hpp>
+#include <chrono>
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -51,7 +55,20 @@ CommunicationNode::CommunicationNode(rclcpp::NodeOptions options):
 	);
 	this->imuPublisher = this->create_publisher<sensor_msgs::msg::Imu>("imu", 10);
 
+	this->robotsNamespacesPublisher = this->create_publisher<minirys_msgs::msg::RobotsNamespaces>("robots_namespaces", 10);
+
+	timer_ = this->create_wall_timer(1s, std::bind(&CommunicationNode::publishNamespaces, this));
+
+
 	RCLCPP_INFO(this->get_logger(), "Data relays initialized");
+
+	this->nodeName_ = this->get_name();
+	this->nodeNamespace_ = this->get_namespace();
+
+	if (!this->nodeNamespace_.empty() && this->nodeNamespace_[0] == '/') {
+        this->nodeNamespace_.erase(0, 1);
+    }
+
 }
 
 void CommunicationNode::receiveBatteryStatus(const minirys_msgs::msg::BatteryStatus::SharedPtr msgIn) {
@@ -111,4 +128,44 @@ void CommunicationNode::receiveCPUTemperature(const std_msgs::msg::Float32::Shar
 
 void CommunicationNode::receiveIMU(const sensor_msgs::msg::Imu::SharedPtr msgIn) {
 	this->imuPublisher->publish(*msgIn);
+}
+
+std::vector<std::string> CommunicationNode::getNamespacesWithNode() {
+    namespace bp = boost::process;
+    std::string output;
+    
+    bp::ipstream pipe_stream;
+    bp::child c(bp::search_path("ros2"), "node", "list", bp::std_out > pipe_stream);
+    
+    std::string line;
+    while (pipe_stream && std::getline(pipe_stream, line) && !line.empty()) {
+        output += line + '\n';
+    }
+    
+    c.wait();  // Wait for the process to exit
+
+    std::set<std::string> namespaces;
+    std::istringstream ss(output);
+    
+    while (std::getline(ss, line)) {
+        std::size_t pos = line.find('/' + this->nodeName_);
+        if (pos != std::string::npos) {
+            std::string namespace_ = line.substr(0, pos);
+            if (!namespace_.empty() && namespace_[0] == '/') {
+                namespace_.erase(0, 1);  // Remove leading '/'
+            }
+			if (namespace_ != this->nodeNamespace_){
+            	namespaces.insert(namespace_);
+			}
+        }
+    }
+    
+    return std::vector<std::string>(namespaces.begin(), namespaces.end());
+}
+
+void CommunicationNode::publishNamespaces() {
+    std::vector<std::string> namespaces = getNamespacesWithNode();
+	auto message = minirys_msgs::msg::RobotsNamespaces();
+    message.namespaces = namespaces;
+    this->robotsNamespacesPublisher->publish(message);
 }
