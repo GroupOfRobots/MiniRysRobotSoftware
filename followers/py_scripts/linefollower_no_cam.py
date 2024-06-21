@@ -115,7 +115,7 @@ class LineFollowerNoCamm(Node):
 
             # publikowanie u
             cmd = Twist()
-            cmd.linear.y = self.speed
+            cmd.linear.x = self.speed
             cmd.angular.z = u
             self.publisher3_.publish(cmd)
 

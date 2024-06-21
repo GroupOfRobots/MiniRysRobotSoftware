@@ -3,11 +3,11 @@ line_follower:
   ros__parameters:
     timer_period: 0.05
     maxU: 5.14
-    K: 0.009
+    K: 0.004
     Ti: 100.0
     Td: 0.03
     turnOffsetParam: 1.5
-    linearSpeed: -1.0
+    linearSpeed: -0.055
   
 wall_follower:
   ros__parameters:
@@ -15,7 +15,7 @@ wall_follower:
     K: 1.5
     Ti: 100.0
     Td: 0.013
-    linearSpeed: -2.0
+    linearSpeed: -0.11
     maxU: 0.30
     left_sensor_offset: 0.02
     pid_start_side_dist: 0.26
@@ -28,11 +28,11 @@ line_follower_no_cam:
   ros__parameters:
     timer_period: 0.05
     maxU: 5.14
-    K: 0.009
+    K: 0.004
     Ti: 100.0
     Td: 0.03
     turnOffsetParam: 1.0
-    linearSpeed: -1.0
+    linearSpeed: -0.055
 
 combined_follower:
   ros__parameters:

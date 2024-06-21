@@ -74,7 +74,7 @@ void WallFollower::timer_callback() {
     if(this->is_working_ && getTimeToNow(program_start_) > INIT_TIME ){
         auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
         float u = NO_TURN;
-        msg_twist->linear.y = this->linearSpeed;
+        msg_twist->linear.x = this->linearSpeed;
         if (this->flag_ == PID_WALL_FOLLOWING){
             u = this->pid->pid_aw(this->right_sensor-this->left_sensor,NO_TURN,20.0f, this->maxU);
             if (u >this->maxU){
@@ -86,11 +86,11 @@ void WallFollower::timer_callback() {
         }
         else if(this->flag_ == TURNING_RIGHT){
             u = -TURN;
-            msg_twist->linear.y = this->linearSpeed/2;
+            msg_twist->linear.x = this->linearSpeed/2;
         }
         else if(this->flag_ == TURNING_LEFT){
             u = TURN;
-            msg_twist->linear.y = this->linearSpeed/2;
+            msg_twist->linear.x = this->linearSpeed/2;
         }
         else if(this->flag_ == POSITIONING_AFTER_RIGHT_TURN){
             u = -SLIGHT_TURN;

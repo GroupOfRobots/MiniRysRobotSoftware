@@ -130,7 +130,7 @@ class LineFollower(Node):
 
             # publishing linear and angular robot speed
             cmd = Twist()
-            cmd.linear.y = self.speed
+            cmd.linear.x = self.speed
             cmd.angular.z = u
             self.publisher3_.publish(cmd)
             if not np.size(areas) == 0:
