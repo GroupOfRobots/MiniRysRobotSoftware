@@ -11,6 +11,8 @@ from picamera2 import Picamera2
 from picamera2.encoders import JpegEncoder
 from picamera2.outputs import FileOutput
 
+DEFAULT_WIDTH = 640
+DEFAULT_HEIGHT = 480
 
 class StreamingOutput(io.BufferedIOBase):
     def __init__(self):
@@ -24,8 +26,8 @@ class StreamingOutput(io.BufferedIOBase):
 
 
 class StreamingHandler(server.BaseHTTPRequestHandler):
-    width = 640
-    height = 480
+    width = DEFAULT_WIDTH
+    height = DEFAULT_HEIGHT
 
     def setResponse(self):
         self.send_response(200)
@@ -85,8 +87,8 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                 post_body = self.rfile.read(content_len)
                 decoded_json = json.loads(post_body)
 
-                width = decoded_json.get('width', 640)
-                height = decoded_json.get('height', 480)
+                width = decoded_json.get('width', DEFAULT_WIDTH)
+                height = decoded_json.get('height', DEFAULT_HEIGHT)
 
                 if (StreamingHandler.width != width) or (StreamingHandler.height != height):
                     StreamingHandler.width = width
