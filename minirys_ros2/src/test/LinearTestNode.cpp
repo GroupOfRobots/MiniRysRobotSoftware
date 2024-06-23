@@ -14,7 +14,7 @@ LinearTestNode::LinearTestNode(rclcpp::NodeOptions options):
 	this->declare_parameter("linearVelocity", rclcpp::ParameterValue(0.1));
 	this->declare_parameter("linearDistance", rclcpp::ParameterValue(2.0));
 
-	auto period = std::chrono::duration<double>(2.0 / this->get_parameter("updateFrequency").as_double());
+	// auto period = std::chrono::duration<double>(2.0 / this->get_parameter("updateFrequency").as_double());
     this->updateFrequency = this->get_parameter("updateFrequency").as_double();
 	this->linearVelocity = this->get_parameter("linearVelocity").as_double();
 	this->linearDistance = this->get_parameter("linearDistance").as_double();
