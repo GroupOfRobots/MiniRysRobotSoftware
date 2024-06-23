@@ -1,7 +1,8 @@
 #include "minirys_ros2/nodes/MotorsControllerNode.hpp"
-
+#include <iostream>
 #include <chrono>
 #include <functional>
+
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -42,11 +43,14 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 
 	// Regulator settings
 	this->declare_parameter("pidSpeedKp", rclcpp::ParameterValue(0.0));
-	this->declare_parameter("pidSpeedKi", rclcpp::ParameterValue(0.0));
-	this->declare_parameter("pidSpeedKd", rclcpp::ParameterValue(0.0));
+	this->declare_parameter("pidSpeedTi", rclcpp::ParameterValue(0.0));
+	this->declare_parameter("pidSpeedTd", rclcpp::ParameterValue(0.0));
 	this->declare_parameter("pidAngleKp", rclcpp::ParameterValue(0.0));
-	this->declare_parameter("pidAngleKi", rclcpp::ParameterValue(0.0));
-	this->declare_parameter("pidAngleKd", rclcpp::ParameterValue(0.0));
+	this->declare_parameter("pidAngleTi", rclcpp::ParameterValue(0.0));
+	this->declare_parameter("pidAngleTd", rclcpp::ParameterValue(0.0));
+
+	parametersCallbackHandle = this->add_on_set_parameters_callback(
+		std::bind(&MotorsControllerNode::setParametersAtomically, this, std::placeholders::_1));
 
 	// Get and save/use the parameters
     std::this_thread::sleep_for(100ms);
@@ -64,21 +68,21 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
     this->maxStandUpSpeed = this->get_parameter("maxStandUpSpeed").as_double();
 
 	auto pidSpeedKp = this->get_parameter("pidSpeedKp").as_double();
-	auto pidSpeedKi = this->get_parameter("pidSpeedKi").as_double();
-	auto pidSpeedKd = this->get_parameter("pidSpeedKd").as_double();
+	auto pidSpeedTi = this->get_parameter("pidSpeedTi").as_double();
+	auto pidSpeedTd = this->get_parameter("pidSpeedTd").as_double();
 	auto pidAngleKp = this->get_parameter("pidAngleKp").as_double();
-	auto pidAngleKi = this->get_parameter("pidAngleKi").as_double();
-	auto pidAngleKd = this->get_parameter("pidAngleKd").as_double();
+	auto pidAngleTi = this->get_parameter("pidAngleTi").as_double();
+	auto pidAngleTd = this->get_parameter("pidAngleTd").as_double();
 
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKp " << pidSpeedKp);
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKi " << pidSpeedKi);
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedKd " << pidSpeedKd);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedTi " << pidSpeedTi);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidSpeedTd " << pidSpeedTd);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKp " << pidAngleKp);
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKi " << pidAngleKi);
-    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleKd " << pidAngleKd);
-
-	this->speedRegulator.setParams(period, pidSpeedKp, pidSpeedKi, pidSpeedKd, this->maxBalancingAngle);
-	this->angleRegulator.setParams(period, pidAngleKp, pidAngleKi, pidAngleKd, this->maxWheelSpeed);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleTi " << pidAngleTi);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pidAngleTd " << pidAngleTd);
+	
+	this->speedPidRegulator = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidSpeedKp, (float) pidSpeedTi, (float) pidSpeedTd));
+	this->anglePidRegulator = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) period.count(), (float) pidAngleKp, (float) pidAngleTi, (float) pidAngleTd));
 
 	// Setup the clock (for standing up)
 	this->steadyROSClock = rclcpp::Clock(RCL_STEADY_TIME);
@@ -151,29 +155,29 @@ void MotorsControllerNode::update() {
 
 	if (this->targetBalancing && !this->targetBalancingPrev) {
 		this->standingUpDir = 0;
-		this->angleRegulator.zero();
-		this->speedRegulator.zero();
+		this->anglePidRegulator->clear();
+       	this->speedPidRegulator->clear();
 	}
 	this->targetBalancingPrev = this->targetBalancing;
 
 	std::pair<double, double> speeds;
 
-	if (this->balancing && std::abs(this->robotAngularPosition) > 1.0) {
+	if (this->balancing && std::abs(this->robotAngularPosition) > 0.7) {
 		this->balancing = false;
 	}
 	if (this->balancing && !this->targetBalancing) {
 		this->balancing = false;
 	}
 	if (!this->balancing) {
-		this->speedRegulator.zero();
-		this->angleRegulator.zero();
+		this->anglePidRegulator->clear();
+       	this->speedPidRegulator->clear();
 	}
 
 	if (this->balancing) {
 		speeds = this->calculateSpeedsBalancing();
 	} else if (this->targetBalancing) {
 		speeds = this->standUp();
-        this->angleRegulator.zero();
+        //this->angleRegulator.zero();
 	} else {
 		speeds = this->calculateSpeedsFlat();
 	}
@@ -265,16 +269,15 @@ std::pair<double, double> MotorsControllerNode::calculateSpeedsFlat() const {
 std::pair<double, double> MotorsControllerNode::calculateSpeedsBalancing() {
 	double outputTargetAngle = 0.0f;
     double currentSpeed = (this->motorSpeedL + this->motorSpeedR) / 2;
-    //RCLCPP_INFO_STREAM(this->get_logger(), "CurrentSpeed: " << currentSpeed);
 	if (this->enableSpeedRegulator) {
-		outputTargetAngle = this->speedRegulator.update(this->targetForwardSpeed, currentSpeed, -this->robotAngularPosition);
-        //outputTargetAngle = this->speedRegulator.update(this->targetForwardSpeed, currentSpeed);
+	outputTargetAngle = this->speedPidRegulator->pid_aw(currentSpeed, this->targetForwardSpeed, 10.0f, 0.25);
+	outputTargetAngle = std::min(std::max(-outputTargetAngle, -0.25), 0.25);
 	}
-	double outputWheelSpeed = this->angleRegulator.update(outputTargetAngle, -this->robotAngularPosition, currentSpeed);
-    //double outputWheelSpeed = this->angleRegulator.update(outputTargetAngle, this->robotAngularPosition);
+    	double outputWheelSpeed = this->anglePidRegulator->pid_aw(this->robotAngularPosition,outputTargetAngle, 10.0f, this->maxWheelSpeed);
 	return {
+
 		std::min(std::max(outputWheelSpeed + this->targetRotationSpeed, -this->maxWheelSpeed), this->maxWheelSpeed),
-		std::min(std::max(outputWheelSpeed - this->targetRotationSpeed, -this->maxWheelSpeed), this->maxWheelSpeed)
+                std::min(std::max(outputWheelSpeed - this->targetRotationSpeed, -this->maxWheelSpeed), this->maxWheelSpeed)
 	};
 }
 
@@ -282,6 +285,8 @@ std::pair<double, double> MotorsControllerNode::standUp() {
 	if (this->standingUpDir == 0) {
 		this->standingUpDir = this->robotAngularPosition < 0 ? -1 : 1;
 		this->standingUpPhase = 0;
+		this->anglePidRegulator->clear();
+       	this->speedPidRegulator->clear();
 		this->standingUpStart = this->steadyROSClock.now();
 	}
 
@@ -294,7 +299,7 @@ std::pair<double, double> MotorsControllerNode::standUp() {
 		}
 	} else {
 		// Phase 1: reverse the direction and get up using the momentum
-		if (this->robotAngularPosition * this->standingUpDir > 0) {
+		if (this->robotAngularPosition >= -0.3 && this->robotAngularPosition <= 0.3) {
 			// We're up, switch to balancing regulation
 			this->standingUpDir = 0;
 			this->balancing = true;
@@ -308,4 +313,38 @@ std::pair<double, double> MotorsControllerNode::standUp() {
 		this->standingUpDir * this->maxStandUpSpeed,
 		this->standingUpDir * this->maxStandUpSpeed
 	};
+}
+
+rcl_interfaces::msg::SetParametersResult
+MotorsControllerNode::setParametersAtomically(const std::vector<rclcpp::Parameter> &parameters) {
+	for (const auto &parameter : parameters)
+	{
+		const std::string &name = parameter.get_name();
+		const rclcpp::ParameterValue parameter1 = parameter.get_parameter_value();
+		const double value = parameter1.get<double>();
+
+		RCLCPP_INFO_STREAM(this->get_logger(), "Got param from service: " << name << "  " << value);
+
+		if (name == "pidSpeedKp") {
+			this->speedPidRegulator->setK(value);
+        } else if (name == "pidSpeedTi") {
+			this->speedPidRegulator->setTi(value);
+        } else if (name == "pidSpeedTd") {
+			this->speedPidRegulator->setTd(value);
+		} else if (name == "pidAngleKp") {
+			this->anglePidRegulator->setK(value);
+		} else if (name == "pidAngleTi") {
+			this->anglePidRegulator->setTi(value);
+		} else if (name == "pidAngleTd") {
+			this->anglePidRegulator->setTd(value);
+		} else {
+			RCLCPP_INFO_STREAM(this->get_logger(), "Unknown param");
+        }
+
+	}
+
+	rcl_interfaces::msg::SetParametersResult result;
+	result.successful = true;
+	result.reason = "success";
+	return result;
 }

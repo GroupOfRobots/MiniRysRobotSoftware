@@ -20,6 +20,7 @@
   <depend>tlsf_cpp</depend>
 
   <depend>v4l2_camera</depend>
+  <depend>boost</depend>
 
   <depend>minirys_msgs</depend>
   <depend>minirys_sensors</depend>

@@ -11,6 +11,7 @@
 #include <minirys_msgs/msg/motor_driver_status.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/float64.hpp>
+#include <memory>
 
 class MotorsControllerNode: public rclcpp::Node {
 public:
@@ -20,10 +21,12 @@ public:
 
 	~MotorsControllerNode() override;
 
+	OnSetParametersCallbackHandle::SharedPtr parametersCallbackHandle;
+
 private:
 	bool enabledL;
 
-    bool enabledR;
+	bool enabledR;
 
 	bool balancing;
 
@@ -69,9 +72,8 @@ private:
     // rad?
 	double maxBalancingAngle;
 
-	PIDRegulator angleRegulator;
-
-	PIDRegulator speedRegulator;
+	std::unique_ptr<PIDRegulator> anglePidRegulator;
+	std::unique_ptr<PIDRegulator> speedPidRegulator;
 
 	rclcpp::Clock steadyROSClock;
 
@@ -117,4 +119,9 @@ private:
 	std::pair<double, double> calculateSpeedsBalancing();
 
 	std::pair<double, double> standUp();
+
+    RCLCPP_PUBLIC
+    rcl_interfaces::msg::SetParametersResult
+    setParametersAtomically(
+    const std::vector<rclcpp::Parameter> & parameters);
 };

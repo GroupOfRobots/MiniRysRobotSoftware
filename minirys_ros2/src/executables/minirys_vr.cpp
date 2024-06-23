@@ -9,7 +9,7 @@ int main(int argc, char const* argv[]) {
 	RTTExecutor::setupRT(2, 98, SCHED_RR);
 	rclcpp::init(argc, argv);
 
-	rclcpp::executors::SingleThreadedExecutor executor;
+	rclcpp::executors::MultiThreadedExecutor executor;
 	rclcpp::NodeOptions options;
 	options.use_intra_process_comms(true);
 

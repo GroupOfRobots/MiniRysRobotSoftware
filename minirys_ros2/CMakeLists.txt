@@ -14,6 +14,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system filesystem)
 
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -144,6 +145,12 @@ target_link_libraries(MotorsNode
 add_library(CommunicationNode
   src/nodes/CommunicationNode.cpp
 )
+
+target_link_libraries(CommunicationNode
+  Boost::system 
+  Boost::filesystem
+)
+
 ament_target_dependencies(CommunicationNode
   rclcpp
   std_msgs
@@ -210,6 +217,15 @@ ament_target_dependencies(RTTExecutor
   rttest
   minirys_msgs
   tlsf_cpp
+)
+
+add_library(LinearTestNode
+  src/test/LinearTestNode.cpp
+)
+ament_target_dependencies(LinearTestNode
+  rclcpp
+  nav_msgs
+  geometry_msgs
 )
 
 ######
@@ -325,7 +341,9 @@ add_executable(minirys_cs
   src/executables/minirys_cs.cpp
 )
 target_link_libraries(minirys_cs
-  CommunicationNode
+  Boost::system 
+  Boost::filesystem
+  CommunicationNode 
   FanRegulatorNode
   MotorsControllerNode
   OdometryNode
@@ -367,6 +385,14 @@ target_link_libraries(minirys_cs_rttest_rt
   RTTExecutor
 )
 
+add_executable(linear_test
+  src/executables/linear_test.cpp
+)
+target_link_libraries(linear_test
+  LinearTestNode
+  RTTExecutor
+)
+
 # Install executables
 install(
   TARGETS
@@ -386,6 +412,7 @@ install(
     minirys_cs_lidar
     minirys_cs_rttest
     minirys_cs_rttest_rt
+    linear_test
   EXPORT export_${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME}
 )

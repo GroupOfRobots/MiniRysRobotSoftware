@@ -65,10 +65,10 @@ MotorsNode::MotorsNode(rclcpp::NodeOptions options):
 	// Current/voltage settings
 	this->motors->setOverCurrentThreshold(L6470_OCD_TH_3000mA);
     //this->motors->setStallThreshold(0x40);
-	this->motors->setAccCurrentKVAL(0x60);  //80/96
-	this->motors->setDecCurrentKVAL(0x60);  //80/96
-	this->motors->setRunCurrentKVAL(0x50);  //B4 70/96
-	this->motors->setHoldCurrentKVAL(0x16);  //40/32
+	this->motors->setAccCurrentKVAL(0x70);  //80
+	this->motors->setDecCurrentKVAL(0x70);  //80
+	this->motors->setRunCurrentKVAL(0x70);  //B4 70
+	this->motors->setHoldCurrentKVAL(0x16);  //40
 	// Disable BEMF compensation and the FLAG (alarm) pin
 	this->motors->setBackEMF();
 	RCLCPP_INFO_STREAM(this->get_logger(), "L6470: setup done");
@@ -127,8 +127,8 @@ void MotorsNode::update() {
 
 	positionMessageL.data = static_cast<double>(motorPositions[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[LEFT_MOTOR])));
 	positionMessageR.data = static_cast<double>(motorPositions[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * pow(2, static_cast<int>(step_mode[RIGHT_MOTOR])));
-	speedMessageL.data = static_cast<double>(motorSpeeds[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * (!motorStatuses[LEFT_MOTOR].direction ? 1 : -1));
-	speedMessageR.data = static_cast<double>(motorSpeeds[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * (!motorStatuses[RIGHT_MOTOR].direction ? 1 : -1));
+	speedMessageL.data = static_cast<double>(motorSpeeds[LEFT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * (motorStatuses[LEFT_MOTOR].direction == 0 ? 1 : -1));
+	speedMessageR.data = static_cast<double>(motorSpeeds[RIGHT_MOTOR]) * 2.0 * M_PI / (this->stepsPerRevolution * (motorStatuses[RIGHT_MOTOR].direction == 0 ? 1 : -1));
     statusMessageL.hi_z = motorStatuses[LEFT_MOTOR].hiZ;
     statusMessageL.busy = motorStatuses[LEFT_MOTOR].busy;
     statusMessageL.direction = motorStatuses[LEFT_MOTOR].direction;

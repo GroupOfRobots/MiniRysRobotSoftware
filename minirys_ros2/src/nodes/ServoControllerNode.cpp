@@ -43,7 +43,7 @@ ServoControllerNode::ServoControllerNode(rclcpp::NodeOptions options):
 
 void ServoControllerNode::update() {
 
-	double duty = this->servoDutyDown;
+	double duty = 0.0;
 	if (this->servoStatus && !this->balanceMode && this->robotAngularPosition < -1.0) {
 		duty = this->servoDutyUp;
 	} else {
