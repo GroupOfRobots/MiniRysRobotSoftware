@@ -1,0 +1,128 @@
+/**:
+  # Virtual Receptors configs
+  battery_vr:
+    ros__parameters:
+      updateFrequency: 10.0
+      cellMultiplier1: 2.55
+      cellMultiplier2: 5.11
+      cellMultiplier3: 7.68
+      movingAverageWeight: 0.5
+      undervoltageThresholdWarning: 3.3
+      undervoltageThresholdError: 3.1
+
+  temperature_vr:
+    ros__parameters:
+      updateFrequency: 2.0
+      cpuTemperaturePath: "/sys/class/thermal/thermal_zone0/temp"
+
+  imu_vr:
+    ros__parameters:
+      updateFrequency: 100.0
+      filterFactor: 0.05
+      angleCorrection: 0.03 #(Yellow 0.000346) #-0.189545 orange 0.042729
+      angleHistorySize: 4
+      gyroOffsetX: 3.850143 #(Yellow 3.850143) #in deg
+      gyroOffsetY: -5.236362 #(Yellow -5.236362) #in deg
+      gyroOffsetZ: -2.870283 #(Yellow -4.604892) #in deg
+
+  distance_vr:
+    ros__parameters:
+      updateFrequency: 10.0
+
+  camera_vr:
+    ros__parameters:
+      image_size: [1920, 1080]
+      white_balance_automatic: true
+
+  lidar_vr:
+    ros__parameters:
+      product_name: "LDLiDAR_LD06"
+      topic_name: "internal/scan"
+      frame_id: "laser_scan"
+      port_name: "/dev/serial0"
+      port_baudrate: 230400
+      laser_scan_dir: true
+      enable_angle_crop_func: false
+      angle_crop_min: 135.0
+      angle_crop_max: 225.0
+
+  # Virtual Effectors configs
+  fan_ve:
+    ros__parameters:
+      updateFrequency: 2.0
+      pwmFrequency: 50.0 # 10.0
+
+  motors_ve:
+    ros__parameters:
+      updateFrequency: 100.0
+      stepsPerRevolution: 200.0
+      maxSpeed: 48.8318530718 # 2*Pi = 1rps
+      acceleration: 81.0 # 2*Pi = 1rps
+      wheelRadius: 0.055
+
+  servo_ve:
+    ros__parameters:
+      updateFrequency: 10.0
+      pwmFrequency: 50.0
+
+  # Control Subsystem
+  fan_regulator_cs:
+    ros__parameters:
+      updateFrequency: 2.0
+      fanLevelLow: 0.6
+      fanLevelMedium: 0.8
+      fanLevelHigh: 1.0
+      thresholdCPUWarning: 50.0
+      thresholdCPUCritical: 65.0
+      thresholdMainWarning: 45.0
+      thresholdMainCritical: 60.0
+
+  motors_controller_cs:
+    ros__parameters:
+      updateFrequency: 100.0
+      invertLeftMotor: true
+      invertRightMotor: false
+      enableSpeedRegulator: true
+      wheelRadius: 0.055
+      wheelSeparation: 0.134
+      maxLinearSpeed: 15.8495559215 # 2*Pi = 1rps
+      maxRotationSpeed: 15.8495559215 # 2*Pi = 1rps
+      maxWheelSpeed: 15.8495559215 # 2*Pi = 1rps
+      maxStandUpSpeed: 8.0 # 2*Pi = 1rps
+      maxBalancingAngle: 0.30
+      pidSpeedKp: 0.0013 #0.001 0.05 to za duzo 0.01 git
+      pidSpeedTi: 0.05 #0.00000005 0.0005 git 0.5 to zajebiscie duzy uchyb ustalony 5.5 ogromne oscylacje
+      pidSpeedTd: 0.0016 #0.01
+      pidAngleKp: 43.3   #100.0
+      pidAngleTi: 0.5 # 0.8   #1.61
+      pidAngleTd: 0.09 #0.00011     #0.00001
+      # pidAngleTi: 1000000000000.0
+      # pidAngleTd: 0.0
+
+  odometry_cs:
+    ros__parameters:
+      updateFrequency: 100.0
+      invertLeftMotor: true
+      invertRightMotor: false
+      wheelRadius: 0.055
+      wheelSeparation: 0.134
+      wheelRadiusCorrection: 1.00
+      wheelSeparationCorrection: 1.00
+
+  servo_controller_cs:
+    ros__parameters:
+      updateFrequency: 10.0
+      servoDutyUp: 0.016
+      servoDutyDown: 0.127
+
+  minirys_rttest:
+    ros__parameters:
+      setMemoryStrategy: false
+      lockMemory: false
+      schedulerPriority: 80
+      schedulerPolicy: "other"
+      iterations: 120000 # = 20 minutes, 20[min] * 60[s/min] * 100[it/s]
+      updatePeriod: 10000000 # [ns] = 10ms
+      stackSizeMB: 10
+      prefaultDynamicSizeMB: 512
+      filename: "/tmp/minirys_rttest.results.txt"

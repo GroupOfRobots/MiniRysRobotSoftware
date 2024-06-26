@@ -16,7 +16,7 @@ def generate_launch_description():
     params_path = os.path.join(
         get_package_share_directory('minirys_ros2'),
         'config',
-        'params.yaml'
+		namespace_value + '_params.yaml'
     )
 
     arg_namespace = actions.DeclareLaunchArgument('namespace', default_value='minirys')
