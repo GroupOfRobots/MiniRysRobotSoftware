@@ -126,3 +126,16 @@
       stackSizeMB: 10
       prefaultDynamicSizeMB: 512
       filename: "/tmp/minirys_rttest.results.txt"
+
+  linear_test:
+    ros__parameters:
+      updateFrequency: 100.0
+      linearVelocity: 0.1
+      linearDistance: 3.0
+
+  circle_test:
+    ros__parameters:
+      updateFrequency: 100.0
+      angularVelocity: 0.314159265
+      numberOfCircles: 1.0
+      turnLeft: true
