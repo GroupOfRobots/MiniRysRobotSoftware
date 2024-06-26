@@ -228,6 +228,15 @@ ament_target_dependencies(LinearTestNode
   geometry_msgs
 )
 
+add_library(CircleTestNode
+  src/test/CircleTestNode.cpp
+)
+ament_target_dependencies(CircleTestNode
+  rclcpp
+  nav_msgs
+  geometry_msgs
+)
+
 ######
 # Executables
 ######
@@ -393,6 +402,14 @@ target_link_libraries(linear_test
   RTTExecutor
 )
 
+add_executable(circle_test
+  src/executables/circle_test.cpp
+)
+target_link_libraries(circle_test
+  CircleTestNode
+  RTTExecutor
+)
+
 # Install executables
 install(
   TARGETS
@@ -413,6 +430,7 @@ install(
     minirys_cs_rttest
     minirys_cs_rttest_rt
     linear_test
+    circle_test
   EXPORT export_${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME}
 )

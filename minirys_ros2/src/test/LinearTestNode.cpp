@@ -7,17 +7,19 @@ using namespace std::chrono_literals;
 using std::placeholders::_1;
 
 LinearTestNode::LinearTestNode(rclcpp::NodeOptions options):
-	Node("linear_test_cs", options),
+	Node("linear_test", options),
 	linearVelocity(0.0),
 	linearDistance(0.0) {
     this->declare_parameter("updateFrequency", rclcpp::ParameterValue(100.0));
 	this->declare_parameter("linearVelocity", rclcpp::ParameterValue(0.1));
-	this->declare_parameter("linearDistance", rclcpp::ParameterValue(2.0));
+	this->declare_parameter("linearDistance", rclcpp::ParameterValue(1.0));
 
 	// auto period = std::chrono::duration<double>(2.0 / this->get_parameter("updateFrequency").as_double());
     this->updateFrequency = this->get_parameter("updateFrequency").as_double();
 	this->linearVelocity = this->get_parameter("linearVelocity").as_double();
 	this->linearDistance = this->get_parameter("linearDistance").as_double();
+
+	RCLCPP_INFO_STREAM(this->get_logger(), "Got param: linearDistance " << this->linearDistance);
 
 
 	this->odometrySubscriber = this->create_subscription<nav_msgs::msg::Odometry>(
