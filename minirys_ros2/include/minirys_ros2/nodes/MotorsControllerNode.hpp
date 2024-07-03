@@ -61,6 +61,11 @@ private:
     double wheelRadius;
 
     double wheelSeparation;
+
+	double wheelRadiusCorrection;
+	
+	double wheelSeparationCorrection;
+
 	// m/s?, TODO: get from maxWheelSpeed
 	double maxLinearSpeed;
 	// rps, TODO: get from maxWheelSpeed

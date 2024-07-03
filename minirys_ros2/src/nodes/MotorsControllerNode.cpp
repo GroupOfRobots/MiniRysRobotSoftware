@@ -32,6 +32,8 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 	this->declare_parameter("enableSpeedRegulator", rclcpp::ParameterValue(true));
     this->declare_parameter("wheelRadius", rclcpp::ParameterValue(0.0));
     this->declare_parameter("wheelSeparation", rclcpp::ParameterValue(0.0));
+	this->declare_parameter("wheelRadiusCorrection", rclcpp::ParameterValue(1.0));
+	this->declare_parameter("wheelSeparationCorrection", rclcpp::ParameterValue(1.0));
 
 	// Limits
 	/// TODO: Adjust the default values of these limits
@@ -60,6 +62,9 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 	this->enableSpeedRegulator = this->get_parameter("enableSpeedRegulator").as_bool();
     this->wheelRadius = this->get_parameter("wheelRadius").as_double();
     this->wheelSeparation = this->get_parameter("wheelSeparation").as_double();
+	this->wheelRadiusCorrection = this->get_parameter("wheelRadiusCorrection").as_double();
+	this->wheelSeparationCorrection = this->get_parameter("wheelSeparationCorrection").as_double();
+	
 
 	this->maxLinearSpeed = this->get_parameter("maxLinearSpeed").as_double();
 	this->maxRotationSpeed = this->get_parameter("maxRotationSpeed").as_double();
@@ -192,8 +197,8 @@ void MotorsControllerNode::update() {
 }
 
 void MotorsControllerNode::receiveVelocityCommand(const geometry_msgs::msg::Twist::SharedPtr message) {
-	this->targetForwardSpeed = std::min(std::max(message->linear.x/this->wheelRadius, -this->maxLinearSpeed), this->maxLinearSpeed);
-	this->targetRotationSpeed = std::min(std::max(message->angular.z*this->wheelSeparation/(2*this->wheelRadius), -this->maxRotationSpeed), this->maxRotationSpeed);
+	this->targetForwardSpeed = std::min(std::max(message->linear.x/(this->wheelRadius * this->wheelRadiusCorrection), -this->maxLinearSpeed), this->maxLinearSpeed);
+	this->targetRotationSpeed = std::min(std::max(message->angular.z*this->wheelSeparation/(2*(this->wheelRadius * this->wheelRadiusCorrection)), -this->maxRotationSpeed), this->maxRotationSpeed);
 //    RCLCPP_INFO_STREAM(this->get_logger(), "Forward Speed: " << this->targetForwardSpeed);
 //    RCLCPP_INFO_STREAM(this->get_logger(), "Rotation Speed: " << this->targetRotationSpeed);
 

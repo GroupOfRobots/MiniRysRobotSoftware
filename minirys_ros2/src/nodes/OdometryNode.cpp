@@ -29,8 +29,8 @@ OdometryNode::OdometryNode(rclcpp::NodeOptions options):
 	// Robot geometry
     this->declare_parameter("invertLeftMotor", rclcpp::ParameterValue(false));
     this->declare_parameter("invertRightMotor", rclcpp::ParameterValue(false));
-	this->declare_parameter("wheelRadius", rclcpp::ParameterValue(0.0));
-	this->declare_parameter("wheelSeparation", rclcpp::ParameterValue(0.0));
+	this->declare_parameter("wheelRadius", rclcpp::ParameterValue(0.055));
+	this->declare_parameter("wheelSeparation", rclcpp::ParameterValue(0.134));
 	this->declare_parameter("wheelRadiusCorrection", rclcpp::ParameterValue(1.0));
 	this->declare_parameter("wheelSeparationCorrection", rclcpp::ParameterValue(1.0));
 
@@ -88,8 +88,10 @@ OdometryNode::OdometryNode(rclcpp::NodeOptions options):
 }
 
 void OdometryNode::update() {
-	double wheelCircL = this->wheelRadius * (2.0 / (this->wheelRadiusCorrection + 1.0));
-	double wheelCircR = this->wheelRadius * (2.0 / (this->wheelRadiusCorrection + 1.0));
+	// double wheelCircL = this->wheelRadius * (2.0 / (this->wheelRadiusCorrection + 1.0));
+	// double wheelCircR = this->wheelRadius * (2.0 / (this->wheelRadiusCorrection + 1.0));
+	double wheelCircL = this->wheelRadius * this->wheelRadiusCorrection;
+	double wheelCircR = this->wheelRadius * this->wheelRadiusCorrection;
 	double distanceL = (this->motorPositionLPrev - this->motorPositionL) * wheelCircL;
 	double distanceR = (this->motorPositionRPrev - this->motorPositionR) * wheelCircR;
 	this->motorPositionLPrev = this->motorPositionL;

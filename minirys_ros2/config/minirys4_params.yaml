@@ -85,6 +85,8 @@
       enableSpeedRegulator: true
       wheelRadius: 0.055
       wheelSeparation: 0.134
+      wheelRadiusCorrection: 1.017878588
+      wheelSeparationCorrection: 1.00
       maxLinearSpeed: 15.8495559215 # 2*Pi = 1rps
       maxRotationSpeed: 15.8495559215 # 2*Pi = 1rps
       maxWheelSpeed: 15.8495559215 # 2*Pi = 1rps
@@ -106,14 +108,14 @@
       invertRightMotor: false
       wheelRadius: 0.055
       wheelSeparation: 0.134
-      wheelRadiusCorrection: 1.00
+      wheelRadiusCorrection: 1.017878588
       wheelSeparationCorrection: 1.00
 
   servo_controller_cs:
     ros__parameters:
       updateFrequency: 10.0
       servoDutyUp: 0.016
-      servoDutyDown: 0.120
+      servoDutyDown: 0.115
 
   minirys_rttest:
     ros__parameters:
