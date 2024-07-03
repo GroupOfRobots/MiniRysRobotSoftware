@@ -55,7 +55,7 @@ MotorsControllerNode::MotorsControllerNode(rclcpp::NodeOptions options):
 		std::bind(&MotorsControllerNode::setParametersAtomically, this, std::placeholders::_1));
 
 	// Get and save/use the parameters
-    std::this_thread::sleep_for(100ms);
+    std::this_thread::sleep_for(500ms);
 	auto period = std::chrono::duration<double>(1.0 / this->get_parameter("updateFrequency").as_double());
 	this->invertLeftMotor = this->get_parameter("invertLeftMotor").as_bool();
 	this->invertRightMotor = this->get_parameter("invertRightMotor").as_bool();
