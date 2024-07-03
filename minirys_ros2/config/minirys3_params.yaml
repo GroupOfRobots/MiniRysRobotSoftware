@@ -115,7 +115,7 @@
     ros__parameters:
       updateFrequency: 10.0
       servoDutyUp: 0.016
-      servoDutyDown: 0.127
+      servoDutyDown: 0.120
 
   minirys_rttest:
     ros__parameters:
