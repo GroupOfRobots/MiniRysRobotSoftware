@@ -131,34 +131,21 @@ void CommunicationNode::receiveIMU(const sensor_msgs::msg::Imu::SharedPtr msgIn)
 }
 
 std::vector<std::string> CommunicationNode::getNamespacesWithNode() {
-    namespace bp = boost::process;
-    std::string output;
-    
-    bp::ipstream pipe_stream;
-    bp::child c(bp::search_path("ros2"), "node", "list", bp::std_out > pipe_stream);
-    
-    std::string line;
-    while (pipe_stream && std::getline(pipe_stream, line) && !line.empty()) {
-        output += line + '\n';
-    }
-    
-    c.wait();  // Wait for the process to exit
-
-    std::set<std::string> namespaces;
-    std::istringstream ss(output);
-    
-    while (std::getline(ss, line)) {
-        std::size_t pos = line.find('/' + this->nodeName_);
-        if (pos != std::string::npos) {
-            std::string namespace_ = line.substr(0, pos);
+	auto nodes_names = this->get_node_names();
+	std::set<std::string> namespaces;
+	for (auto &name : nodes_names)
+	{
+		std::size_t pos = name.find('/' + this->nodeName_);
+		if (pos != std::string::npos) {
+            std::string namespace_ = name.substr(0, pos);
             if (!namespace_.empty() && namespace_[0] == '/') {
-                namespace_.erase(0, 1);  // Remove leading '/'
+                namespace_.erase(0, 1);
             }
 			if (namespace_ != this->nodeNamespace_){
-            	namespaces.insert(namespace_);
+				namespaces.insert(namespace_);
 			}
-        }
-    }
+		}
+	}
     
     return std::vector<std::string>(namespaces.begin(), namespaces.end());
 }

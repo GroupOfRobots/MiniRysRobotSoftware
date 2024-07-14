@@ -13,13 +13,13 @@ int main(int argc, char const* argv[]) {
 	rclcpp::NodeOptions options;
 	options.use_intra_process_comms(true);
 
-	//auto communicationNode = CommunicationNode::make_shared(options);
+	auto communicationNode = CommunicationNode::make_shared(options);
 	auto fanRegulatorNode = FanRegulatorNode::make_shared(options);
 	auto servoControllerNode = ServoControllerNode::make_shared(options);
 	auto motorsControllerNode = MotorsControllerNode::make_shared(options);
 	auto odometryNode = OdometryNode::make_shared(options);
 
-	//executor.add_node(communicationNode);
+	executor.add_node(communicationNode);
 	executor.add_node(fanRegulatorNode);
 	executor.add_node(servoControllerNode);
 	executor.add_node(motorsControllerNode);
