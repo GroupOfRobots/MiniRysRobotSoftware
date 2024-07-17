@@ -86,7 +86,7 @@
       wheelRadius: 0.055
       wheelSeparation: 0.134
       wheelRadiusCorrection: 1.018225465
-      wheelSeparationCorrection: 1.00
+      wheelSeparationCorrection: 0.9744964747
       maxLinearSpeed: 15.8495559215 # 2*Pi = 1rps
       maxRotationSpeed: 15.8495559215 # 2*Pi = 1rps
       maxWheelSpeed: 15.8495559215 # 2*Pi = 1rps
@@ -109,7 +109,7 @@
       wheelRadius: 0.055
       wheelSeparation: 0.134
       wheelRadiusCorrection: 1.018225465
-      wheelSeparationCorrection: 1.00
+      wheelSeparationCorrection: 0.9744964747
 
   servo_controller_cs:
     ros__parameters:
