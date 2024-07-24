@@ -25,32 +25,32 @@ private:
 	std::string nodeNamespace_;
 	rclcpp::TimerBase::SharedPtr timer_;
 
-	rclcpp::Subscription<minirys_msgs::msg::BatteryStatus>::SharedPtr batteryStatusSubscription;
-	rclcpp::Publisher<sensor_msgs::msg::BatteryState>::SharedPtr batteryStatePublisher;
+	// rclcpp::Subscription<minirys_msgs::msg::BatteryStatus>::SharedPtr batteryStatusSubscription;
+	// rclcpp::Publisher<sensor_msgs::msg::BatteryState>::SharedPtr batteryStatePublisher;
 
-	rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr distanceSubscriptions[6];
-	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr distancePublishers[6];
+	// rclcpp::Subscription<sensor_msgs::msg::Range>::SharedPtr distanceSubscriptions[6];
+	// rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr distancePublishers[6];
 
-	rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr mainTempSubscription;
-	rclcpp::Publisher<sensor_msgs::msg::Temperature>::SharedPtr mainTempPublisher;
+	// rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr mainTempSubscription;
+	// rclcpp::Publisher<sensor_msgs::msg::Temperature>::SharedPtr mainTempPublisher;
 
-	rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr cpuTempSubscription;
-	rclcpp::Publisher<sensor_msgs::msg::Temperature>::SharedPtr cpuTempPublisher;
+	// rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr cpuTempSubscription;
+	// rclcpp::Publisher<sensor_msgs::msg::Temperature>::SharedPtr cpuTempPublisher;
 
-	rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imuSubscription;
-	rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imuPublisher;
+	// rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imuSubscription;
+	// rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imuPublisher;
 
 	rclcpp::Publisher<minirys_msgs::msg::RobotsNamespaces>::SharedPtr robotsNamespacesPublisher;
 
-	void receiveBatteryStatus(const minirys_msgs::msg::BatteryStatus::SharedPtr msgIn);
+	// void receiveBatteryStatus(const minirys_msgs::msg::BatteryStatus::SharedPtr msgIn);
 
-	void receiveDistance(const sensor_msgs::msg::Range::SharedPtr msgIn);
+	// void receiveDistance(const sensor_msgs::msg::Range::SharedPtr msgIn);
 
-	void receiveMainTemperature(const std_msgs::msg::Float32::SharedPtr msgIn);
+	// void receiveMainTemperature(const std_msgs::msg::Float32::SharedPtr msgIn);
 
-	void receiveCPUTemperature(const std_msgs::msg::Float32::SharedPtr msgIn);
+	// void receiveCPUTemperature(const std_msgs::msg::Float32::SharedPtr msgIn);
 
-	void receiveIMU(const sensor_msgs::msg::Imu::SharedPtr msgIn);
+	// void receiveIMU(const sensor_msgs::msg::Imu::SharedPtr msgIn);
 
 	std::vector<std::string> getNamespacesWithNode();
 
