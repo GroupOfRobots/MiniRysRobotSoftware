@@ -77,6 +77,7 @@ OdometryNode::OdometryNode(rclcpp::NodeOptions options):
 
 	this->odometryValidPublisher = this->create_publisher<std_msgs::msg::Bool>("odom_valid", 10);
 	this->odometryPublisher = this->create_publisher<nav_msgs::msg::Odometry>("odom", 10);
+	// this->poseThetaPublisher = this->create_publisher<std_msgs::msg::Float64>("pose_theta", 10);
 
 	this->setPoseService = this->create_service<minirys_msgs::srv::SetPose>(
 		"set_pose",
@@ -98,7 +99,7 @@ void OdometryNode::update() {
 	this->motorPositionRPrev = this->motorPositionR;
 
 	double distanceAvg = (distanceL + distanceR) / 2.0;
-	double thetaChange = (distanceL - distanceR) / (this->wheelSeparation * this->wheelSeparationCorrection);
+	double thetaChange = (distanceL - distanceR) / (this->wheelSeparation / this->wheelSeparationCorrection);
 	this->poseTheta += thetaChange;
 	if (this->poseTheta > M_PI) {
 		this->poseTheta -= 2.0 * M_PI;
@@ -150,8 +151,12 @@ void OdometryNode::update() {
 	messageOdom.twist.twist.linear.z = 0;
 	messageOdom.twist.twist.angular.x = 0;
 	messageOdom.twist.twist.angular.y = 0;
-	messageOdom.twist.twist.angular.z = (speedL - speedR) / (this->wheelSeparation * this->wheelSeparationCorrection);
+	messageOdom.twist.twist.angular.z = (speedL - speedR) / (this->wheelSeparation / this->wheelSeparationCorrection);
 	this->odometryPublisher->publish(messageOdom);
+
+	// auto messagePoseTheta = std_msgs::msg::Float64();
+	// messagePoseTheta.data = this->poseTheta;
+	// this->poseThetaPublisher->publish(messagePoseTheta);
 
 	auto messageOdomValid = std_msgs::msg::Bool();
 	messageOdomValid.data = this->poseValid;

@@ -198,7 +198,7 @@ void MotorsControllerNode::update() {
 
 void MotorsControllerNode::receiveVelocityCommand(const geometry_msgs::msg::Twist::SharedPtr message) {
 	this->targetForwardSpeed = std::min(std::max(message->linear.x/(this->wheelRadius * this->wheelRadiusCorrection), -this->maxLinearSpeed), this->maxLinearSpeed);
-	this->targetRotationSpeed = std::min(std::max(message->angular.z*this->wheelSeparation/(2*(this->wheelRadius * this->wheelRadiusCorrection)), -this->maxRotationSpeed), this->maxRotationSpeed);
+	this->targetRotationSpeed = std::min(std::max(message->angular.z*(this->wheelSeparation/this->wheelSeparationCorrection)/(2*(this->wheelRadius * this->wheelRadiusCorrection)), -this->maxRotationSpeed), this->maxRotationSpeed);
 //    RCLCPP_INFO_STREAM(this->get_logger(), "Forward Speed: " << this->targetForwardSpeed);
 //    RCLCPP_INFO_STREAM(this->get_logger(), "Rotation Speed: " << this->targetRotationSpeed);
 

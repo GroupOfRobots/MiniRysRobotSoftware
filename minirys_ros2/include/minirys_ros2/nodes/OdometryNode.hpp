@@ -48,6 +48,8 @@ private:
 
 	rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odometryPublisher;
 
+	// rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr poseThetaPublisher;
+
 	rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr motorPositionLSubscription;
 
 	rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr motorPositionRSubscription;
