@@ -114,8 +114,8 @@
   servo_controller_cs:
     ros__parameters:
       updateFrequency: 10.0
-      servoDutyUp: 0.019  # max 0.016
-      servoDutyDown: 0.129 # max 0.133
+      servoDutyUp: 0.0186  # max 0.016
+      servoDutyDown: 0.128 # max 0.133
 
   minirys_rttest:
     ros__parameters:
