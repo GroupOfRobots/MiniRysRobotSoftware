@@ -1,0 +1,7 @@
+detector:
+  ros__parameters:
+    timer_period: 0.05
+    nms_threshold: 0.1
+    prob_threshold: 0.1
+    target_size: 650
+    weights: "weights/best100ep1inp.ncnn"
