@@ -33,7 +33,6 @@ class Detector: public rclcpp::Node{
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_detected_;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_goal_;
-    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_detected_;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_image_;
 
     cv::Mat ori_img_;
@@ -41,7 +40,7 @@ class Detector: public rclcpp::Node{
     std::unique_ptr<YoloV7> yolov7_;
     float prob_threshold_;
     float nms_threshold_;
-    float focal_length_
-    float width_side_
-    float width_front_
+    float focal_length_;
+    float width_side_;
+    float width_front_;
 };

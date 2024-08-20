@@ -61,16 +61,16 @@ void Detector::timer_callback()
         publisher_detected_->publish(*msg_img);
         float dist;
         float deltX;
-        float focal_px = focal_length_ * (float)detected_img_.size().width/3.6
+        float focal_px = focal_length_ * (float)detected_img_.size().width/3.6;
         if( objects[0].label == 0 )
         {
-            dist = (width_side_ * focal_px)/ objects[0].rect.width
+            dist = (width_side_ * focal_px)/ objects[0].rect.width;
         }
         else
         {
-            dist = (width_front_ * focal_px)/ objects[0].rect.width
+            dist = (width_front_ * focal_px)/ objects[0].rect.width;
         }
-        deltX = dist/focal_length_ *(3.6/detected_img_.size().width) * ( (float)objects[0].rect.x + (float)objects[0].rect.width/2.0 - (float)detected_img_.size().width/2.0)
+        deltX = dist/focal_length_ *(3.6/detected_img_.size().width) * ( (float)objects[0].rect.x + (float)objects[0].rect.width/2.0 - (float)detected_img_.size().width/2.0);
     }
 }
 
