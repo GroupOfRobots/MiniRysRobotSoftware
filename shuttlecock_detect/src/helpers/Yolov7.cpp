@@ -1,7 +1,4 @@
 #include "shuttlecock_detect/helpers/Yolov7.hpp"
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include "cpu.h"
 
 
 static inline float intersection_area(const Object &a, const Object &b) {

@@ -2,8 +2,10 @@
 #define YOLO_H
 #include <iostream>
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <net.h>
 #include <string>
+#include "cpu.h"
 
 struct Object
 {

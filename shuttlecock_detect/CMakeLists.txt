@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 project(shuttlecock_detect)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -46,7 +46,7 @@ add_library(Yolov7
 target_link_libraries(Yolov7 ncnn)
 
 ament_target_dependencies(Yolov7
-ncnn 
+OpenCV
 )
 
 add_library(DetectorNode
@@ -63,6 +63,16 @@ ament_target_dependencies(yolov7_time_test OpenCV ncnn)
 
 add_executable(detector src/executables/detector.cpp)
 target_link_libraries(detector DetectorNode)
+
+add_executable(imgtest src/executables/imgtest.cpp)
+ament_target_dependencies(imgtest
+rclcpp std_msgs sensor_msgs cv_bridge OpenCV ncnn
+)
+
+install(TARGETS
+   imgtest
+   DESTINATION lib/${PROJECT_NAME}
+)
 
 install(TARGETS
    yolov7_time_test
@@ -81,12 +91,6 @@ install(DIRECTORY
 
 install(DIRECTORY
   config
-  DESTINATION share/${PROJECT_NAME}
-)
-
-
-install(DIRECTORY
-  weights
   DESTINATION share/${PROJECT_NAME}
 )
 

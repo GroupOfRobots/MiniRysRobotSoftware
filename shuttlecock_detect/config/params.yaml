@@ -3,5 +3,8 @@ detector:
     timer_period: 0.05
     nms_threshold: 0.1
     prob_threshold: 0.1
-    target_size: 650
-    weights: "weights/best100ep1inp.ncnn"
+    target_size: 480
+    weights: "best100ep1inp.ncnn"
+    focal_length: 3.15
+    width_side: 20.0
+    width_front: 10.0

@@ -1,5 +1,5 @@
 #include "rclcpp/rclcpp.hpp"
-#include "nodes/DetectorNode.hpp"
+#include "shuttlecock_detect/nodes/DetectorNode.hpp"
 
 int main(int argc, char * argv[])
 {
