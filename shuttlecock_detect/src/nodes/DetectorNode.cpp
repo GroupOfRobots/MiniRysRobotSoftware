@@ -46,7 +46,7 @@ Detector::Detector() : Node("detector")
     timer_ = this->create_wall_timer(std::chrono::duration<double>(timer_period), std::bind(&Detector::timer_callback, this));
     //subscribers
     subscription_image_ = this->create_subscription<sensor_msgs::msg::Image>(
-        "cv_video_frames", 10, std::bind(&Detector::image_callback, this, std::placeholders::_1));
+        "/cv_video_frames_plain_img", 10, std::bind(&Detector::image_callback, this, std::placeholders::_1));
 }
 
 void Detector::timer_callback() 
@@ -62,15 +62,19 @@ void Detector::timer_callback()
         float dist;
         float deltX;
         float focal_px = focal_length_ * (float)detected_img_.size().width/3.6;
-        if( objects[0].label == 0 )
+        if(objects.size() >0)
         {
-            dist = (width_side_ * focal_px)/ objects[0].rect.width;
+            if( objects[0].label == 0 )
+            {
+                dist = (width_side_ * focal_px)/ objects[0].rect.width;
+            }
+            else
+            {
+                dist = (width_front_ * focal_px)/ objects[0].rect.width;
+            }
+            deltX = dist/focal_length_ *(3.6/detected_img_.size().width) * ( (float)objects[0].rect.x + (float)objects[0].rect.width/2.0 - (float)detected_img_.size().width/2.0);
+            std::cout<<"dist: "<< dist<<" x: "<<deltX<<std::endl;
         }
-        else
-        {
-            dist = (width_front_ * focal_px)/ objects[0].rect.width;
-        }
-        deltX = dist/focal_length_ *(3.6/detected_img_.size().width) * ( (float)objects[0].rect.x + (float)objects[0].rect.width/2.0 - (float)detected_img_.size().width/2.0);
     }
 }
 

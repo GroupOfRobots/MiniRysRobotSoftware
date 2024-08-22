@@ -26,6 +26,7 @@ class ImagePublisher(Node):
         logging.info('ROS2 PRI CV CAMERA CAMERA')
 
         self.publisher = self.create_publisher(Image, 'cv_video_frames', 10)
+        self.publisher_plain_img = self.create_publisher(Image, 'cv_video_frames_plain_img', 10)
 
         self.declareParameters()
 
@@ -68,14 +69,16 @@ class ImagePublisher(Node):
         img_erosion = cv2.erode(gray, kernel, iterations=1)
         _, thresh = cv2.threshold(img_erosion, 127, 255, cv2.THRESH_BINARY_INV)
 
-        return  self.br.cv2_to_imgmsg(thresh)
+        return  self.br.cv2_to_imgmsg(thresh), self.br.cv2_to_imgmsg(img, encoding="rgb8")
 
     def image_callback(self):
-        msg = self.capture_image()
+        msg, msg_plain_img = self.capture_image()
         msg.header.stamp = self.get_time_msg()
+        msg_plain_img.header.stamp = self.get_time_msg()
         self.frame_id += 1
         msg.header.frame_id = str(self.frame_id)
-
+        msg_plain_img.header.frame_id = str(self.frame_id)
+        self.publisher_plain_img.publish(msg_plain_img)
         self.publisher.publish(msg)
 
 def main(args=None):

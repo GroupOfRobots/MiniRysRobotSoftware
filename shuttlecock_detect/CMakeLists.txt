@@ -94,4 +94,9 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}
 )
 
+install(DIRECTORY
+  weights
+  DESTINATION share/${PROJECT_NAME}
+)
+
 ament_package()

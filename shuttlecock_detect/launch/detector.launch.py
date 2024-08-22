@@ -17,13 +17,12 @@ def generate_launch_description():
         parameters = [config]
     )
 
-    #camera = actions.IncludeLaunchDescription(
-	#	launch_description_sources.PythonLaunchDescriptionSource(
-	#		os.path.join(
-	#			get_package_share_directory('minirys_camera'),
-	#			'ros2_rpi_cv_camera.launch.py')
-	#	)
-	#)
-    #ld = LaunchDescription([ node, camera])
-    ld = LaunchDescription([ node])
+    camera = actions.IncludeLaunchDescription(
+		launch_description_sources.PythonLaunchDescriptionSource(
+			os.path.join(
+				get_package_share_directory('minirys_camera'),
+				'ros2_rpi_cv_camera.launch.py')
+		)
+	)
+    ld = LaunchDescription([ node, camera])
     return ld
