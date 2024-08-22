@@ -6,5 +6,5 @@ detector:
     target_size: 480
     weights: "best80ep.ncnn"
     focal_length: 3.15
-    width_side: 20.0
-    width_front: 10.0
+    width_side: 68.0
+    width_front: 95.0
