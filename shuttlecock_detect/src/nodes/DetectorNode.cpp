@@ -12,9 +12,9 @@ Detector::Detector() : Node("detector")
     this->declare_parameter("prob_threshold", rclcpp::ParameterValue(0.25));
     this->declare_parameter("nms_threshold", rclcpp::ParameterValue(0.45));
     this->declare_parameter("timer_period", rclcpp::ParameterValue(0.05));
-    this->declare_parameter("width_front", rclcpp::ParameterValue(0.05));
-    this->declare_parameter("focal_length", rclcpp::ParameterValue(0.05));
-    this->declare_parameter("width_side", rclcpp::ParameterValue(0.05));
+    this->declare_parameter("width_front", rclcpp::ParameterValue(68.0));
+    this->declare_parameter("focal_length", rclcpp::ParameterValue(3.15));
+    this->declare_parameter("width_side", rclcpp::ParameterValue(95.0));
     std::this_thread::sleep_for(100ms);
     
     //load parameters
@@ -73,7 +73,7 @@ void Detector::timer_callback()
                 dist = (width_front_ * focal_px)/ objects[0].rect.width;
             }
             deltX = dist/focal_length_ *(3.6/detected_img_.size().width) * ( (float)objects[0].rect.x + (float)objects[0].rect.width/2.0 - (float)detected_img_.size().width/2.0);
-            std::cout<<"dist: "<< dist<<" x: "<<deltX<<std::endl;
+            RCLCPP_INFO_STREAM(this->get_logger(), "dist: "<< dist<<" x: "<<deltX );
         }
     }
 }
