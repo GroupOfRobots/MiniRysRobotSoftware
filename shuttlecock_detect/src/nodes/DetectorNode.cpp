@@ -160,5 +160,5 @@ std::pair<float, float> Detector::calculate_dist()
             ( (float)objects[0].rect.x + (float)objects[0].rect.width/2.0 - (float)detected_img_.size().width/2.0);
         return std::make_pair(dist, deltX );
     }
-    return std::make_pair(-1.0, -1.0);
+    return std::make_pair(-1.0f, -1.0f);
 }
