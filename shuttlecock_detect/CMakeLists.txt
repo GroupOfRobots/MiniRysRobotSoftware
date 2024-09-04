@@ -22,6 +22,7 @@ find_package(rclpy REQUIRED)
 find_package(geometry_msgs)
 find_package(ament_cmake_python REQUIRED)
 find_package(ncnn REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 
 if(BUILD_TESTING)
@@ -53,7 +54,7 @@ add_library(DetectorNode
   src/nodes/DetectorNode.cpp 
 )
 ament_target_dependencies(DetectorNode
-rclcpp std_msgs sensor_msgs cv_bridge OpenCV ncnn
+rclcpp std_msgs sensor_msgs cv_bridge OpenCV ncnn nav_msgs
 )
 target_link_libraries(DetectorNode Yolov7)
 
