@@ -64,6 +64,7 @@ void Detector::timer_callback()
     {
         if(state_ == DETECTING)
         {
+            RCLCPP_INFO_STREAM(this->get_logger(), "DETECTING" );
             std::pair<float, float> distances = calculate_dist();
             if(distances.first != -1.0)
             {
@@ -87,6 +88,7 @@ void Detector::timer_callback()
         }
         else if(state_ == GETTING_CLOSER)
         {
+            RCLCPP_INFO_STREAM(this->get_logger(), "GETTING_CLOSER" );
             ++counter_;
             std::pair<float, float> distances = calculate_dist();
             if(distances.first != -1.0)
@@ -114,6 +116,7 @@ void Detector::timer_callback()
         }
         else if(state_ == WAITING_FOR_ARRIVAL)
         {
+            RCLCPP_INFO_STREAM(this->get_logger(), "WAITING_FOR_ARRIVAL" );
             //TODO oczekiwanie na akcje
         }
     }
