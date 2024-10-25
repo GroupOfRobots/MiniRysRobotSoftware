@@ -54,6 +54,7 @@ class Detector: public rclcpp::Node{
     nav_msgs::msg::Odometry current_odom_;
     DetectorStates state_;
     int counter_;
+    int closer_counter_;
     float ori_dist_;
     bool is_closer_;
 };

@@ -43,16 +43,17 @@ Detector::Detector() : Node("detector")
     //publishers
     publisher_detected_ = this->create_publisher<sensor_msgs::msg::Image>("/img_detect", 10);
     timer_ = this->create_wall_timer(std::chrono::duration<double>(timer_period), std::bind(&Detector::timer_callback, this));
-    publisher_goal_= this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal_pose", 10);
+    publisher_goal_= this->create_publisher<geometry_msgs::msg::PoseStamped>("minirys2/goal_pose", 10);
     
     //subscribers
     subscription_image_ = this->create_subscription<sensor_msgs::msg::Image>(
         "/cv_video_frames_plain_img", 10, std::bind(&Detector::image_callback, this, std::placeholders::_1));
     subscription_odom_ = this->create_subscription<nav_msgs::msg::Odometry>(
-        "odom", 10, std::bind(&Detector::odom_callback, this, std::placeholders::_1));
+        "minirys2/odom", 10, std::bind(&Detector::odom_callback, this, std::placeholders::_1));
 
     state_ = DETECTING;
     counter_ = 0;
+    closer_counter_ = 0;
     is_closer_ = false;
     ori_dist_ = 0;
     // TODO rozpocznij krążenie
@@ -77,7 +78,7 @@ void Detector::timer_callback()
                 float new_x = current_odom_.pose.pose.position.x + distances.first * std::cos(angle) -distances.second * std::sin(angle); 
                 float new_y = current_odom_.pose.pose.position.y + distances.first * std::sin(angle) +distances.second * std::cos(angle);
                 auto msg = geometry_msgs::msg::PoseStamped();
-                msg.header.frame_id = "map";
+                msg.header.frame_id = "minirys2/map";
                 msg.header.stamp = this->get_clock()->now();
                 msg.pose.position.x = new_x;
                 msg.pose.position.y = new_y;
@@ -94,7 +95,8 @@ void Detector::timer_callback()
             if(distances.first != -1.0)
             {
                 RCLCPP_INFO_STREAM(this->get_logger(), "dist: "<< distances.first<<" x: "<<distances.second );
-                if(ori_dist_ >= distances.first && counter_ > 1) 
+                closer_counter_ = ori_dist_ >= distances.first? closer_counter_ +1:closer_counter_ ;
+                if(closer_counter_ > 1 && counter_ > 1) 
                 {
                     is_closer_ = true;
                 }
@@ -161,7 +163,7 @@ std::pair<float, float> Detector::calculate_dist()
         }
         deltX = dist/focal_length_ *(3.6/detected_img_.size().width) * 
             ( (float)objects[0].rect.x + (float)objects[0].rect.width/2.0 - (float)detected_img_.size().width/2.0);
-        return std::make_pair(dist, deltX );
+        return std::make_pair(dist/1000.0, deltX/1000.0 );
     }
     return std::make_pair(-1.0f, -1.0f);
 }
