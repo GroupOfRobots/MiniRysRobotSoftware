@@ -76,7 +76,7 @@ void Detector::timer_callback()
                 float angle = std::atan2(2.0*(current_odom_.pose.pose.orientation.w * current_odom_.pose.pose.orientation.z + current_odom_.pose.pose.orientation.x * current_odom_.pose.pose.orientation.y),
                     1.0-2.0*(current_odom_.pose.pose.orientation.y*current_odom_.pose.pose.orientation.y + current_odom_.pose.pose.orientation.z * current_odom_.pose.pose.orientation.z) );
                 float new_x = current_odom_.pose.pose.position.x + distances.first * std::cos(angle) -distances.second * std::sin(angle); 
-                float new_y = current_odom_.pose.pose.position.y + distances.first * std::sin(angle) +distances.second * std::cos(angle);
+                float new_y = current_odom_.pose.pose.position.y - distances.first * std::sin(angle) -distances.second * std::cos(angle);
                 auto msg = geometry_msgs::msg::PoseStamped();
                 msg.header.frame_id = "minirys2/map";
                 msg.header.stamp = this->get_clock()->now();
@@ -126,16 +126,16 @@ void Detector::timer_callback()
 
 void Detector::image_callback(const sensor_msgs::msg::Image::SharedPtr msg) 
 {
-    ori_img_ = cv_bridge::toCvCopy(msg, "rgb8")->image;
+    cv::rotate(cv_bridge::toCvCopy(msg, "rgb8")->image, ori_img_, cv::ROTATE_180);
 }
 
 void Detector::odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg)
 {
 	auto position = msg->pose.pose.position;
 	auto orientation = msg->pose.pose.orientation;
-	RCLCPP_INFO(this->get_logger(), "Position -> x: %f, y: %f, z: %f", position.x, position.y, position.z);
-	RCLCPP_INFO(this->get_logger(), "Orientation -> x: %f, y: %f, z: %f, w: %f",
-            orientation.x, orientation.y, orientation.z, orientation.w);
+	//RCLCPP_INFO(this->get_logger(), "Position -> x: %f, y: %f, z: %f", position.x, position.y, position.z);
+	//RCLCPP_INFO(this->get_logger(), "Orientation -> x: %f, y: %f, z: %f, w: %f",
+    //        orientation.x, orientation.y, orientation.z, orientation.w);
     current_odom_.pose.pose.position = msg->pose.pose.position;
     current_odom_.pose.pose.orientation = msg->pose.pose.orientation;
 }
