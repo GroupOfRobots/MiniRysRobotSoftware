@@ -44,12 +44,18 @@ Detector::Detector() : Node("detector")
     publisher_detected_ = this->create_publisher<sensor_msgs::msg::Image>("/img_detect", 10);
     timer_ = this->create_wall_timer(std::chrono::duration<double>(timer_period), std::bind(&Detector::timer_callback, this));
     publisher_goal_= this->create_publisher<geometry_msgs::msg::PoseStamped>("minirys2/goal_pose", 10);
+    publisher_velocity_ = this->create_publisher<geometry_msgs::msg::Twist>("minirys2cmd_vel", 10);
     
     //subscribers
     subscription_image_ = this->create_subscription<sensor_msgs::msg::Image>(
         "/cv_video_frames_plain_img", 10, std::bind(&Detector::image_callback, this, std::placeholders::_1));
     subscription_odom_ = this->create_subscription<nav_msgs::msg::Odometry>(
         "minirys2/odom", 10, std::bind(&Detector::odom_callback, this, std::placeholders::_1));
+
+    //actions
+    action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(this, "minirys2/navigate_to_pose");
+    send_goal_options_ = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
+    send_goal_options_.result_callback = std::bind(&Detector::result_callback, this, std::placeholders::_1);
 
     state_ = DETECTING;
     counter_ = 0;
@@ -78,6 +84,7 @@ void Detector::timer_callback()
                 float new_x = current_odom_.pose.pose.position.x + distances.first * std::cos(angle) -distances.second * std::sin(angle); 
                 float new_y = current_odom_.pose.pose.position.y - distances.first * std::sin(angle) -distances.second * std::cos(angle);
                 auto msg = geometry_msgs::msg::PoseStamped();
+                //auto msg = NavigateToPose::Goal();
                 msg.header.frame_id = "minirys2/map";
                 msg.header.stamp = this->get_clock()->now();
                 msg.pose.position.x = new_x;
@@ -85,6 +92,8 @@ void Detector::timer_callback()
                 msg.pose.position.z = current_odom_.pose.pose.position.z;
                 msg.pose.orientation = current_odom_.pose.pose.orientation;
                 publisher_goal_->publish(msg);
+                //action_client_->async_send_goal(msg, send_goal_options);
+                is_goal_reached_ = false;
             }
         }
         else if(state_ == GETTING_CLOSER)
@@ -111,6 +120,10 @@ void Detector::timer_callback()
                 {
                     state_ = DETECTING;
                     // TODO przestań jechać do celu i zacznij szukać
+                    action_client_->async_cancel_all_goals();
+                    RCLCPP_INFO_STREAM(this->get_logger(), "Sent cancel request for navigation goal.");
+                    auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
+                    publisher_velocity_->publish(*msg_twist);
                 }
                 counter_ = 0;
                 is_closer_ = 0;
@@ -167,3 +180,21 @@ std::pair<float, float> Detector::calculate_dist()
     }
     return std::make_pair(-1.0f, -1.0f);
 }
+
+void Detector::result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult & result)
+    {
+        switch (result.code) {
+            case rclcpp_action::ResultCode::SUCCEEDED:
+                RCLCPP_INFO_STREAM(this->get_logger(), "Goal reached successfully!");
+                is_goal_reached_ = true;
+            case rclcpp_action::ResultCode::ABORTED:
+                RCLCPP_INFO_STREAM(this->get_logger(), "Goal was aborted.");
+                is_goal_reached_ = true;
+            case rclcpp_action::ResultCode::CANCELED:
+                RCLCPP_INFO_STREAM(this->get_logger(), "Goal was canceled.");
+                is_goal_reached_ = true;
+            default:
+                RCLCPP_INFO_STREAM(this->get_logger(), "Unknown result code.");
+                is_goal_reached_ = false;
+        }
+    }

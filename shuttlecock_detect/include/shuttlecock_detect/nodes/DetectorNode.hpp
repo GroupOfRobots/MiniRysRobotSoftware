@@ -12,6 +12,8 @@
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include "nav_msgs/msg/odometry.hpp"
+#include "nav2_msgs/action/navigate_to_pose.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
 #include <utility>
 #include <iostream>
 #include <math.h>
@@ -36,13 +38,15 @@ class Detector: public rclcpp::Node{
     void timer_callback();
     void image_callback(const sensor_msgs::msg::Image::SharedPtr msg);
     void odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg);
+    void result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult & result);
     std::pair<float, float> calculate_dist();
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_detected_;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr publisher_goal_;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_image_;
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr subscription_odom_;
-
+    rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr action_client_;
+    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_velocity_;
     cv::Mat ori_img_;
     cv::Mat detected_img_;
     std::unique_ptr<YoloV7> yolov7_;
@@ -57,4 +61,6 @@ class Detector: public rclcpp::Node{
     int closer_counter_;
     float ori_dist_;
     bool is_closer_;
+    bool is_goal_reached_;
+    rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions send_goal_options_;
 };

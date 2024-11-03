@@ -13,6 +13,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
@@ -23,6 +24,7 @@ find_package(geometry_msgs)
 find_package(ament_cmake_python REQUIRED)
 find_package(ncnn REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
 
 
 if(BUILD_TESTING)
@@ -54,7 +56,7 @@ add_library(DetectorNode
   src/nodes/DetectorNode.cpp 
 )
 ament_target_dependencies(DetectorNode
-rclcpp std_msgs sensor_msgs cv_bridge OpenCV ncnn nav_msgs
+rclcpp std_msgs sensor_msgs cv_bridge OpenCV ncnn nav_msgs nav2_msgs rclcpp_action geometry_msgs
 )
 target_link_libraries(DetectorNode Yolov7)
 
