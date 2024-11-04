@@ -126,7 +126,7 @@ void Detector::timer_callback()
                     publisher_velocity_->publish(*msg_twist);
                 }
                 counter_ = 0;
-                is_closer_ = 0;
+                is_closer_ = false;
             }
         }
         else if(state_ == WAITING_FOR_ARRIVAL)
@@ -144,11 +144,6 @@ void Detector::image_callback(const sensor_msgs::msg::Image::SharedPtr msg)
 
 void Detector::odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg)
 {
-	auto position = msg->pose.pose.position;
-	auto orientation = msg->pose.pose.orientation;
-	//RCLCPP_INFO(this->get_logger(), "Position -> x: %f, y: %f, z: %f", position.x, position.y, position.z);
-	//RCLCPP_INFO(this->get_logger(), "Orientation -> x: %f, y: %f, z: %f, w: %f",
-    //        orientation.x, orientation.y, orientation.z, orientation.w);
     current_odom_.pose.pose.position = msg->pose.pose.position;
     current_odom_.pose.pose.orientation = msg->pose.pose.orientation;
 }
@@ -187,12 +182,15 @@ void Detector::result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::
             case rclcpp_action::ResultCode::SUCCEEDED:
                 RCLCPP_INFO_STREAM(this->get_logger(), "Goal reached successfully!");
                 is_goal_reached_ = true;
+                break;
             case rclcpp_action::ResultCode::ABORTED:
                 RCLCPP_INFO_STREAM(this->get_logger(), "Goal was aborted.");
                 is_goal_reached_ = true;
+                break;
             case rclcpp_action::ResultCode::CANCELED:
                 RCLCPP_INFO_STREAM(this->get_logger(), "Goal was canceled.");
                 is_goal_reached_ = true;
+                break;
             default:
                 RCLCPP_INFO_STREAM(this->get_logger(), "Unknown result code.");
                 is_goal_reached_ = false;
