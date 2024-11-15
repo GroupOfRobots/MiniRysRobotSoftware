@@ -45,12 +45,13 @@ Detector::Detector() : Node("detector")
     timer_ = this->create_wall_timer(std::chrono::duration<double>(timer_period), std::bind(&Detector::timer_callback, this));
     publisher_goal_= this->create_publisher<geometry_msgs::msg::PoseStamped>("minirys2/goal_pose", 10);
     publisher_velocity_ = this->create_publisher<geometry_msgs::msg::Twist>("minirys2cmd_vel", 10);
-    
+    publisher_isCoverage_ =  this->create_publisher<std_msgs::msg::Bool>("coverage", 10);
+
     //subscribers
     subscription_image_ = this->create_subscription<sensor_msgs::msg::Image>(
         "/cv_video_frames_plain_img", 10, std::bind(&Detector::image_callback, this, std::placeholders::_1));
-    subscription_odom_ = this->create_subscription<nav_msgs::msg::Odometry>(
-        "minirys2/odom", 10, std::bind(&Detector::odom_callback, this, std::placeholders::_1));
+    //subscription_odom_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
+    //    "/minirys2/amcl_pose", 10, std::bind(&Detector::odom_callback, this, std::placeholders::_1));
 
     //actions
     action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(this, "minirys2/navigate_to_pose");
@@ -75,10 +76,25 @@ void Detector::timer_callback()
             std::pair<float, float> distances = calculate_dist();
             if(distances.first != -1.0)
             {
+                
+                action_client_->async_cancel_all_goals();
+                geometry_msgs::msg::TransformStamped transform_stamped =
+                    tf_buffer_->lookupTransform("minirys2/map", "minirys2/base_link", tf2::TimePointZero);
+
+                current_odom_.pose.pose.position.x = transform_stamped.transform.translation.x;
+                current_odom_.pose.pose.position.y = transform_stamped.transform.translation.y;
+                current_odom_.pose.pose.position.z = transform_stamped.transform.translation.z;
+                current_odom_.pose.pose.orientation = transform_stamped.transform.rotation;
                 RCLCPP_INFO_STREAM(this->get_logger(), "dist: "<< distances.first<<" x: "<<distances.second );
+                RCLCPP_INFO_STREAM(this->get_logger(), "currentOdomX: "<< current_odom_.pose.pose.position.x<<" currentOdomY: "<<current_odom_.pose.pose.position.y );
                 state_ = GETTING_CLOSER;
+                //action_client_->async_cancel_all_goals();
+                distances = calculate_dist();
                 ori_dist_ = distances.first;
+                RCLCPP_INFO_STREAM(this->get_logger(), "dist: "<< distances.first<<" x: "<<distances.second );
+                RCLCPP_INFO_STREAM(this->get_logger(), "currentOdomX: "<< current_odom_.pose.pose.position.x<<" currentOdomY: "<<current_odom_.pose.pose.position.y );
                 // TODO Push Goal
+                
                 float angle = std::atan2(2.0*(current_odom_.pose.pose.orientation.w * current_odom_.pose.pose.orientation.z + current_odom_.pose.pose.orientation.x * current_odom_.pose.pose.orientation.y),
                     1.0-2.0*(current_odom_.pose.pose.orientation.y*current_odom_.pose.pose.orientation.y + current_odom_.pose.pose.orientation.z * current_odom_.pose.pose.orientation.z) );
                 float new_x = current_odom_.pose.pose.position.x + distances.first * std::cos(angle) -distances.second * std::sin(angle); 
@@ -131,7 +147,7 @@ void Detector::timer_callback()
         }
         else if(state_ == WAITING_FOR_ARRIVAL)
         {
-            RCLCPP_INFO_STREAM(this->get_logger(), "WAITING_FOR_ARRIVAL" );
+            //RCLCPP_INFO_STREAM(this->get_logger(), "WAITING_FOR_ARRIVAL" );
             //TODO oczekiwanie na akcje
         }
     }
@@ -142,7 +158,7 @@ void Detector::image_callback(const sensor_msgs::msg::Image::SharedPtr msg)
     cv::rotate(cv_bridge::toCvCopy(msg, "rgb8")->image, ori_img_, cv::ROTATE_180);
 }
 
-void Detector::odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg)
+void Detector::odom_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
 {
     current_odom_.pose.pose.position = msg->pose.pose.position;
     current_odom_.pose.pose.orientation = msg->pose.pose.orientation;

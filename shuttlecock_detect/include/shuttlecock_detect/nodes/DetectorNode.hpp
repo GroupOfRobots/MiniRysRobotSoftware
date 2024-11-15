@@ -9,14 +9,18 @@
 #include "shuttlecock_detect/helpers/Yolov7.hpp"
 #include <memory>
 #include "geometry_msgs/msg/twist.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include "nav_msgs/msg/odometry.hpp"
 #include "nav2_msgs/action/navigate_to_pose.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <tf2_ros/buffer.h>
 #include <utility>
 #include <iostream>
 #include <math.h>
+#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 
 using namespace std::chrono_literals;
 
@@ -37,16 +41,18 @@ class Detector: public rclcpp::Node{
 
     void timer_callback();
     void image_callback(const sensor_msgs::msg::Image::SharedPtr msg);
-    void odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg);
+    void odom_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg);
     void result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult & result);
     std::pair<float, float> calculate_dist();
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_detected_;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr publisher_goal_;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_image_;
-    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr subscription_odom_;
+    rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr subscription_odom_;
     rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr action_client_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_velocity_;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_isCoverage_;
+    std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
     cv::Mat ori_img_;
     cv::Mat detected_img_;
     std::unique_ptr<YoloV7> yolov7_;
