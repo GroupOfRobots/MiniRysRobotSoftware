@@ -63,6 +63,8 @@ Detector::Detector() : Node("detector")
     closer_counter_ = 0;
     is_closer_ = false;
     ori_dist_ = 0;
+    tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
+    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
     // TODO rozpocznij krążenie
 }
 
@@ -76,37 +78,31 @@ void Detector::timer_callback()
             std::pair<float, float> distances = calculate_dist();
             if(distances.first != -1.0)
             {
-                
                 action_client_->async_cancel_all_goals();
                 geometry_msgs::msg::TransformStamped transform_stamped =
                     tf_buffer_->lookupTransform("minirys2/map", "minirys2/base_link", tf2::TimePointZero);
-
-                current_odom_.pose.pose.position.x = transform_stamped.transform.translation.x;
-                current_odom_.pose.pose.position.y = transform_stamped.transform.translation.y;
-                current_odom_.pose.pose.position.z = transform_stamped.transform.translation.z;
-                current_odom_.pose.pose.orientation = transform_stamped.transform.rotation;
                 RCLCPP_INFO_STREAM(this->get_logger(), "dist: "<< distances.first<<" x: "<<distances.second );
-                RCLCPP_INFO_STREAM(this->get_logger(), "currentOdomX: "<< current_odom_.pose.pose.position.x<<" currentOdomY: "<<current_odom_.pose.pose.position.y );
+                RCLCPP_INFO_STREAM(this->get_logger(), "currentOdomX: "<< transform_stamped.transform.translation.x<<" currentOdomY: "<<transform_stamped.transform.translation.y );
                 state_ = GETTING_CLOSER;
-                //action_client_->async_cancel_all_goals();
-                distances = calculate_dist();
                 ori_dist_ = distances.first;
-                RCLCPP_INFO_STREAM(this->get_logger(), "dist: "<< distances.first<<" x: "<<distances.second );
-                RCLCPP_INFO_STREAM(this->get_logger(), "currentOdomX: "<< current_odom_.pose.pose.position.x<<" currentOdomY: "<<current_odom_.pose.pose.position.y );
                 // TODO Push Goal
-                
-                float angle = std::atan2(2.0*(current_odom_.pose.pose.orientation.w * current_odom_.pose.pose.orientation.z + current_odom_.pose.pose.orientation.x * current_odom_.pose.pose.orientation.y),
-                    1.0-2.0*(current_odom_.pose.pose.orientation.y*current_odom_.pose.pose.orientation.y + current_odom_.pose.pose.orientation.z * current_odom_.pose.pose.orientation.z) );
-                float new_x = current_odom_.pose.pose.position.x + distances.first * std::cos(angle) -distances.second * std::sin(angle); 
-                float new_y = current_odom_.pose.pose.position.y - distances.first * std::sin(angle) -distances.second * std::cos(angle);
+                tf2::Quaternion q(
+                    transform_stamped.transform.rotation.x,
+                    transform_stamped.transform.rotation.y,
+                    transform_stamped.transform.rotation.z,
+                    transform_stamped.transform.rotation.w);
+                double roll, pitch, yaw;
+                tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
+                double x_offset = distances.first * std::cos(yaw) + distances.second * std::sin(yaw);
+                double y_offset = distances.first * std::sin(yaw) - distances.second * std::cos(yaw);
                 auto msg = geometry_msgs::msg::PoseStamped();
                 //auto msg = NavigateToPose::Goal();
                 msg.header.frame_id = "minirys2/map";
                 msg.header.stamp = this->get_clock()->now();
-                msg.pose.position.x = new_x;
-                msg.pose.position.y = new_y;
-                msg.pose.position.z = current_odom_.pose.pose.position.z;
-                msg.pose.orientation = current_odom_.pose.pose.orientation;
+                msg.pose.position.x = transform_stamped.transform.translation.x + x_offset;
+                msg.pose.position.y = transform_stamped.transform.translation.y + y_offset;
+                msg.pose.position.z = transform_stamped.transform.translation.z;
+                msg.pose.orientation = transform_stamped.transform.rotation;
                 publisher_goal_->publish(msg);
                 //action_client_->async_send_goal(msg, send_goal_options);
                 is_goal_reached_ = false;
@@ -156,12 +152,6 @@ void Detector::timer_callback()
 void Detector::image_callback(const sensor_msgs::msg::Image::SharedPtr msg) 
 {
     cv::rotate(cv_bridge::toCvCopy(msg, "rgb8")->image, ori_img_, cv::ROTATE_180);
-}
-
-void Detector::odom_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
-{
-    current_odom_.pose.pose.position = msg->pose.pose.position;
-    current_odom_.pose.pose.orientation = msg->pose.pose.orientation;
 }
 
 std::pair<float, float> Detector::calculate_dist()

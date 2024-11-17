@@ -4,6 +4,7 @@
 #include <sensor_msgs/msg/image.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 #include <chrono>
 #include <cv_bridge/cv_bridge.h>
 #include "shuttlecock_detect/helpers/Yolov7.hpp"
@@ -20,6 +21,7 @@
 #include <utility>
 #include <iostream>
 #include <math.h>
+#include <tf2_ros/transform_listener.h>
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 
 using namespace std::chrono_literals;
@@ -41,7 +43,6 @@ class Detector: public rclcpp::Node{
 
     void timer_callback();
     void image_callback(const sensor_msgs::msg::Image::SharedPtr msg);
-    void odom_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg);
     void result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult & result);
     std::pair<float, float> calculate_dist();
     rclcpp::TimerBase::SharedPtr timer_;
@@ -61,7 +62,6 @@ class Detector: public rclcpp::Node{
     float focal_length_;
     float width_side_;
     float width_front_;
-    nav_msgs::msg::Odometry current_odom_;
     DetectorStates state_;
     int counter_;
     int closer_counter_;
@@ -69,4 +69,5 @@ class Detector: public rclcpp::Node{
     bool is_closer_;
     bool is_goal_reached_;
     rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions send_goal_options_;
+    std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 };
