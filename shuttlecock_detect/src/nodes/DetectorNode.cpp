@@ -50,13 +50,9 @@ Detector::Detector() : Node("detector")
     //subscribers
     subscription_image_ = this->create_subscription<sensor_msgs::msg::Image>(
         "/cv_video_frames_plain_img", 10, std::bind(&Detector::image_callback, this, std::placeholders::_1));
-    //subscription_odom_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
-    //    "/minirys2/amcl_pose", 10, std::bind(&Detector::odom_callback, this, std::placeholders::_1));
 
     //actions
     action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(this, "minirys2/navigate_to_pose");
-    send_goal_options_ = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
-    send_goal_options_.result_callback = std::bind(&Detector::result_callback, this, std::placeholders::_1);
 
     state_ = DETECTING;
     counter_ = 0;
@@ -96,7 +92,6 @@ void Detector::timer_callback()
                 double x_offset = distances.first * std::cos(yaw) + distances.second * std::sin(yaw);
                 double y_offset = distances.first * std::sin(yaw) - distances.second * std::cos(yaw);
                 auto msg = geometry_msgs::msg::PoseStamped();
-                //auto msg = NavigateToPose::Goal();
                 msg.header.frame_id = "minirys2/map";
                 msg.header.stamp = this->get_clock()->now();
                 msg.pose.position.x = transform_stamped.transform.translation.x + x_offset;
@@ -104,7 +99,6 @@ void Detector::timer_callback()
                 msg.pose.position.z = transform_stamped.transform.translation.z;
                 msg.pose.orientation = transform_stamped.transform.rotation;
                 publisher_goal_->publish(msg);
-                //action_client_->async_send_goal(msg, send_goal_options);
                 is_goal_reached_ = false;
             }
         }
@@ -162,10 +156,9 @@ std::pair<float, float> Detector::calculate_dist()
     yolov7_->draw(detected_img_, objects);
     auto msg_img = cv_bridge::CvImage(std_msgs::msg::Header(), "rgb8", detected_img_).toImageMsg();
     publisher_detected_->publish(*msg_img);
-    float dist;
-    float deltX;
+    float dist, deltX;
     float focal_px = focal_length_ * (float)detected_img_.size().width/3.6;
-    if(objects.size() >0)
+    if(objects.size() > 0)
     {
         if( objects[0].label == 0 )
         {
@@ -181,24 +174,3 @@ std::pair<float, float> Detector::calculate_dist()
     }
     return std::make_pair(-1.0f, -1.0f);
 }
-
-void Detector::result_callback(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::WrappedResult & result)
-    {
-        switch (result.code) {
-            case rclcpp_action::ResultCode::SUCCEEDED:
-                RCLCPP_INFO_STREAM(this->get_logger(), "Goal reached successfully!");
-                is_goal_reached_ = true;
-                break;
-            case rclcpp_action::ResultCode::ABORTED:
-                RCLCPP_INFO_STREAM(this->get_logger(), "Goal was aborted.");
-                is_goal_reached_ = true;
-                break;
-            case rclcpp_action::ResultCode::CANCELED:
-                RCLCPP_INFO_STREAM(this->get_logger(), "Goal was canceled.");
-                is_goal_reached_ = true;
-                break;
-            default:
-                RCLCPP_INFO_STREAM(this->get_logger(), "Unknown result code.");
-                is_goal_reached_ = false;
-        }
-    }
