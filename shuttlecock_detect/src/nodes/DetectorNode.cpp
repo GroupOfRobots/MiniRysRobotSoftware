@@ -62,6 +62,9 @@ Detector::Detector() : Node("detector")
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
     // TODO rozpocznij krążenie
+    auto msg_bool = std_msgs::msg::Bool();
+    msg_bool.data = true;
+    publisher_isCoverage_->publish(msg_bool);
 }
 
 void Detector::timer_callback() 
@@ -71,34 +74,20 @@ void Detector::timer_callback()
         if(state_ == DETECTING)
         {
             RCLCPP_INFO_STREAM(this->get_logger(), "DETECTING" );
+            geometry_msgs::msg::TransformStamped transform_stamped =
+                    tf_buffer_->lookupTransform("minirys2/map", "minirys2/base_link", tf2::TimePointZero);
             std::pair<float, float> distances = calculate_dist();
             if(distances.first != -1.0)
             {
+                auto msg_bool = std_msgs::msg::Bool();
+                msg_bool.data = flase;
+                publisher_isCoverage_->publish(msg_bool);
                 action_client_->async_cancel_all_goals();
-                geometry_msgs::msg::TransformStamped transform_stamped =
-                    tf_buffer_->lookupTransform("minirys2/map", "minirys2/base_link", tf2::TimePointZero);
                 RCLCPP_INFO_STREAM(this->get_logger(), "dist: "<< distances.first<<" x: "<<distances.second );
-                RCLCPP_INFO_STREAM(this->get_logger(), "currentOdomX: "<< transform_stamped.transform.translation.x<<" currentOdomY: "<<transform_stamped.transform.translation.y );
                 state_ = GETTING_CLOSER;
                 ori_dist_ = distances.first;
                 // TODO Push Goal
-                tf2::Quaternion q(
-                    transform_stamped.transform.rotation.x,
-                    transform_stamped.transform.rotation.y,
-                    transform_stamped.transform.rotation.z,
-                    transform_stamped.transform.rotation.w);
-                double roll, pitch, yaw;
-                tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
-                double x_offset = distances.first * std::cos(yaw) + distances.second * std::sin(yaw);
-                double y_offset = distances.first * std::sin(yaw) - distances.second * std::cos(yaw);
-                auto msg = geometry_msgs::msg::PoseStamped();
-                msg.header.frame_id = "minirys2/map";
-                msg.header.stamp = this->get_clock()->now();
-                msg.pose.position.x = transform_stamped.transform.translation.x + x_offset;
-                msg.pose.position.y = transform_stamped.transform.translation.y + y_offset;
-                msg.pose.position.z = transform_stamped.transform.translation.z;
-                msg.pose.orientation = transform_stamped.transform.rotation;
-                publisher_goal_->publish(msg);
+                this->send_goal(distances, transform_stamped);
                 is_goal_reached_ = false;
             }
         }
@@ -106,9 +95,13 @@ void Detector::timer_callback()
         {
             RCLCPP_INFO_STREAM(this->get_logger(), "GETTING_CLOSER" );
             ++counter_;
+            geometry_msgs::msg::TransformStamped transform_stamped =
+                    tf_buffer_->lookupTransform("minirys2/map", "minirys2/base_link", tf2::TimePointZero);
             std::pair<float, float> distances = calculate_dist();
+
             if(distances.first != -1.0)
             {
+                this->send_goal(distances, transform_stamped);
                 RCLCPP_INFO_STREAM(this->get_logger(), "dist: "<< distances.first<<" x: "<<distances.second );
                 closer_counter_ = ori_dist_ >= distances.first? closer_counter_ +1:closer_counter_ ;
                 if(closer_counter_ > 1 && counter_ > 1) 
@@ -130,6 +123,9 @@ void Detector::timer_callback()
                     RCLCPP_INFO_STREAM(this->get_logger(), "Sent cancel request for navigation goal.");
                     auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
                     publisher_velocity_->publish(*msg_twist);
+                    auto msg_bool = std_msgs::msg::Bool()
+                    msg_bool.data = true;
+                    publisher_isCoverage_->publish(msg_bool)
                 }
                 counter_ = 0;
                 is_closer_ = false;
@@ -173,4 +169,25 @@ std::pair<float, float> Detector::calculate_dist()
         return std::make_pair(dist/1000.0, deltX/1000.0 );
     }
     return std::make_pair(-1.0f, -1.0f);
+}
+
+void Detector::send_goal(const std::pair<float, float>& distances, const geometry_msgs::msg::TransformStamped& transform_stamped)
+{
+    tf2::Quaternion q(
+                    transform_stamped.transform.rotation.x,
+                    transform_stamped.transform.rotation.y,
+                    transform_stamped.transform.rotation.z,
+                    transform_stamped.transform.rotation.w);
+    double roll, pitch, yaw;
+    tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
+    double x_offset = distances.first * std::cos(yaw) + distances.second * std::sin(yaw);
+    double y_offset = distances.first * std::sin(yaw) - distances.second * std::cos(yaw);
+    auto msg = geometry_msgs::msg::PoseStamped();
+    msg.header.frame_id = "minirys2/map";
+    msg.header.stamp = this->get_clock()->now();
+    msg.pose.position.x = transform_stamped.transform.translation.x + x_offset;
+    msg.pose.position.y = transform_stamped.transform.translation.y + y_offset;
+    msg.pose.position.z = transform_stamped.transform.translation.z;
+    msg.pose.orientation = transform_stamped.transform.rotation;
+    publisher_goal_->publish(msg);
 }

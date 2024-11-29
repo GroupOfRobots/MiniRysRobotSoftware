@@ -43,6 +43,7 @@ class Detector: public rclcpp::Node{
 
     void timer_callback();
     void image_callback(const sensor_msgs::msg::Image::SharedPtr msg);
+    void send_goal(const std::pair<float, float>& distances, const geometry_msgs::msg::TransformStamped& transform_stamped);
     std::pair<float, float> calculate_dist();
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_detected_;
