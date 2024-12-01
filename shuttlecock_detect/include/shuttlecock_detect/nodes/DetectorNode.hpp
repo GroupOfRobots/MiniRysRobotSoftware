@@ -50,7 +50,6 @@ class Detector: public rclcpp::Node{
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr publisher_goal_;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_image_;
     rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr action_client_;
-    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_velocity_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_isCoverage_;
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
     cv::Mat ori_img_;
@@ -65,7 +64,6 @@ class Detector: public rclcpp::Node{
     int counter_;
     int closer_counter_;
     float ori_dist_;
-    bool is_closer_;
     bool is_goal_reached_;
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 };

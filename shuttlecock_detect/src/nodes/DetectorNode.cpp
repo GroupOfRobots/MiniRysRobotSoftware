@@ -44,7 +44,6 @@ Detector::Detector() : Node("detector")
     publisher_detected_ = this->create_publisher<sensor_msgs::msg::Image>("/img_detect", 10);
     timer_ = this->create_wall_timer(std::chrono::duration<double>(timer_period), std::bind(&Detector::timer_callback, this));
     publisher_goal_= this->create_publisher<geometry_msgs::msg::PoseStamped>("minirys2/goal_pose", 10);
-    publisher_velocity_ = this->create_publisher<geometry_msgs::msg::Twist>("minirys2cmd_vel", 10);
     publisher_isCoverage_ =  this->create_publisher<std_msgs::msg::Bool>("coverage", 10);
 
     //subscribers
@@ -57,7 +56,6 @@ Detector::Detector() : Node("detector")
     state_ = DETECTING;
     counter_ = 0;
     closer_counter_ = 0;
-    is_closer_ = false;
     ori_dist_ = 0;
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -74,22 +72,29 @@ void Detector::timer_callback()
         if(state_ == DETECTING)
         {
             RCLCPP_INFO_STREAM(this->get_logger(), "DETECTING" );
-            geometry_msgs::msg::TransformStamped transform_stamped =
-                    tf_buffer_->lookupTransform("minirys2/map", "minirys2/base_link", tf2::TimePointZero);
-            std::pair<float, float> distances = calculate_dist();
-            if(distances.first != -1.0)
+            try
             {
-                auto msg_bool = std_msgs::msg::Bool();
-                msg_bool.data = flase;
-                publisher_isCoverage_->publish(msg_bool);
-                action_client_->async_cancel_all_goals();
-                RCLCPP_INFO_STREAM(this->get_logger(), "dist: "<< distances.first<<" x: "<<distances.second );
-                state_ = GETTING_CLOSER;
-                ori_dist_ = distances.first;
-                // TODO Push Goal
-                this->send_goal(distances, transform_stamped);
-                is_goal_reached_ = false;
+                geometry_msgs::msg::TransformStamped transform_stamped =
+                        tf_buffer_->lookupTransform("minirys2/map", "minirys2/base_link", tf2::TimePointZero);
+                std::pair<float, float> distances = calculate_dist();
+                if(distances.first != -1.0)
+                {
+                    auto msg_bool = std_msgs::msg::Bool();
+                    msg_bool.data = false;
+                    publisher_isCoverage_->publish(msg_bool);
+                    action_client_->async_cancel_all_goals();
+                    RCLCPP_INFO_STREAM(this->get_logger(), "dist: "<< distances.first<<" x: "<<distances.second );
+                    state_ = GETTING_CLOSER;
+                    ori_dist_ = distances.first;
+                    // TODO Push Goal
+                    this->send_goal(distances, transform_stamped);
+                    is_goal_reached_ = false;
+                }
             }
+            catch (...)
+            {
+                RCLCPP_INFO_STREAM(this->get_logger(), "Problems with TF" );
+            } 
         }
         else if(state_ == GETTING_CLOSER)
         {
@@ -104,14 +109,10 @@ void Detector::timer_callback()
                 this->send_goal(distances, transform_stamped);
                 RCLCPP_INFO_STREAM(this->get_logger(), "dist: "<< distances.first<<" x: "<<distances.second );
                 closer_counter_ = ori_dist_ >= distances.first? closer_counter_ +1:closer_counter_ ;
-                if(closer_counter_ > 1 && counter_ > 1) 
-                {
-                    is_closer_ = true;
-                }
             }
             if(counter_ == 4)
             {
-                if(is_closer_)
+                if(closer_counter_ > 1)
                 {
                     state_ = WAITING_FOR_ARRIVAL;
                 }
@@ -123,18 +124,35 @@ void Detector::timer_callback()
                     RCLCPP_INFO_STREAM(this->get_logger(), "Sent cancel request for navigation goal.");
                     auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
                     publisher_velocity_->publish(*msg_twist);
-                    auto msg_bool = std_msgs::msg::Bool()
+                    auto msg_bool = std_msgs::msg::Bool();
                     msg_bool.data = true;
-                    publisher_isCoverage_->publish(msg_bool)
+                    publisher_isCoverage_->publish(msg_bool);
                 }
                 counter_ = 0;
-                is_closer_ = false;
+                closer_counter_ = 0;
             }
         }
         else if(state_ == WAITING_FOR_ARRIVAL)
         {
             //RCLCPP_INFO_STREAM(this->get_logger(), "WAITING_FOR_ARRIVAL" );
             //TODO oczekiwanie na akcje
+            geometry_msgs::msg::TransformStamped transform_stamped =
+                    tf_buffer_->lookupTransform("minirys2/map", "minirys2/base_link", tf2::TimePointZero);
+            std::pair<float, float> distances = calculate_dist();
+
+            if(distances.first != -1.0)
+            {
+                this->send_goal(distances, transform_stamped);
+                if(distances.first < 0.6) state_ = DOCKING;
+            }
+            else
+            {
+                state_ = DOCKING;
+            }
+        }
+        else if(state_ == DOCKING)
+        {
+            RCLCPP_INFO_STREAM(this->get_logger(), "DOCKING");
         }
     }
 }
