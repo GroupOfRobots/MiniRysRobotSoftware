@@ -79,10 +79,10 @@ void Detector::timer_callback()
                 std::pair<float, float> distances = calculate_dist();
                 if(distances.first != -1.0)
                 {
-                    auto msg_bool = std_msgs::msg::Bool();
-                    msg_bool.data = false;
-                    publisher_isCoverage_->publish(msg_bool);
-                    action_client_->async_cancel_all_goals();
+                    //auto msg_bool = std_msgs::msg::Bool();
+                    // msg_bool.data = false;
+                    // publisher_isCoverage_->publish(msg_bool);
+                    //action_client_->async_cancel_all_goals();
                     RCLCPP_INFO_STREAM(this->get_logger(), "dist: "<< distances.first<<" x: "<<distances.second );
                     state_ = GETTING_CLOSER;
                     ori_dist_ = distances.first;
@@ -115,6 +115,9 @@ void Detector::timer_callback()
                 if(closer_counter_ > 1)
                 {
                     state_ = WAITING_FOR_ARRIVAL;
+                    auto msg_bool = std_msgs::msg::Bool();
+                    msg_bool.data = false;
+                    publisher_isCoverage_->publish(msg_bool);
                 }
                 else
                 {
@@ -122,11 +125,9 @@ void Detector::timer_callback()
                     // TODO przestań jechać do celu i zacznij szukać
                     action_client_->async_cancel_all_goals();
                     RCLCPP_INFO_STREAM(this->get_logger(), "Sent cancel request for navigation goal.");
-                    auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
-                    publisher_velocity_->publish(*msg_twist);
-                    auto msg_bool = std_msgs::msg::Bool();
-                    msg_bool.data = true;
-                    publisher_isCoverage_->publish(msg_bool);
+                    // auto msg_bool = std_msgs::msg::Bool();
+                    // msg_bool.data = true;
+                    // publisher_isCoverage_->publish(msg_bool);
                 }
                 counter_ = 0;
                 closer_counter_ = 0;
@@ -143,7 +144,10 @@ void Detector::timer_callback()
             if(distances.first != -1.0)
             {
                 this->send_goal(distances, transform_stamped);
-                if(distances.first < 0.6) state_ = DOCKING;
+                if(distances.first < 0.6)
+                {
+                    state_ = DOCKING;
+                }
             }
             else
             {

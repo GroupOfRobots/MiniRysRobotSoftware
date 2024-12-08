@@ -2,7 +2,7 @@ detector:
   ros__parameters:
     timer_period: 0.05
     nms_threshold: 0.35
-    prob_threshold: 0.25
+    prob_threshold: 0.35
     target_size: 480
     weights: "best100ep1inp.ncnn" #best100ep1inp.ncnn best80ep.ncnn
     focal_length: 3.15
