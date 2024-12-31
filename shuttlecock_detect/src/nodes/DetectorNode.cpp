@@ -43,8 +43,8 @@ Detector::Detector() : Node("detector")
     //publishers
     publisher_detected_ = this->create_publisher<sensor_msgs::msg::Image>("/img_detect", 10);
     timer_ = this->create_wall_timer(std::chrono::duration<double>(timer_period), std::bind(&Detector::timer_callback, this));
-    publisher_goal_= this->create_publisher<geometry_msgs::msg::PoseStamped>("minirys2/goal_pose", 10);
-    publisher_isCoverage_ =  this->create_publisher<std_msgs::msg::Bool>("coverage", 10);
+    publisher_goal_= this->create_publisher<geometry_msgs::msg::PoseStamped>("/minirys2/goal_pose", 10);
+    publisher_isCoverage_ =  this->create_publisher<std_msgs::msg::Bool>("/minirys2/coverage", 10);
 
     //subscribers
     subscription_image_ = this->create_subscription<sensor_msgs::msg::Image>(
