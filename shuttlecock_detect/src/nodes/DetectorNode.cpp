@@ -15,6 +15,10 @@ Detector::Detector() : Node("detector")
     this->declare_parameter("width_front", rclcpp::ParameterValue(68.0));
     this->declare_parameter("focal_length", rclcpp::ParameterValue(3.15));
     this->declare_parameter("width_side", rclcpp::ParameterValue(95.0));
+    this->declare_parameter("K", rclcpp::ParameterValue(0.0));
+    this->declare_parameter("Ti", rclcpp::ParameterValue(0.0));
+    this->declare_parameter("Td", rclcpp::ParameterValue(0.0));
+    this->declare_parameter("linearSpeed", rclcpp::ParameterValue(0.0));
     std::this_thread::sleep_for(100ms);
     
     //load parameters
@@ -27,10 +31,15 @@ Detector::Detector() : Node("detector")
     focal_length_ = (float) this->get_parameter("focal_length").as_double();
     width_side_ = (float) this->get_parameter("width_side").as_double();
     std::string weight = this->get_parameter("weights").as_string();
+    double K = this->get_parameter("K").as_double();
+    double Ti = this->get_parameter("Ti").as_double();
+    double Td = this->get_parameter("Td").as_double();
+    this->linear_speed_ = this->get_parameter("linearSpeed").as_double();
     yolov7_ = std::make_unique<YoloV7>(); 
     yolov7_->load(target_size, package_share_directory+ "/weights/" + weight+".param",
         package_share_directory+ "/weights/" +weight + ".bin");
-
+    this->pid = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) timer_period,
+        (float) K,(float) Ti,(float) Td));
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: prob_threshold " << prob_threshold_);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: nms_threshold " << nms_threshold_);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: target_size " << target_size);
@@ -39,12 +48,18 @@ Detector::Detector() : Node("detector")
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: width_side " << width_side_);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: focal_length " << focal_length_);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: timer_period " << timer_period);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: Ti " << Ti);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: Td " << Td);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: K " << K);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: linear speed " << this->linear_speed_);
 
     //publishers
     publisher_detected_ = this->create_publisher<sensor_msgs::msg::Image>("/img_detect", 10);
     timer_ = this->create_wall_timer(std::chrono::duration<double>(timer_period), std::bind(&Detector::timer_callback, this));
     publisher_goal_= this->create_publisher<geometry_msgs::msg::PoseStamped>("/minirys2/goal_pose", 10);
     publisher_isCoverage_ =  this->create_publisher<std_msgs::msg::Bool>("/minirys2/coverage", 10);
+    publisher_vocity_ =
+    this->create_publisher<geometry_msgs::msg::Twist>("/minirys2/cmd_vel", 10);
 
     //subscribers
     subscription_image_ = this->create_subscription<sensor_msgs::msg::Image>(
@@ -146,17 +161,47 @@ void Detector::timer_callback()
                 this->send_goal(distances, transform_stamped);
                 if(distances.first < 0.6)
                 {
+                    RCLCPP_INFO_STREAM(this->get_logger(), "DOCKING");
                     state_ = DOCKING;
                 }
             }
             else
             {
+                RCLCPP_INFO_STREAM(this->get_logger(), "DOCKING");
                 state_ = DOCKING;
             }
         }
         else if(state_ == DOCKING)
         {
-            RCLCPP_INFO_STREAM(this->get_logger(), "DOCKING");
+            std::pair<float, float> distances = calculate_dist();
+            if(distances.first != -1.0)
+            {
+                if(distances.first > 0.2)
+                {
+                    //wyślij prędkosc i obrot
+                    
+                    auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
+                    msg_twist->linear.x = linear_speed_;
+                    msg_twist->angular.z = pid(distances.second,0.0f);
+                    publisher_vocity_->publish(*msg_twist);
+                }
+                else
+                {
+                    //RCLCPP_INFO_STREAM(this->get_logger(), "RETURN");
+                    state_ = RETURN;
+                    auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
+                    publisher_vocity_->publish(*msg_twist);
+                }
+            }
+            else
+            {
+                state_ == DETECTING;
+            }
+
+        }
+        else if(state_ == RETURN)
+        {
+            RCLCPP_INFO_STREAM(this->get_logger(), "RETURN");
         }
     }
 }

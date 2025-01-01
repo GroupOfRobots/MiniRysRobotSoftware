@@ -23,6 +23,7 @@
 #include <math.h>
 #include <tf2_ros/transform_listener.h>
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
+#include "minirys_ros2/helpers/PIDRegulator.hpp"
 
 using namespace std::chrono_literals;
 
@@ -31,7 +32,8 @@ enum DetectorStates{
     GETTING_CLOSER,
     WAITING_FOR_ARRIVAL,
     DOCKING,
-    GETTING_BACK
+    GETTING_BACK,
+    RETURN,
 };
 
 class Detector: public rclcpp::Node{
@@ -51,6 +53,7 @@ class Detector: public rclcpp::Node{
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_image_;
     rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr action_client_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_isCoverage_;
+    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_vocity_;
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
     cv::Mat ori_img_;
     cv::Mat detected_img_;
@@ -64,6 +67,8 @@ class Detector: public rclcpp::Node{
     int counter_;
     int closer_counter_;
     float ori_dist_;
+    double linear_speed_;
     bool is_goal_reached_;
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+    std::unique_ptr<PIDRegulator> pid;
 };

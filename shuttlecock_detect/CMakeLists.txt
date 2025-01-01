@@ -45,6 +45,9 @@ endif()
 include_directories(include ${ament_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 
+add_library(PIDRegulator
+  ../minirys_ros2/src/helpers/PIDRegulator.cpp
+)
 add_library(Yolov7
   src/helpers/Yolov7.cpp
 )
@@ -60,7 +63,7 @@ add_library(DetectorNode
 ament_target_dependencies(DetectorNode
 rclcpp std_msgs sensor_msgs cv_bridge OpenCV ncnn nav_msgs nav2_msgs rclcpp_action geometry_msgs tf2_ros
 )
-target_link_libraries(DetectorNode Yolov7)
+target_link_libraries(DetectorNode Yolov7 PIDRegulator)
 
 add_executable(yolov7_time_test src/executables/yolov7_time_test.cpp)
 target_link_libraries(yolov7_time_test Yolov7 ncnn)
