@@ -70,5 +70,5 @@ class Detector: public rclcpp::Node{
     double linear_speed_;
     bool is_goal_reached_;
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
-    std::unique_ptr<PIDRegulator> pid;
+    std::unique_ptr<PIDRegulator> pid_;
 };

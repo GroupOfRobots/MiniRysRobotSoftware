@@ -38,7 +38,7 @@ Detector::Detector() : Node("detector")
     yolov7_ = std::make_unique<YoloV7>(); 
     yolov7_->load(target_size, package_share_directory+ "/weights/" + weight+".param",
         package_share_directory+ "/weights/" +weight + ".bin");
-    this->pid = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) timer_period,
+    this->pid_ = std::unique_ptr<PIDRegulator>(new PIDRegulator((float) timer_period,
         (float) K,(float) Ti,(float) Td));
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: prob_threshold " << prob_threshold_);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: nms_threshold " << nms_threshold_);
@@ -176,13 +176,13 @@ void Detector::timer_callback()
             std::pair<float, float> distances = calculate_dist();
             if(distances.first != -1.0)
             {
-                if(distances.first > 0.2)
+                if(distances.first > 0.1)
                 {
                     //wyślij prędkosc i obrot
                     
                     auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
                     msg_twist->linear.x = linear_speed_;
-                    msg_twist->angular.z = pid(distances.second,0.0f);
+                    msg_twist->angular.z = pid_->pid(distances.second,0.0f);
                     publisher_vocity_->publish(*msg_twist);
                 }
                 else
@@ -195,7 +195,10 @@ void Detector::timer_callback()
             }
             else
             {
-                state_ == DETECTING;
+                RCLCPP_INFO_STREAM(this->get_logger(), "NO SHUTTLECOCK");
+                auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
+                publisher_vocity_->publish(*msg_twist);
+                state_ = DETECTING;
             }
 
         }

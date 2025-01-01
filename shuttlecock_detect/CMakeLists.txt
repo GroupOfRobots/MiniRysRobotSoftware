@@ -42,7 +42,7 @@ if(BUILD_TESTING)
 endif()
 
 
-include_directories(include ${ament_INCLUDE_DIRS})
+include_directories(include ${ament_INCLUDE_DIRS} ../minirys_ros2/include)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 add_library(PIDRegulator
