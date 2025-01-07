@@ -9,6 +9,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include "shuttlecock_detect/helpers/Yolov7.hpp"
 #include <memory>
+#include <cmath>
 #include "geometry_msgs/msg/twist.hpp"
 #include "std_msgs/msg/bool.hpp"
 #include <geometry_msgs/msg/pose_stamped.hpp>
@@ -32,6 +33,7 @@ enum DetectorStates{
     GETTING_CLOSER,
     WAITING_FOR_ARRIVAL,
     DOCKING,
+    ROTATING,
     GETTING_BACK,
     RETURN,
 };
@@ -63,6 +65,9 @@ class Detector: public rclcpp::Node{
     float focal_length_;
     float width_side_;
     float width_front_;
+    float stop_from_planner_;
+    float stop_rotate_;
+    float stop_docking_;
     DetectorStates state_;
     int counter_;
     int closer_counter_;
@@ -71,4 +76,5 @@ class Detector: public rclcpp::Node{
     bool is_goal_reached_;
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
     std::unique_ptr<PIDRegulator> pid_;
+    int rotateNoShCounter_;
 };

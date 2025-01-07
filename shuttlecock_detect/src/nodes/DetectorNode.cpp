@@ -15,6 +15,9 @@ Detector::Detector() : Node("detector")
     this->declare_parameter("width_front", rclcpp::ParameterValue(68.0));
     this->declare_parameter("focal_length", rclcpp::ParameterValue(3.15));
     this->declare_parameter("width_side", rclcpp::ParameterValue(95.0));
+    this->declare_parameter("stop_from_planner", rclcpp::ParameterValue(0.0));
+    this->declare_parameter("stop_rotate", rclcpp::ParameterValue(0.0));
+    this->declare_parameter("stop_docking", rclcpp::ParameterValue(0.0));
     this->declare_parameter("K", rclcpp::ParameterValue(0.0));
     this->declare_parameter("Ti", rclcpp::ParameterValue(0.0));
     this->declare_parameter("Td", rclcpp::ParameterValue(0.0));
@@ -34,6 +37,9 @@ Detector::Detector() : Node("detector")
     double K = this->get_parameter("K").as_double();
     double Ti = this->get_parameter("Ti").as_double();
     double Td = this->get_parameter("Td").as_double();
+    stop_from_planner_ = (float) this->get_parameter("stop_from_planner").as_double();;
+    stop_rotate_ = (float) this->get_parameter("stop_rotate").as_double();;
+    stop_docking_ = (float) this->get_parameter("stop_docking").as_double();;
     this->linear_speed_ = this->get_parameter("linearSpeed").as_double();
     yolov7_ = std::make_unique<YoloV7>(); 
     yolov7_->load(target_size, package_share_directory+ "/weights/" + weight+".param",
@@ -52,6 +58,9 @@ Detector::Detector() : Node("detector")
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: Td " << Td);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: K " << K);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: linear speed " << this->linear_speed_);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: stop_from_planner " << stop_from_planner_);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: stop_rotate " << stop_rotate_);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: stop_docking " << stop_docking_);
 
     //publishers
     publisher_detected_ = this->create_publisher<sensor_msgs::msg::Image>("/img_detect", 10);
@@ -78,6 +87,7 @@ Detector::Detector() : Node("detector")
     auto msg_bool = std_msgs::msg::Bool();
     msg_bool.data = true;
     publisher_isCoverage_->publish(msg_bool);
+    rotateNoShCounter_ = 0;
 }
 
 void Detector::timer_callback() 
@@ -159,30 +169,66 @@ void Detector::timer_callback()
             if(distances.first != -1.0)
             {
                 this->send_goal(distances, transform_stamped);
-                if(distances.first < 0.6)
+                if(distances.first < stop_from_planner_)
                 {
-                    RCLCPP_INFO_STREAM(this->get_logger(), "DOCKING");
-                    state_ = DOCKING;
+                    RCLCPP_INFO_STREAM(this->get_logger(), "ROTATING");
+                    state_ = ROTATING;
                 }
             }
             else
             {
-                RCLCPP_INFO_STREAM(this->get_logger(), "DOCKING");
-                state_ = DOCKING;
+                RCLCPP_INFO_STREAM(this->get_logger(), "ROTATING");
+                state_ = ROTATING;
             }
+        }
+        else if(state_ == ROTATING)
+        {
+            
+            std::pair<float, float> distances = calculate_dist();
+            if(distances.first != -1.0)
+            {
+                if(std::abs(distances.second) > stop_rotate_)
+                {
+                    //wyślij prędkosc i obrot
+                    
+                    auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
+                    // msg_twist->linear.x = linear_speed_;
+                    msg_twist->angular.z = pid_->pid(distances.second,0.0f);
+                    publisher_vocity_->publish(*msg_twist);
+                }
+                else
+                {
+                    RCLCPP_INFO_STREAM(this->get_logger(), "DOCKING");
+                    state_ = DOCKING;
+                    auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
+                    publisher_vocity_->publish(*msg_twist);
+                }
+            }
+            else
+            {
+                ++rotateNoShCounter_;
+            }
+            if(rotateNoShCounter_ == 4)
+            {
+                RCLCPP_INFO_STREAM(this->get_logger(), "NO SHUTTLECOCK");
+                auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
+                publisher_vocity_->publish(*msg_twist);
+                state_ = DETECTING;
+                rotateNoShCounter_ = 0;
+            }
+
         }
         else if(state_ == DOCKING)
         {
             std::pair<float, float> distances = calculate_dist();
             if(distances.first != -1.0)
             {
-                if(distances.first > 0.1)
+                if(distances.first > stop_docking_)
                 {
                     //wyślij prędkosc i obrot
                     
                     auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
                     msg_twist->linear.x = linear_speed_;
-                    msg_twist->angular.z = pid_->pid(distances.second,0.0f);
                     publisher_vocity_->publish(*msg_twist);
                 }
                 else
