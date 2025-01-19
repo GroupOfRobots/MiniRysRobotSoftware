@@ -17,8 +17,9 @@ def generate_launch_description():
     node = Node(
         package = 'followers',
         name = 'line_follower',
+        namespace=namespace_value,
         executable = 'linefollower.py',
-        parameters = [config, {'minirys_namespace': namespace_value}]
+        parameters = [config]
     )
 
     return LaunchDescription([arg_namespace, node])

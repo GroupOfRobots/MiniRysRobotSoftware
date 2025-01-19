@@ -33,9 +33,9 @@ class LineFollowerNoCamm(Node):
                 ('Ti', Parameter.Type.DOUBLE),
                 ('Td', Parameter.Type.DOUBLE),
                 ('turnOffsetParam', Parameter.Type.DOUBLE),
-                ('linearSpeed', Parameter.Type.DOUBLE),
-                ('minirys_namespace', Parameter.Type.STRING)
-            ])
+                ('linearSpeed', Parameter.Type.DOUBLE)
+            ]
+        )
         self.logger.info("LLL")
         self.maxU = self.get_parameter("maxU").get_parameter_value().double_value
         self.minU = -self.maxU
@@ -45,21 +45,20 @@ class LineFollowerNoCamm(Node):
         K = self.get_parameter("K").get_parameter_value().double_value
         Ti = self.get_parameter("Ti").get_parameter_value().double_value
         Td = self.get_parameter("Td").get_parameter_value().double_value
-        minirys_namespace = self.get_parameter("minirys_namespace").get_parameter_value().string_value
 
         self.logger.info(f"timer_period: { timer_period}, maxU: {self.maxU}, K: {K}, Ti:{Ti}")
-        self.logger.info(f"Td: {Td},turnOffsetParam: {self.turnOffsetParam}, speed: {self.speed}, namespace:{minirys_namespace}")
+        self.logger.info(f"Td: {Td},turnOffsetParam: {self.turnOffsetParam}, speed: {self.speed}, namespace:{self.get_namespace()}")
 
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.thresh = None
 
-        self.subscription = self.create_subscription(Image, 'cv_video_frames',
+        self.subscription = self.create_subscription(Image, '/cv_video_frames',
             self.listener_callback, 10)
 
         self.pid = PID(timer_period,K,Ti,Td)
 
-        self.publisher3_ = self.create_publisher(Twist, '/'+minirys_namespace+'/cmd_vel', 10)
-        self.subscriber = self.create_subscription(Bool,'/'+minirys_namespace+'/is_line_follower', self.subscr_callback, 10)
+        self.publisher3_ = self.create_publisher(Twist, 'cmd_vel', 10)
+        self.subscriber = self.create_subscription(Bool, 'is_line_follower', self.subscr_callback, 10)
 
         self.is_working = True
 

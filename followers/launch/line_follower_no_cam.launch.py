@@ -18,8 +18,9 @@ def generate_launch_description():
     node = Node(
         package = 'followers',
         name = 'line_follower_no_cam',
+        namespace=namespace_value,
         executable = 'linefollower_no_cam.py',
-        parameters = [config, {'minirys_namespace': namespace_value}]
+        parameters = [config]
     )
 
     camera = IncludeLaunchDescription(
