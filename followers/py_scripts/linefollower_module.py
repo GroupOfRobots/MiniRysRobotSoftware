@@ -18,6 +18,7 @@ class LineFollowerModule:
     image_ = None
     input_mode_ = InputMode.NONE
     image_binary_ = None
+    image_debug_ = None
     pid_ = None
     #control_points_ = [(220, 270),(220, 230),(220, 200),(220, 170)]
     control_points_ = [(220, 200)]
@@ -48,7 +49,23 @@ class LineFollowerModule:
         self.image_ = image
         self.input_mode_ = mode
 
-    def compute_angular_velocity(self) -> Optional[tuple[float, np.ndarray]]:
+    def get_image_binary(self) -> np.ndarray:
+        """
+        Call after `compute_angular_velocity`
+        """
+        if self.image_binary_ is not None:
+            return self.image_binary_
+        raise LineFollowerModuleError("Binary image has not yet been created")
+
+    def get_image_debug(self) -> np.ndarray:
+        """
+        Call after `compute_angular_velocity`
+        """
+        if self.image_debug_ is not None:
+            return self.image_debug_
+        raise LineFollowerModuleError("Debug image has not yet been created")
+
+    def compute_angular_velocity(self) -> Optional[float]:
         try:
             self.__process_image()
             contour = self.__compute_max_contour()
@@ -59,8 +76,8 @@ class LineFollowerModule:
                                  + " Skipping this update!")
             return None
 
-        debug_image = self.image_
-        cv.drawContours(image=debug_image, contours=[contour], contourIdx=-1, color=(0, 255, 0), thickness=3, lineType=cv.LINE_AA)
+        self.image_debug_ = self.image_
+        cv.drawContours(image=self.image_debug_, contours=[contour], contourIdx=-1, color=(0, 255, 0), thickness=3, lineType=cv.LINE_AA)
 
         turn_offset = 0
         error_sum = 0
@@ -79,8 +96,8 @@ class LineFollowerModule:
                 matching_mean = matching_sum / matching_count
                 error_sum += matching_mean - control_point[0]
 
-                cv.circle(debug_image, control_point,                          radius=5, color=(0, 0, 255), thickness=-1)
-                cv.circle(debug_image, (int(matching_mean), control_point[1]), radius=5, color=(255, 0, 0), thickness=-1)
+                cv.circle(self.image_debug_, control_point,                          radius=5, color=(0, 0, 255), thickness=-1)
+                cv.circle(self.image_debug_, (int(matching_mean), control_point[1]), radius=5, color=(255, 0, 0), thickness=-1)
 
         error_mean = error_sum / len(self.control_points_)
 
@@ -93,7 +110,7 @@ class LineFollowerModule:
 
         u = self.pid_.pid(error_mean, 0) + turn_offset
         u = np.clip(u, self.min_u_, self.max_u_)
-        return u, debug_image
+        return u
 
     def __is_in_polygon(self, polygon: np.ndarray, point: tuple) -> bool:
         return cv.pointPolygonTest(polygon, point, False) >= 0
