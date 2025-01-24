@@ -24,7 +24,8 @@ class LineFollowerNoCamm(Node):
                 ('Ti', Parameter.Type.DOUBLE),
                 ('Td', Parameter.Type.DOUBLE),
                 ('turnOffsetParam', Parameter.Type.DOUBLE),
-                ('linearSpeed', Parameter.Type.DOUBLE)
+                ('linearSpeed', Parameter.Type.DOUBLE),
+                ('processedImage', Parameter.Type.BOOL)
             ]
         )
         self.logger.info("LLL")
@@ -32,15 +33,18 @@ class LineFollowerNoCamm(Node):
         self.minU = -self.maxU
         self.speed = self.get_parameter("linearSpeed").get_parameter_value().double_value
         self.turnOffsetParam = self.get_parameter("turnOffsetParam").get_parameter_value().double_value
+        processedImage = self.get_parameter("processedImage").get_parameter_value().bool_value
         timer_period = self.get_parameter("timer_period").get_parameter_value().double_value
         K = self.get_parameter("K").get_parameter_value().double_value
         Ti = self.get_parameter("Ti").get_parameter_value().double_value
         Td = self.get_parameter("Td").get_parameter_value().double_value
 
-        self.logger.info(f"timer_period: { timer_period}, maxU: {self.maxU}, K: {K}, Ti:{Ti}")
-        self.logger.info(f"Td: {Td},turnOffsetParam: {self.turnOffsetParam}, speed: {self.speed}, namespace:{self.get_namespace()}")
+        self.logger.info(f"timer_period: { timer_period}, maxU: {self.maxU}, K: {K}, Ti: {Ti}")
+        self.logger.info(f"Td: {Td}, turnOffsetParam: {self.turnOffsetParam}, speed: {self.speed}"
+                         + f", processedImage: {processedImage}, namespace:{self.get_namespace()}")
 
         self.line_follower = LineFollowerModule(timer_period, K, Ti, Td, self.minU, self.maxU, self.turnOffsetParam, self.get_logger())
+        self.line_follower_input_mode = LineFollowerModule.InputMode.PROCESSED if processedImage else LineFollowerModule.InputMode.RAW
 
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
@@ -53,7 +57,7 @@ class LineFollowerNoCamm(Node):
 
     def listener_callback(self, msg):
         thresh = self.bridge.imgmsg_to_cv2(msg)
-        self.line_follower.set_image(thresh, LineFollowerModule.InputMode.PROCESSED)
+        self.line_follower.set_image(thresh, self.line_follower_input_mode)
 
     def timer_callback(self):
         if not self.is_working:
