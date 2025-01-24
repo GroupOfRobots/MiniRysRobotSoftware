@@ -8,7 +8,7 @@ detector:
     focal_length: 3.15
     width_side: 95.0
     width_front: 68.0
-    K: 1.21
+    K: 1.20
     Ti: 100.0
     Td: 0.07
     linearSpeed: 0.05
