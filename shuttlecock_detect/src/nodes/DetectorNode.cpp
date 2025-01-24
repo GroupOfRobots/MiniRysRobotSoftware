@@ -173,12 +173,14 @@ void Detector::timer_callback()
                 {
                     RCLCPP_INFO_STREAM(this->get_logger(), "ROTATING");
                     state_ = ROTATING;
+                    action_client_->async_cancel_all_goals();
                 }
             }
             else
             {
                 RCLCPP_INFO_STREAM(this->get_logger(), "ROTATING");
                 state_ = ROTATING;
+                action_client_->async_cancel_all_goals();
             }
         }
         else if(state_ == ROTATING)
