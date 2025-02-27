@@ -32,7 +32,6 @@ find_package(vl53l1x-linux REQUIRED)
 find_package(l6470-linux REQUIRED)
 find_package(ldlidar_stl_ros2 REQUIRED)
 
-
 include_directories(include)
 
 ######
@@ -122,6 +121,18 @@ ament_target_dependencies(ServoNode
   std_msgs
 )
 target_link_libraries(ServoNode
+  sbc-linux-interfaces
+)
+# Servo grabber
+add_library(GrabberControllerNode
+  src/nodes/GrabberControllerNode.cpp
+)
+ament_target_dependencies(GrabberControllerNode
+  rclcpp
+  sbc-linux-interfaces
+  std_msgs
+)
+target_link_libraries(GrabberControllerNode
   sbc-linux-interfaces
 )
 # Motors
@@ -293,11 +304,19 @@ add_executable(fan
   src/executables/fan.cpp
 )
 
+add_executable(grabber
+  src/executables/grabber_controller.cpp
+)
+
 add_executable(servo
   src/executables/servo.cpp
 )
 target_link_libraries(servo
   ServoNode
+  RTTExecutor
+)
+target_link_libraries(grabber
+  GrabberControllerNode
   RTTExecutor
 )
 target_link_libraries(fan
@@ -320,6 +339,7 @@ add_executable(minirys_ve
 target_link_libraries(minirys_ve
   FanNode
   ServoNode
+  GrabberControllerNode
   MotorsNode
   RTTExecutor
 )
@@ -398,6 +418,7 @@ install(
   TARGETS
     battery
     distance
+    grabber
     fan
     servo
     joycon_receiver_node
@@ -445,3 +466,4 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
+
