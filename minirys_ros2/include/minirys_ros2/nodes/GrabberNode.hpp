@@ -7,13 +7,13 @@
 
 #include <PWMPin.hpp>
 
-class GrabberControllerNode: public rclcpp::Node {
+class GrabberNode: public rclcpp::Node {
 public:
-	RCLCPP_SMART_PTR_DEFINITIONS(GrabberControllerNode);
+	RCLCPP_SMART_PTR_DEFINITIONS(GrabberNode);
 
-	explicit GrabberControllerNode(rclcpp::NodeOptions options);
+	explicit GrabberNode(rclcpp::NodeOptions options);
 
-	~GrabberControllerNode() override;
+	~GrabberNode() override;
 
 private:
 	PWMPin::SharedPtr pwm;

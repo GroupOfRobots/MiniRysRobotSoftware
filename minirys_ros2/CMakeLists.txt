@@ -124,15 +124,15 @@ target_link_libraries(ServoNode
   sbc-linux-interfaces
 )
 # Servo grabber
-add_library(GrabberControllerNode
-  src/nodes/GrabberControllerNode.cpp
+add_library(GrabberNode
+  src/nodes/GrabberNode.cpp
 )
-ament_target_dependencies(GrabberControllerNode
+ament_target_dependencies(GrabberNode
   rclcpp
   sbc-linux-interfaces
   std_msgs
 )
-target_link_libraries(GrabberControllerNode
+target_link_libraries(GrabberNode
   sbc-linux-interfaces
 )
 # Motors
@@ -305,7 +305,7 @@ add_executable(fan
 )
 
 add_executable(grabber
-  src/executables/grabber_controller.cpp
+  src/executables/grabber.cpp
 )
 
 add_executable(servo
@@ -316,7 +316,7 @@ target_link_libraries(servo
   RTTExecutor
 )
 target_link_libraries(grabber
-  GrabberControllerNode
+  GrabberNode
   RTTExecutor
 )
 target_link_libraries(fan
@@ -339,7 +339,7 @@ add_executable(minirys_ve
 target_link_libraries(minirys_ve
   FanNode
   ServoNode
-  GrabberControllerNode
+  GrabberNode
   MotorsNode
   RTTExecutor
 )

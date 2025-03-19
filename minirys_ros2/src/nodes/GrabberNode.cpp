@@ -1,4 +1,4 @@
-#include "minirys_ros2/nodes/GrabberControllerNode.hpp"
+#include "minirys_ros2/nodes/GrabberNode.hpp"
 
 #include <chrono>
 #include <functional>
@@ -7,7 +7,7 @@ using namespace std::chrono_literals;
 using std::placeholders::_1;
 
 
-GrabberControllerNode::GrabberControllerNode(rclcpp::NodeOptions options):
+GrabberNode::GrabberNode(rclcpp::NodeOptions options):
 	Node("servo_ve", options),
 	output(0.125f) {
 	this->declare_parameter("pwmFrequency", rclcpp::ParameterValue(50.0));
@@ -35,13 +35,13 @@ GrabberControllerNode::GrabberControllerNode(rclcpp::NodeOptions options):
 	this->grabberStateSubscriber = this->create_subscription<std_msgs::msg::Bool>(
 		"minirys3/servo_status",
 		10,
-		std::bind(&GrabberControllerNode::receiveGrabberState, this, _1)
+		std::bind(&GrabberNode::receiveGrabberState, this, _1)
 	);
 
-	this->updateTimer = this->create_wall_timer(period, std::bind(&GrabberControllerNode::update, this));
+	this->updateTimer = this->create_wall_timer(period, std::bind(&GrabberNode::update, this));
 }
 
-GrabberControllerNode::~GrabberControllerNode() {
+GrabberNode::~GrabberNode() {
 
 	this->pwm->setDuty(this->closeDuty);
 	std::this_thread::sleep_for(500ms);
@@ -49,11 +49,11 @@ GrabberControllerNode::~GrabberControllerNode() {
 	RCLCPP_INFO_STREAM(this->get_logger(), "PWM: disabled");
 }
 
-void GrabberControllerNode::receiveGrabberState(const std_msgs::msg::Bool::SharedPtr message) {
+void GrabberNode::receiveGrabberState(const std_msgs::msg::Bool::SharedPtr message) {
 	this->is_closed = message->data;
 }
 
-void GrabberControllerNode::update() {
+void GrabberNode::update() {
     if (this->is_closed) {
 	    this->pwm->setDuty(this->openDuty);
 		RCLCPP_INFO_STREAM(this->get_logger(), "PWM: servo open");
