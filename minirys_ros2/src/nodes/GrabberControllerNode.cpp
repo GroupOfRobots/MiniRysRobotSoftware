@@ -19,19 +19,19 @@ GrabberControllerNode::GrabberControllerNode(rclcpp::NodeOptions options):
 	RCLCPP_INFO_STREAM(this->get_logger(), "Got param: pwmFrequency " << pwmFrequency);
 
 	RCLCPP_INFO_STREAM(this->get_logger(), "PWM: initializing");
-    this->is_open = false;
+    this->is_closed = false;
 	this->pin = 13;
 	this->pwm = PWMPin::makeShared(0, 1);
 	this->pwm->setFrequency(pwmFrequency);
     // this->min_pulse_width = 700;
 	// this->pwm->max_pulse_width = 2300;
-	this->is_open = false;
+	this->is_closed = false;
 	float PWMperiod = 1000000.0 / pwmFrequency;
 	// limity to 700 i 2300
-	this->openDuty = 1200 / PWMperiod;
-	RCLCPP_INFO_STREAM(this->get_logger(), "Got openDuty " << this->openDuty);
-	this->closeDuty = 1500 / PWMperiod;
+	this->closeDuty = 1150 / PWMperiod;
 	RCLCPP_INFO_STREAM(this->get_logger(), "Got closeDuty " << this->closeDuty);
+	this->openDuty = 2080 / PWMperiod;
+	RCLCPP_INFO_STREAM(this->get_logger(), "Got openDuty " << this->openDuty);
 
 	// this->pwm->setDuty(0.2);
 	this->pwm->enable();
@@ -43,7 +43,7 @@ GrabberControllerNode::GrabberControllerNode(rclcpp::NodeOptions options):
 GrabberControllerNode::~GrabberControllerNode() { // wyłączenie
 	// this->setOpenPosition();
 	
-	this->pwm->setDuty(this->openDuty);
+	this->pwm->setDuty(this->closeDuty);
 	std::this_thread::sleep_for(500ms);
 	this->pwm->disable();
 	RCLCPP_INFO_STREAM(this->get_logger(), "PWM: disabled");
@@ -51,15 +51,15 @@ GrabberControllerNode::~GrabberControllerNode() { // wyłączenie
 
 void GrabberControllerNode::update() {
 	// otwiaramy jesli byl zamkniety, zamykamy jesli byl otwarty
-    if (this->is_open) {
-	    this->pwm->setDuty(this->closeDuty); // 0 stopni
-        this->is_open = false;
-		RCLCPP_INFO_STREAM(this->get_logger(), "PWM: servo closed");
+    if (this->is_closed) {
+	    this->pwm->setDuty(this->openDuty); // 0 stopni
+        this->is_closed = false;
+		RCLCPP_INFO_STREAM(this->get_logger(), "PWM: servo open");
     }
     else {
-        this->pwm->setDuty(this->openDuty); // 180 stopni
-        this->is_open = true;
-		RCLCPP_INFO_STREAM(this->get_logger(), "PWM: servo open");
+        this->pwm->setDuty(this->closeDuty); // 180 stopni
+        this->is_closed = true;
+		RCLCPP_INFO_STREAM(this->get_logger(), "PWM: servo closed");
     }
 }
 

@@ -25,7 +25,7 @@ private:
 
 	float closeDuty;
 
-    bool is_open;
+    bool is_closed;
 
 	rclcpp::TimerBase::SharedPtr updateTimer;
 
