@@ -4,7 +4,7 @@ from launch import actions, launch_description_sources, LaunchDescription,  subs
 from launch_ros.actions import Node
 
 def generate_launch_description():
-
+    namespace_value = os.environ.get("NAMESPACE")
     config = os.path.join(
         get_package_share_directory('shuttlecock_detect'),
         'config',
@@ -14,6 +14,7 @@ def generate_launch_description():
         package = 'shuttlecock_detect',
         name = 'detector',
         executable = 'detector',
+        namespace=namespace_value,
         parameters = [config]
     )
 

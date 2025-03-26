@@ -26,8 +26,23 @@ find_package(ncnn REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(behaviortree_ros2 REQUIRED)
+find_package(std_srvs REQUIRED)
+find_package(btcpp_ros2_interfaces REQUIRED)
 
-
+set(THIS_PACKAGE_DEPS
+    behaviortree_ros2
+    std_msgs
+    std_srvs
+    rclcpp
+    rclcpp_action
+    sensor_msgs
+    geometry_msgs
+    nav_msgs
+    nav2_msgs
+    tf2_ros
+    btcpp_ros2_interfaces
+    )
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -65,6 +80,103 @@ rclcpp std_msgs sensor_msgs cv_bridge OpenCV ncnn nav_msgs nav2_msgs rclcpp_acti
 )
 target_link_libraries(DetectorNode Yolov7 PIDRegulator)
 
+add_library(DistancesNode
+  src/nodes/DistancesNode.cpp 
+)
+ament_target_dependencies(DistancesNode
+rclcpp std_msgs sensor_msgs cv_bridge OpenCV ncnn nav_msgs nav2_msgs rclcpp_action geometry_msgs tf2_ros
+)
+target_link_libraries(DistancesNode Yolov7)
+
+add_library(DeliverShuttlecockServer
+src/servers/DeliverShuttlecockServer.cpp
+)
+ament_target_dependencies(DeliverShuttlecockServer ${THIS_PACKAGE_DEPS})
+
+add_library(BackUpServer
+src/servers/BackUpServer.cpp
+)
+ament_target_dependencies(BackUpServer ${THIS_PACKAGE_DEPS})
+
+add_library(GetToShuttlecockServer
+src/servers/GetToShuttlecockServer.cpp
+)
+ament_target_dependencies(GetToShuttlecockServer ${THIS_PACKAGE_DEPS})
+
+add_library(PickShuttlecockServer
+src/servers/PickShuttlecockServer.cpp
+)
+ament_target_dependencies(PickShuttlecockServer ${THIS_PACKAGE_DEPS})
+
+add_library(RotateServer
+src/servers/RotateServer.cpp
+)
+ament_target_dependencies(RotateServer ${THIS_PACKAGE_DEPS})
+target_link_libraries(RotateServer PIDRegulator)
+
+add_library(SearchingShuttlecockServer
+src/servers/SearchingShuttlecockServer.cpp
+)
+ament_target_dependencies(SearchingShuttlecockServer ${THIS_PACKAGE_DEPS})
+
+add_executable(server_executor
+  src/executables/server_executor.cpp
+)
+target_link_libraries(server_executor
+  SearchingShuttlecockServer
+  RotateServer
+  PickShuttlecockServer
+  GetToShuttlecockServer
+  BackUpServer
+  DeliverShuttlecockServer
+  DistancesNode
+)
+ament_target_dependencies(server_executor ${THIS_PACKAGE_DEPS})
+
+add_library(BackUpAction
+src/actions/BackUpAction.cpp
+)
+ament_target_dependencies(BackUpAction ${THIS_PACKAGE_DEPS})
+
+add_library(DeliverShuttlecockAction
+src/actions/DeliverShuttlecockAction.cpp
+)
+ament_target_dependencies(DeliverShuttlecockAction ${THIS_PACKAGE_DEPS})
+
+add_library(GetToShuttlecockAction
+src/actions/GetToShuttlecockAction.cpp
+)
+ament_target_dependencies(GetToShuttlecockAction ${THIS_PACKAGE_DEPS})
+
+add_library(PickShuttlecockAction
+src/actions/PickShuttlecockAction.cpp
+)
+ament_target_dependencies(PickShuttlecockAction ${THIS_PACKAGE_DEPS})
+
+add_library(RotateAction
+src/actions/RotateAction.cpp
+)
+ament_target_dependencies(RotateAction ${THIS_PACKAGE_DEPS})
+
+add_library(SearchingShuttlecockAction
+src/actions/SearchingShuttlecockAction.cpp
+)
+ament_target_dependencies(SearchingShuttlecockAction ${THIS_PACKAGE_DEPS})
+
+add_executable(client_executor
+  src/executables/client_executor.cpp
+)
+target_link_libraries(client_executor
+  SearchingShuttlecockAction
+  RotateAction
+  PickShuttlecockAction
+  GetToShuttlecockAction
+  BackUpAction
+  DeliverShuttlecockAction
+)
+ament_target_dependencies(client_executor ${THIS_PACKAGE_DEPS})
+
+
 add_executable(yolov7_time_test src/executables/yolov7_time_test.cpp)
 target_link_libraries(yolov7_time_test Yolov7 ncnn)
 ament_target_dependencies(yolov7_time_test OpenCV ncnn)
@@ -92,6 +204,13 @@ install(TARGETS
    DESTINATION lib/${PROJECT_NAME}
 )
 
+install(TARGETS
+  server_executor
+  client_executor
+  EXPORT export_${PROJECT_NAME}
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 install(DIRECTORY
   launch
   DESTINATION share/${PROJECT_NAME}
@@ -105,6 +224,11 @@ install(DIRECTORY
 install(DIRECTORY
   weights
   DESTINATION share/${PROJECT_NAME}
+)
+
+install(DIRECTORY
+  behavior_trees
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 ament_package()

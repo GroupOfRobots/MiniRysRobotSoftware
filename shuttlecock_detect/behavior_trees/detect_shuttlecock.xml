@@ -1,0 +1,12 @@
+<root BTCPP_format="4">
+  <BehaviorTree ID="DetectShuttlecock">
+    <Sequence>
+      <SearchingShuttlecockAction/>
+      <GetToShuttlecockAction/>
+      <RotateAction/>
+      <PickShuttlecockAction/>
+      <DeliverShuttlecockAction/>
+      <BackUpAction/>
+    </Sequence>
+  </BehaviorTree>
+</root>
