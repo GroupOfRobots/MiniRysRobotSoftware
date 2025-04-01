@@ -6,6 +6,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 #include <chrono>
+#include <cv_bridge/cv_bridge.h>
 #include "shuttlecock_detect/helpers/Yolov7.hpp"
 #include <memory>
 #include <cmath>
@@ -31,13 +32,14 @@ using namespace std::chrono_literals;
 class Distances: public rclcpp::Node{
     public:
 
-    Distances();
+    Distances(rclcpp::NodeOptions options);
 
     private:
 
     void timer_callback();
     void image_callback(const sensor_msgs::msg::Image::SharedPtr msg);
     std::pair<float, float> calculate_dist();
+    rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<btcpp_ros2_interfaces::msg::DistancesAndTransform>::SharedPtr publisher_dat_;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_image_;
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -49,6 +51,5 @@ class Distances: public rclcpp::Node{
     float focal_length_;
     float width_side_;
     float width_front_;
-    DetectorStates state_;
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 };

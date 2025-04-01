@@ -10,6 +10,8 @@
 #include "shuttlecock_detect/actions/PickShuttlecockAction.hpp"
 #include "shuttlecock_detect/actions/RotateAction.hpp"
 #include "shuttlecock_detect/actions/SearchingShuttlecockAction.hpp"
+#include <chrono>
+#include <thread>
 
 
 using namespace std;
@@ -19,6 +21,7 @@ using namespace BT;
 int main(int argc, char** argv)
 {
     rclcpp::init(argc, argv);
+    std::this_thread::sleep_for(std::chrono::seconds(5));
     BehaviorTreeFactory factory;
     // BackUpAction
     auto bn = std::make_shared<rclcpp::Node>("back_up_client");
@@ -57,10 +60,10 @@ int main(int argc, char** argv)
     paramsSn.default_port_value = "searching_shuttlecock_service";
     factory.registerNodeType<SearchingShuttlecockAction>("SearchingShuttlecockAction", paramsSn);
 
-    string package_share_directory = ament_index_cpp::get_package_share_directory("shuttlecock_detector_tree");
+    string package_share_directory = ament_index_cpp::get_package_share_directory("shuttlecock_detect");
         auto tree = factory.createTreeFromFile(package_share_directory+"/behavior_trees/detect_shuttlecock.xml");
 
-    for(int i = 0; i < 5; i++)
+    while (rclcpp::ok())
     {
         tree.tickWhileRunning();
     }

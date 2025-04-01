@@ -36,16 +36,18 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: timer_period " << timer_period_);
 
     //publishers
-    publisher_isCoverage_ =  this->create_publisher<std_msgs::msg::Bool>("/minirys2/coverage", 10);
+    publisher_isCoverage_ =  this->create_publisher<std_msgs::msg::Bool>("coverage", 10);
     publisher_vocity_ =
-    this->create_publisher<geometry_msgs::msg::Twist>("/minirys2/cmd_vel", 10);
+    this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
     //subscribers
     subscription_dat_ = this->create_subscription<btcpp_ros2_interfaces::msg::DistancesAndTransform>(
-        "/distances", 10, std::bind(&RotateServer::distance_callback, this, std::placeholders::_1));
+        "distances", 10, std::bind(&RotateServer::distance_callback, this, std::placeholders::_1));
 
     //actions
-    action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(this, "minirys2/navigate_to_pose");
+    action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(this, "navigate_to_pose");
+
+    distance_ = -1.0;
   }
 
   rclcpp_action::GoalResponse RotateServer::handle_goal(const rclcpp_action::GoalUUID&,
@@ -76,7 +78,6 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     auto feedback = std::make_shared<Standard::Feedback>();
     auto result = std::make_shared<Standard::Result>();
     int rotateNoShCounter = 0;
-    rclcpp::Rate loop_rate(timer_period_);
 
     while(rclcpp::ok())
     {
@@ -111,7 +112,7 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
           RCLCPP_INFO(this->get_logger(), "Goal fail");
           break;
       }
-      loop_rate.sleep();
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
   }
 

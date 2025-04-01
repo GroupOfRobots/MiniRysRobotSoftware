@@ -1,10 +1,10 @@
 #include <rclcpp/rclcpp.hpp>
-#include "shuttlecock_detector_tree/servers/BackUpServer.hpp"
-#include "shuttlecock_detector_tree/servers/DeliverShuttlecockServer.hpp"
-#include "shuttlecock_detector_tree/servers/GetToShuttlecockServer.hpp"
-#include "shuttlecock_detector_tree/servers/PickShuttlecockServer.hpp"
-#include "shuttlecock_detector_tree/servers/RotateServer.hpp"
-#include "shuttlecock_detector_tree/servers/SearchingShuttlecockServer.hpp"
+#include "shuttlecock_detect/servers/BackUpServer.hpp"
+#include "shuttlecock_detect/servers/DeliverShuttlecockServer.hpp"
+#include "shuttlecock_detect/servers/GetToShuttlecockServer.hpp"
+#include "shuttlecock_detect/servers/PickShuttlecockServer.hpp"
+#include "shuttlecock_detect/servers/RotateServer.hpp"
+#include "shuttlecock_detect/servers/SearchingShuttlecockServer.hpp"
 #include "shuttlecock_detect/nodes/DistancesNode.hpp"
 
 
@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 	rclcpp::NodeOptions options;
 	options.use_intra_process_comms(true);
 
-	auto distances = std::make_shared<Distances>();
+	auto distances = std::make_shared<Distances>(options);
 	auto backUpServer = std::make_shared<BackUpServer>(options);
 	auto deliverShuttlecockServer = std::make_shared<DeliverShuttlecockServer>(options);
 	auto getToShuttlecockServer = std::make_shared<GetToShuttlecockServer>(options);

@@ -18,13 +18,14 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: timer_period " << timer_period_);
 
     //publishers
-    publisher_goal_= this->create_publisher<geometry_msgs::msg::PoseStamped>("/minirys2/goal_pose", 10);
-    publisher_isCoverage_ =  this->create_publisher<std_msgs::msg::Bool>("/minirys2/coverage", 10);
+    publisher_goal_= this->create_publisher<geometry_msgs::msg::PoseStamped>("goal_pose", 10);
+    publisher_isCoverage_ =  this->create_publisher<std_msgs::msg::Bool>("coverage", 10);
 
     //subscribers
     subscription_dat_ = this->create_subscription<btcpp_ros2_interfaces::msg::DistancesAndTransform>(
-        "/distances", 10, std::bind(&SearchingShuttlecockServer::distance_callback, this, std::placeholders::_1));
+        "distances", 10, std::bind(&SearchingShuttlecockServer::distance_callback, this, std::placeholders::_1));
 
+    distance_ = -1.0;
   }
 
   rclcpp_action::GoalResponse SearchingShuttlecockServer::handle_goal(const rclcpp_action::GoalUUID&,
@@ -57,16 +58,16 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     RCLCPP_INFO(this->get_logger(), "Executing goal");
     auto feedback = std::make_shared<Standard::Feedback>();
     auto result = std::make_shared<Standard::Result>();
-    rclcpp::Rate loop_rate(timer_period_);
 
     while(rclcpp::ok())
     {
       if(distance_ != -1.0)
       {
+          RCLCPP_INFO(this->get_logger(), "Lotka");
           this->send_goal();
           break;
       }
-      loop_rate.sleep();
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
     
     if(rclcpp::ok())

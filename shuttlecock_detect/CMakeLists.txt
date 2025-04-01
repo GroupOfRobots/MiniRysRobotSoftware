@@ -84,7 +84,8 @@ add_library(DistancesNode
   src/nodes/DistancesNode.cpp 
 )
 ament_target_dependencies(DistancesNode
-rclcpp std_msgs sensor_msgs cv_bridge OpenCV ncnn nav_msgs nav2_msgs rclcpp_action geometry_msgs tf2_ros
+rclcpp std_msgs sensor_msgs cv_bridge OpenCV ncnn nav_msgs nav2_msgs 
+rclcpp_action geometry_msgs tf2_ros btcpp_ros2_interfaces
 )
 target_link_libraries(DistancesNode Yolov7)
 

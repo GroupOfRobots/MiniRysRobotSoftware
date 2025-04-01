@@ -28,12 +28,13 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
 
     //publishers
     publisher_vocity_ =
-    this->create_publisher<geometry_msgs::msg::Twist>("/minirys2/cmd_vel", 10);
+    this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
     //subscribers
     subscription_dat_ = this->create_subscription<btcpp_ros2_interfaces::msg::DistancesAndTransform>(
-        "/distances", 10, std::bind(&PickShuttlecockServer::distance_callback, this, std::placeholders::_1));
+        "distances", 10, std::bind(&PickShuttlecockServer::distance_callback, this, std::placeholders::_1));
 
+    distance_ = -1.0;
   }
 
   rclcpp_action::GoalResponse PickShuttlecockServer::handle_goal(const rclcpp_action::GoalUUID&,
@@ -63,7 +64,6 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     RCLCPP_INFO(this->get_logger(), "Executing goal");
     auto feedback = std::make_shared<Standard::Feedback>();
     auto result = std::make_shared<Standard::Result>();
-    rclcpp::Rate loop_rate(timer_period_);
 
     while(rclcpp::ok())
     {
@@ -94,7 +94,7 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
           RCLCPP_INFO(this->get_logger(), "Goal fail");
           break;
       }
-      loop_rate.sleep();
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
   }
 

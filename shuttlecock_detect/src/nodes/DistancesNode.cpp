@@ -4,7 +4,7 @@
 using namespace std::chrono_literals;
 
 
-Distances::Distances() : Node("distances") 
+Distances::Distances(rclcpp::NodeOptions options) : Node("distances", options) 
 {
     //declare parameters
     this->declare_parameter("target_size", rclcpp::ParameterValue(650));
@@ -37,17 +37,17 @@ Distances::Distances() : Node("distances")
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: width_front " << width_front_);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: width_side " << width_side_);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: focal_length " << focal_length_);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: timer_period " << timer_period);
 
     //publishers
-    publisher_dat_ = this->create_publisher<btcpp_ros2_interfaces::msg::DistancesAndTransfor>("/distances", 10);
-    timer_ = this->create_wall_timer(std::chrono::duration<double>(timer_period), std::bind(&Detector::timer_callback, this));
+    publisher_dat_ = this->create_publisher<btcpp_ros2_interfaces::msg::DistancesAndTransform>("distances", 10);
+    timer_ = this->create_wall_timer(std::chrono::duration<double>(timer_period), std::bind(&Distances::timer_callback, this));
 
     //subscribers
     subscription_image_ = this->create_subscription<sensor_msgs::msg::Image>(
-        "/cv_video_frames_plain_img", 10, std::bind(&Detector::image_callback, this, std::placeholders::_1));
+        "/cv_video_frames_plain_img", 10, std::bind(&Distances::image_callback, this, std::placeholders::_1));
 
     //actions
-    action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(this, "minirys2/navigate_to_pose");
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 }
@@ -88,8 +88,6 @@ std::pair<float, float> Distances::calculate_dist()
     std::vector<Object> objects;
     yolov7_->detect(detected_img_, objects, prob_threshold_, nms_threshold_);
     yolov7_->draw(detected_img_, objects);
-    auto msg_img = cv_bridge::CvImage(std_msgs::msg::Header(), "rgb8", detected_img_).toImageMsg();
-    publisher_detected_->publish(*msg_img);
     float dist, deltX;
     float focal_px = focal_length_ * (float)detected_img_.size().width/3.6;
     if(objects.size() > 0)

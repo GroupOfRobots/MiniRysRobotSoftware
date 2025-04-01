@@ -41,7 +41,10 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     rclcpp::Rate loop_rate(5);
     auto feedback = std::make_shared<Standard::Feedback>();
     auto result = std::make_shared<Standard::Result>();
-
+    while(true)
+    {
+      
+    }
     // Check if goal is done
     if(rclcpp::ok())
     {
