@@ -45,7 +45,6 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
         "distances", 10, std::bind(&RotateServer::distance_callback, this, std::placeholders::_1));
 
     //actions
-    action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(this, "navigate_to_pose");
 
     distance_ = -1.0;
   }
@@ -112,7 +111,7 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
           RCLCPP_INFO(this->get_logger(), "Goal fail");
           break;
       }
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      std::this_thread::sleep_for(std::chrono::milliseconds((int)(timer_period_*1000.0f)));
     }
   }
 

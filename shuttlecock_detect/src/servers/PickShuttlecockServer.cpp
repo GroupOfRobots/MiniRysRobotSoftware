@@ -15,19 +15,19 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     
     //load parameters
     this->declare_parameter("stop_docking", rclcpp::ParameterValue(0.0));
-    this->declare_parameter("linearSpeed", rclcpp::ParameterValue(0.0));
+    this->declare_parameter("linear_speed", rclcpp::ParameterValue(0.0));
     this->declare_parameter("timer_period", rclcpp::ParameterValue(0.05));
  
-    this->linear_speed_ = this->get_parameter("linearSpeed").as_double();
+    this->linear_speed_ = this->get_parameter("linear_speed").as_double();
     timer_period_ = this->get_parameter("timer_period").as_double();
-    stop_docking_ = (float) this->get_parameter("stop_docking").as_double();;
+    stop_docking_ = (float) this->get_parameter("stop_docking").as_double();
 
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: timer_period " << timer_period_);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: linear speed " << linear_speed_);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: stop_docking " << stop_docking_);
 
     //publishers
-    publisher_vocity_ =
+    publisher_velocity_ =
     this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
     //subscribers
@@ -73,12 +73,12 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
           {
               auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
               msg_twist->linear.x = linear_speed_;
-              publisher_vocity_->publish(*msg_twist);
+              publisher_velocity_->publish(*msg_twist);
           }
           else
           {
               auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
-              publisher_vocity_->publish(*msg_twist);
+              publisher_velocity_->publish(*msg_twist);
               result->done = true;
               goal_handle->succeed(result);
               RCLCPP_INFO(this->get_logger(), "Goal succeeded");
@@ -88,13 +88,13 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
       else
       {
           auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
-          publisher_vocity_->publish(*msg_twist);
+          publisher_velocity_->publish(*msg_twist);
           result->done = false;
           goal_handle->succeed(result);
           RCLCPP_INFO(this->get_logger(), "Goal fail");
           break;
       }
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      std::this_thread::sleep_for(std::chrono::milliseconds((int)(timer_period_*1000.0f)));
     }
   }
 

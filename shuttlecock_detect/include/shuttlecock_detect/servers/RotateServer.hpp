@@ -37,7 +37,6 @@ private:
   void execute(const std::shared_ptr<GoalHandleStandard> goal_handle);
   void distance_callback(const btcpp_ros2_interfaces::msg::DistancesAndTransform::SharedPtr msg);
   rclcpp::Subscription<btcpp_ros2_interfaces::msg::DistancesAndTransform>::SharedPtr subscription_dat_;
-  rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr action_client_;
   rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_isCoverage_;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_vocity_;
   float stop_rotate_;

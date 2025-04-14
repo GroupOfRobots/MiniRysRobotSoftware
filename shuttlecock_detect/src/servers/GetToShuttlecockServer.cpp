@@ -108,7 +108,7 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
           }
       }
       ++counter;
-      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      std::this_thread::sleep_for(std::chrono::milliseconds((int)(timer_period_*1000.0)));
     }
   }
 
@@ -131,7 +131,9 @@ void GetToShuttlecockServer::send_goal()
     double x_offset = distance_ * std::cos(yaw) + deltX_ * std::sin(yaw);
     double y_offset = distance_ * std::sin(yaw) - deltX_ * std::cos(yaw);
     auto msg = geometry_msgs::msg::PoseStamped();
-    msg.header.frame_id = "minirys2/map";
+    std::string ns = this->get_namespace();
+    ns.erase(0, 1);
+    msg.header.frame_id = ns + "/map";
     msg.header.stamp = this->get_clock()->now();
     msg.pose.position.x = transform_.transform.translation.x + x_offset;
     msg.pose.position.y = transform_.transform.translation.y + y_offset;

@@ -3,9 +3,12 @@
 #include <functional>
 #include <memory>
 #include <thread>
+#include <chrono>
 #include "rclcpp/rclcpp.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "btcpp_ros2_interfaces/action/standard.hpp"
+#include "nav2_msgs/action/navigate_to_pose.hpp"
 #include "behaviortree_ros2/bt_action_node.hpp"
 
 using Standard = btcpp_ros2_interfaces::action::Standard;
@@ -29,5 +32,9 @@ private:
   void handle_accepted(const std::shared_ptr<GoalHandleStandard> goal_handle);
 
   void execute(const std::shared_ptr<GoalHandleStandard> goal_handle);
-  double timer_period_;
+  rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr action_client_;
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_velocity_;
+  double linear_speed_;
+  double back_up_dist_;
+  double rotate_speed_;
 };

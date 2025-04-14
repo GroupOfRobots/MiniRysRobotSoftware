@@ -38,7 +38,7 @@ private:
   void execute(const std::shared_ptr<GoalHandleStandard> goal_handle);
   void distance_callback(const btcpp_ros2_interfaces::msg::DistancesAndTransform::SharedPtr msg);
   rclcpp::Subscription<btcpp_ros2_interfaces::msg::DistancesAndTransform>::SharedPtr subscription_dat_;
-  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_vocity_;
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_velocity_;
   float distance_;
   float deltX_;
   geometry_msgs::msg::TransformStamped transform_;
