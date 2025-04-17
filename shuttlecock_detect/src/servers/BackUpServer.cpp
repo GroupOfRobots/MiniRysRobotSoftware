@@ -28,7 +28,9 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     publisher_velocity_ =
     this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
-    action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(this, "navigate_to_pose");
+    publisher_cancel_ = this->create_publisher<std_msgs::msg::Bool>(
+    "stop_navigate", 
+    10);
   }
 
   rclcpp_action::GoalResponse BackUpServer::handle_goal(const rclcpp_action::GoalUUID&,
@@ -55,7 +57,8 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
   void BackUpServer::execute(const std::shared_ptr<GoalHandleStandard> goal_handle)
   {
     RCLCPP_INFO(this->get_logger(), "Executing goal");
-    action_client_->async_cancel_all_goals();
+    std_msgs::msg::Bool cancel_msg;
+    publisher_cancel_->publish(cancel_msg);
     auto feedback = std::make_shared<Standard::Feedback>();
     auto result = std::make_shared<Standard::Result>();
     auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();

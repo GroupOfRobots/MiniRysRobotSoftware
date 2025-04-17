@@ -39,8 +39,8 @@ private:
   std::pair<float, float> calculate_dist();
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr publisher_goal_;
   rclcpp::Subscription<btcpp_ros2_interfaces::msg::DistancesAndTransform>::SharedPtr subscription_dat_;
-  rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr action_client_;
   rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_isCoverage_;
+  rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_cancel_;
   float distance_;
   float deltX_;
   float stop_from_planner_;

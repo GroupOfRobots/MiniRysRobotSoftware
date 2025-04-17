@@ -11,7 +11,7 @@ def generate_launch_description():
             parameters=[
                 {'width': 640},
                 {'height': 480},
-                {'frame_interval': 0.5}
+                {'frame_interval': 0.7}
             ]
         ),
     ])

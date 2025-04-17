@@ -29,7 +29,10 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     subscription_dat_ = this->create_subscription<btcpp_ros2_interfaces::msg::DistancesAndTransform>(
         "distances", 10, std::bind(&GetToShuttlecockServer::distance_callback, this, std::placeholders::_1));
 
-    action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(this, "navigate_to_pose");
+    publisher_cancel_ = this->create_publisher<std_msgs::msg::Bool>(
+    "stop_navigate", 
+    10);
+
     distance_ = -1.0;
   }
 
@@ -77,7 +80,8 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
             result->done = true;
             goal_handle->succeed(result);
             RCLCPP_INFO(this->get_logger(), "Goal succeeded");
-            action_client_->async_cancel_all_goals();
+            std_msgs::msg::Bool cancel_msg;
+            publisher_cancel_->publish(cancel_msg);
             break;
           }
           
@@ -87,7 +91,8 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
         result->done = true;
         goal_handle->succeed(result);
         RCLCPP_INFO(this->get_logger(), "Goal succeeded");
-        action_client_->async_cancel_all_goals();
+        std_msgs::msg::Bool cancel_msg;
+        publisher_cancel_->publish(cancel_msg);
         break;
       }
       
@@ -95,11 +100,12 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
       {
           if(closer_counter <= 1)
           {
-            action_client_->async_cancel_all_goals();
-              result->done = false;
-              goal_handle->succeed(result);
-              RCLCPP_INFO(this->get_logger(), "Goal failed");
-              break;
+            std_msgs::msg::Bool cancel_msg;
+            publisher_cancel_->publish(cancel_msg);
+            result->done = false;
+            goal_handle->succeed(result);
+            RCLCPP_INFO(this->get_logger(), "Goal failed");
+            break;
           }
           else{
             auto msg_bool = std_msgs::msg::Bool();

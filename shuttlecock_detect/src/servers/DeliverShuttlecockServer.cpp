@@ -123,8 +123,7 @@ void DeliverShuttlecockServer::status_callback(const action_msgs::msg::GoalStatu
 double DeliverShuttlecockServer::distance(const geometry_msgs::msg::Point& p1, const geometry_msgs::msg::Point& p2) {
     double dx = p1.x - p2.x;
     double dy = p1.y - p2.y;
-    double dz = p1.z - p2.z;
-    return std::sqrt(dx * dx + dy * dy + dz * dz);
+    return std::sqrt(dx * dx + dy * dy);
 }
 
 bool DeliverShuttlecockServer::isRobotCloseToPose(

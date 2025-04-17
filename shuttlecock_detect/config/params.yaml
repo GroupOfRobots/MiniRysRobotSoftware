@@ -19,7 +19,7 @@
 
   distances:
     ros__parameters:
-      timer_period: 1.0
+      timer_period: 1.2
       nms_threshold: 0.35
       prob_threshold: 0.35
       target_size: 480
@@ -35,10 +35,10 @@
   rotate_action_server:
     ros__parameters:
       stop_rotate: 0.0055
-      K: 1.20
+      K: 1.10
       Ti: 100.0
       Td: 0.07
-      timer_period: 0.5
+      timer_period: 0.7
 
   pick_shuttlecock_action_server:
     ros__parameters:
@@ -60,4 +60,4 @@
   deliver_shuttlecock_action_server:
     ros__parameters:
       timer_period: 0.5
-      position_tolerance: 0.1
+      position_tolerance: 0.007
