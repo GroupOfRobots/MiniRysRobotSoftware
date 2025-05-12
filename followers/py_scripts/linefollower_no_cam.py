@@ -11,6 +11,7 @@ from linefollower_module import LineFollowerModule, LineFollowerModuleError
 class LineFollowerNoCamm(Node):
     bridge = CvBridge()
     is_working = True
+    recalculate_points = False  # If true recalculates follower points only on first callback
 
     def __init__(self):
         super().__init__('line_follower_no_cam')
@@ -57,6 +58,11 @@ class LineFollowerNoCamm(Node):
 
     def listener_callback(self, msg):
         thresh = self.bridge.imgmsg_to_cv2(msg)
+
+        if self.recalculate_points:
+            self.line_follower.recalculate_points(thresh, 0.05)
+            self.recalculate_points = False
+
         self.line_follower.set_image(thresh, self.line_follower_input_mode)
 
     def timer_callback(self):
