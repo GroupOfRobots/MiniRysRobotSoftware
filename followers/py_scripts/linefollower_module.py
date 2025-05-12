@@ -82,18 +82,13 @@ class LineFollowerModule:
         turn_offset = 0
         error_sum = 0
         for control_point in self.control_points_:
-            matching_sum = 0
-            matching_count = 0
-            for contour_point in contour:
-                contour_point = contour_point[0]  # This is necessary due to the way OpenCV works
+            # Find indices of points with matching Y coordinate
+            indices = np.asarray(contour[:,0,1] == control_point[1]).nonzero()
+            # Extract X coordinates
+            xs = contour[indices,0,0]
 
-                # Increment when vertical coordinate matches
-                if contour_point[1] == control_point[1]:
-                    matching_sum += contour_point[0]
-                    matching_count += 1
-
-            if matching_count != 0:
-                matching_mean = matching_sum / matching_count
+            if np.size(xs) != 0:
+                matching_mean = np.sum(xs) / np.size(xs)
                 error_sum += matching_mean - control_point[0]
 
                 cv.circle(self.image_debug_, control_point,                          radius=5, color=(0, 0, 255), thickness=-1)
@@ -101,11 +96,18 @@ class LineFollowerModule:
 
         error_mean = error_sum / len(self.control_points_)
 
+        # Draw circles for other control points
+        cv.circle(self.image_debug_, self.leftT_,     radius=5, color=(0, 0, 255), thickness=-1)
+        cv.circle(self.image_debug_, self.rightT_,    radius=5, color=(0, 0, 255), thickness=-1)
+
         # recognizing 90 degree turn
-        if self.__is_in_polygon(contour, self.leftT_) and not self.__is_in_polygon(contour, self.rightT_):
+        is_left_in_polygon = self.__is_in_polygon(contour, self.leftT_)
+        is_right_in_polygon = self.__is_in_polygon(contour, self.rightT_)
+
+        if is_left_in_polygon and not is_right_in_polygon:
             turn_offset = -self.turn_offset_#-1.0 #-1
 
-        elif not self.__is_in_polygon(contour, self.leftT_) and self.__is_in_polygon(contour, self.rightT_):
+        elif not is_left_in_polygon and is_right_in_polygon:
             turn_offset = self.turn_offset_#1.0 #1
 
         u = self.pid_.pid(error_mean, 0) + turn_offset
