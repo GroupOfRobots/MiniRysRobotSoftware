@@ -126,11 +126,14 @@ class LineFollowerModule:
             return
 
         elif self.InputMode.RAW == self.input_mode_:
-            gray = cv.cvtColor(self.image_, cv.COLOR_BGR2GRAY)
-            kernel = np.ones((5, 5), np.uint8)
-            img_erosion = cv.erode(gray, kernel, iterations=1)
+            processed = cv.blur(self.image_, (5, 5))
+            gray = cv.cvtColor(processed, cv.COLOR_BGR2GRAY)
 
-            _, thresh = cv.threshold(img_erosion, 127, 255, cv.THRESH_BINARY_INV)
+            # _, thresh = cv.threshold(gray, 178, 255, cv.THRESH_BINARY_INV)
+            _, thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
+
+            kernel = np.ones((5, 5), np.uint8)
+            thresh = cv.erode(thresh, kernel, iterations=1)
             self.image_binary_ = thresh
             return
 
