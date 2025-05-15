@@ -66,20 +66,20 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-ament_python_install_package(py_scripts)
+ament_python_install_package(followers)
 
 install(PROGRAMS
-  py_scripts/linefollower.py
+  followers/linefollower.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
 install(PROGRAMS
-  py_scripts/pid.py
+  followers/pid.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
 install(PROGRAMS
-  py_scripts/linefollower_no_cam.py
+  followers/linefollower_no_cam.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

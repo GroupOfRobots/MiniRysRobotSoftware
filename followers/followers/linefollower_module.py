@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-from pid import PID
+from followers.pid import PID
 from rclpy.impl.rcutils_logger import RcutilsLogger
 from rclpy.logging import get_logger
 from enum import Enum
