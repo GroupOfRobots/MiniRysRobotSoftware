@@ -42,15 +42,26 @@ class LineFollowerModule:
         self.turn_offset_ = turn_offset
         self.logger_ = logger if logger is not None else get_logger("LineFollowerModule")
 
-    def recalculate_points(self, image: np.ndarray, turn_point_ratio: float = 0.1) -> None:
+    def recalculate_points(self, image: np.ndarray, turn_point_horizontal_ratio: float = 0.1,
+                           turn_point_vertical_ratio: float = 0.5) -> None:
+        """
+        Recalculate control points
+
+        :param turn_point_horizontal_ratio: How far from the side edge of image the control points
+        should be located (defined as what part of the whole image; 0.1 is 10% of width from the side)
+
+        :param turn_point_vertical_ratio: How far from the top edge of the image the control points
+        should be located (defined as what part of teh whole image; 0.6 is 60% of height from the top)
+        """
         y = int(image.shape[0] * 0.5)
         x = int(image.shape[1] * 0.5)
         self.control_points_ = [ (x, y) ]
 
-        x = int(image.shape[1] * (1 - turn_point_ratio))
+        y = int(image.shape[0] * turn_point_vertical_ratio)
+        x = int(image.shape[1] * (1 - turn_point_horizontal_ratio))
         self.leftT_ = (x, y)
 
-        x = int(image.shape[1] * turn_point_ratio)
+        x = int(image.shape[1] * turn_point_horizontal_ratio)
         self.rightT_ = (x, y)
 
     def set_image(self, image: np.ndarray, mode: InputMode) -> None:
