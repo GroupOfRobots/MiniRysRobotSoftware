@@ -33,6 +33,7 @@
       Td: 0.03
       turnOffsetParam: 1.0
       linearSpeed: -0.055
+      processedImage: true
 
   combined_follower:
     ros__parameters:
