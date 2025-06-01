@@ -14,7 +14,8 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
         std::bind(&RotateServer::handle_accepted, this, _1));
 
         //declare parameters
-    this->declare_parameter("stop_rotate", rclcpp::ParameterValue(0.0));
+    this->declare_parameter("stop_rotate", rclcpp::ParameterValue(0.009));
+    this->declare_parameter("stop_rotate_dist", rclcpp::ParameterValue(0.14));
     this->declare_parameter("K", rclcpp::ParameterValue(0.0));
     this->declare_parameter("Ti", rclcpp::ParameterValue(0.0));
     this->declare_parameter("Td", rclcpp::ParameterValue(0.0));
@@ -25,6 +26,7 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     double Ti = this->get_parameter("Ti").as_double();
     double Td = this->get_parameter("Td").as_double();
     timer_period_ = this->get_parameter("timer_period").as_double();
+    stop_rotate_dist_ = (float) this->get_parameter("stop_rotate_dist").as_double();
     stop_rotate_ = (float) this->get_parameter("stop_rotate").as_double();
     this->pid_ = std::unique_ptr<PIDRegulator>(new PIDRegulator(timer_period_,
         (float) K,(float) Ti,(float) Td));
@@ -34,6 +36,7 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: K " << K);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: stop_rotate " << stop_rotate_);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: timer_period " << timer_period_);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: stop_rotate_dist " << stop_rotate_dist_);
 
     //publishers
     publisher_isCoverage_ =  this->create_publisher<std_msgs::msg::Bool>("coverage", 10);
@@ -80,9 +83,10 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
 
     while(rclcpp::ok())
     {
+      RCLCPP_INFO_STREAM(this->get_logger(), "DISTANCE_R: " << distance_ << "rot: " << deltX_);
       if(distance_ != -1.0)
       {
-          if(std::abs(deltX_) > stop_rotate_)
+          if(std::fabs(deltX_) > stop_rotate_ && distance_ > stop_rotate_dist_)
           {
               auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
               msg_twist->angular.z = pid_->pid(deltX_,0.0f);

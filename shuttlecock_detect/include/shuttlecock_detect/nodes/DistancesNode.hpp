@@ -40,6 +40,7 @@ class Distances: public rclcpp::Node{
     void image_callback(const sensor_msgs::msg::Image::SharedPtr msg);
     std::pair<float, float> calculate_dist();
     rclcpp::TimerBase::SharedPtr timer_;
+    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_detected_;
     rclcpp::Publisher<btcpp_ros2_interfaces::msg::DistancesAndTransform>::SharedPtr publisher_dat_;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_image_;
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;

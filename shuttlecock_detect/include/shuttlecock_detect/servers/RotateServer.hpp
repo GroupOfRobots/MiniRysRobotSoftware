@@ -44,5 +44,6 @@ private:
   float distance_;
   float deltX_;
   double timer_period_;
+  float stop_rotate_dist_;
   geometry_msgs::msg::TransformStamped transform_;
 };

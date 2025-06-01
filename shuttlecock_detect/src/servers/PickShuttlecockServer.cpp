@@ -17,14 +17,20 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     this->declare_parameter("stop_docking", rclcpp::ParameterValue(0.0));
     this->declare_parameter("linear_speed", rclcpp::ParameterValue(0.0));
     this->declare_parameter("timer_period", rclcpp::ParameterValue(0.05));
+    this->declare_parameter("stop_from_planner", rclcpp::ParameterValue(0.0));
+    this->declare_parameter("how_many_trys", rclcpp::ParameterValue(1));
  
     this->linear_speed_ = this->get_parameter("linear_speed").as_double();
     timer_period_ = this->get_parameter("timer_period").as_double();
     stop_docking_ = (float) this->get_parameter("stop_docking").as_double();
+    stop_from_planner_ = (float) this->get_parameter("stop_from_planner").as_double();
+    how_many_trys_ = this->get_parameter("how_many_trys").as_int();
 
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: timer_period " << timer_period_);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: linear speed " << linear_speed_);
     RCLCPP_INFO_STREAM(this->get_logger(), "Got param: stop_docking " << stop_docking_);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param: stop_from_planner " << stop_from_planner_);
+    RCLCPP_INFO_STREAM(this->get_logger(), "Got param:  how_many_trys " << how_many_trys_);
 
     //publishers
     publisher_velocity_ =
@@ -64,10 +70,12 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
     RCLCPP_INFO(this->get_logger(), "Executing goal");
     auto feedback = std::make_shared<Standard::Feedback>();
     auto result = std::make_shared<Standard::Result>();
+    int no_shuttlecock_counter_ = 0;
 
     while(rclcpp::ok())
     {
-      if(distance_ != -1.0)
+      RCLCPP_INFO_STREAM(this->get_logger(), "DISTANCE_P: " << distance_);
+      if(distance_ != -1.0 && distance_ < stop_from_planner_)
       {
           if(distance_ > stop_docking_)
           {
@@ -86,13 +94,17 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
           }
       }
       else
-      {
+      { 
+        if (no_shuttlecock_counter_ >= how_many_trys_)
+        {
           auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
           publisher_velocity_->publish(*msg_twist);
           result->done = false;
           goal_handle->succeed(result);
           RCLCPP_INFO(this->get_logger(), "Goal fail");
           break;
+        }
+        ++no_shuttlecock_counter_;
       }
       std::this_thread::sleep_for(std::chrono::milliseconds((int)(timer_period_*1000.0f)));
     }

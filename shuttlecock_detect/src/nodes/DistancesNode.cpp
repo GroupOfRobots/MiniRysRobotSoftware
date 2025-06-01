@@ -42,6 +42,7 @@ Distances::Distances(rclcpp::NodeOptions options) : Node("distances", options)
     //publishers
     publisher_dat_ = this->create_publisher<btcpp_ros2_interfaces::msg::DistancesAndTransform>("distances", 10);
     timer_ = this->create_wall_timer(std::chrono::duration<double>(timer_period), std::bind(&Distances::timer_callback, this));
+    publisher_detected_ = this->create_publisher<sensor_msgs::msg::Image>("/img_detect", 10);
 
     //subscribers
     subscription_image_ = this->create_subscription<sensor_msgs::msg::Image>(
@@ -88,6 +89,9 @@ std::pair<float, float> Distances::calculate_dist()
     std::vector<Object> objects;
     yolov7_->detect(detected_img_, objects, prob_threshold_, nms_threshold_);
     yolov7_->draw(detected_img_, objects);
+    yolov7_->draw(detected_img_, objects);
+    auto msg_img = cv_bridge::CvImage(std_msgs::msg::Header(), "rgb8", detected_img_).toImageMsg();
+    publisher_detected_->publish(*msg_img);
     float dist, deltX;
     float focal_px = focal_length_ * (float)detected_img_.size().width/3.6;
     if(objects.size() > 0)

@@ -45,4 +45,6 @@ private:
   float stop_docking_;
   double linear_speed_;
   double timer_period_;
+  float stop_from_planner_;
+  int how_many_trys_;
 };
