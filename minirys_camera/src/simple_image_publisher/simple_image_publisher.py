@@ -85,6 +85,15 @@ class SimpleImagePublisher(Node):
                                f"\nmain:  {config['main']}\nlores: {config['lores']}")
         self.picam2.configure(config)
 
+        print(f"Camera controls:\n{self.picam2.camera_controls}")
+        self.picam2.set_controls({
+            # "AeEnable": False,         # Disable auto-exposure
+            # "AwbEnable": False,        # Optionally disable auto white balance
+            # "ExposureTime": 1000,        # Use a short exposure time (near the minimum)
+            "ExposureValue": -2.5,        # Use a short exposure time (near the minimum)
+            # "AnalogueGain": 1.0,       # Use the minimal analogue gain
+        })
+
         self.picam2.start()
 
     def get_time_msg(self):
