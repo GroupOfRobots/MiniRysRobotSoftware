@@ -24,9 +24,9 @@ class SimpleImagePublisher(Node):
         self.publisher = self.create_publisher(Image, 'internal/camera', 10)
         self.publisher_lores = self.create_publisher(Image, 'internal/camera_low_res', 10)
 
-        frame_interval_main, frame_interval_lores = self.get_parameters()
+        frame_interval_main, frame_interval_lores, exposure_value = self.get_parameters()
 
-        self.configure_picamera()
+        self.configure_picamera(exposure_value)
 
         self.frame_id = 0
         self.frame_id_lores = 0
@@ -38,12 +38,15 @@ class SimpleImagePublisher(Node):
         self.declare_parameter('high_res_frequency', 5.0)
         frame_interval_main = 1.0 / self.get_parameter('high_res_frequency').value
 
-        self.declare_parameter('low_res_frequency', 10.0)
+        self.declare_parameter('low_res_frequency', 20.0)
         frame_interval_lores = 1.0 / self.get_parameter('low_res_frequency').value
 
-        return frame_interval_main, frame_interval_lores
+        self.declare_parameter('exposure_value', -2.0)
+        exposure_value = self.get_parameter('exposure_value').value
 
-    def configure_picamera(self):
+        return frame_interval_main, frame_interval_lores, exposure_value
+
+    def configure_picamera(self, exposure_value: float):
         self.picam2 = Picamera2()
 
         # https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf
@@ -74,7 +77,7 @@ class SimpleImagePublisher(Node):
             },
             lores={
                 'size': self.low_resolution,
-                # 'format': 'RGB888',  # Format is mandatory to be YUV420 on Pi 4
+                # 'format': 'RGB888',  # Format is mandatory to be YUV420 on Pi 4 in lores stream
             },
         )
 
@@ -87,11 +90,11 @@ class SimpleImagePublisher(Node):
 
         print(f"Camera controls:\n{self.picam2.camera_controls}")
         self.picam2.set_controls({
-            # "AeEnable": False,         # Disable auto-exposure
-            # "AwbEnable": False,        # Optionally disable auto white balance
-            # "ExposureTime": 1000,        # Use a short exposure time (near the minimum)
-            "ExposureValue": -2.0,        # Use a short exposure time (near the minimum)
-            # "AnalogueGain": 1.0,       # Use the minimal analogue gain
+            # "AeEnable": False,
+            # "AwbEnable": False,
+            # "ExposureTime": 1000,
+            "ExposureValue": exposure_value,
+            # "AnalogueGain": 1.0,
         })
 
         self.picam2.start()
