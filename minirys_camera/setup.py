@@ -11,7 +11,8 @@ setup(
               source_path + '/ros2_rpi_cv_camera',
               source_path + '/ros2_rpi_rest_camera',
               source_path + '/ros2_rpi_video_recorder',
-              source_path + '/simple_image_publisher'],
+              source_path + '/simple_image_publisher',
+              ],
     data_files=[
         ('share/ament_index/resource_index/packages',
          ['resource/' + package_name]),
@@ -30,8 +31,8 @@ setup(
             'ros2_rpi_camera = ' + source_path + '.ros2_rpi_camera.ros2_rpi_camera:main',
             'ros2_rpi_cv_camera = ' + source_path + '.ros2_rpi_cv_camera.ros2_rpi_cv_camera:main',
             'ros2_rpi_rest_camera = ' + source_path + '.ros2_rpi_rest_camera.ros2_rpi_rest_camera:main',
-            'ros2_rpi_video_recorder = ' + source_path + '.ros2_rpi_video_recorder.ros2_rpi_video_recorder:main'
-            'simple_image_publisher = ' + source_path + '.simple_image_publisher.simple_image_publisher:main'
+            'ros2_rpi_video_recorder = ' + source_path + '.ros2_rpi_video_recorder.ros2_rpi_video_recorder:main',
+            'simple_image_publisher = ' + source_path + '.simple_image_publisher.simple_image_publisher:main',
         ],
     },
 )
