@@ -1,6 +1,7 @@
 import rclpy
 from builtin_interfaces.msg import Time
 from picamera2 import Picamera2
+from libcamera import Transform
 from rclpy.node import Node  # Handles the creation of nodes
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
@@ -42,7 +43,23 @@ class SimpleImagePublisher(Node):
 
     def configure_picamera(self):
         self.picam2 = Picamera2()
-        config = self.picam2.create_preview_configuration(lores={"size": (self.width, self.height)})
+        # https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf
+        config = self.picam2.create_still_configuration(
+            main={
+                'size': (2592, 1944),  # full frame
+                'size': (1296, 972),  # full frame
+                'format': 'RGB888',  # Compatible with OpenCV BGR default encoding
+            },
+            buffer_count=2,
+            queue=True,
+            transform=Transform(hflip=True, vflip=True),  # Flip because camera is upside down with LiDAR up
+            # lores={"size": (self.width, self.height)},
+        )
+        # self.picam2.preview_configuration.main.size = (1296, 972)
+        # self.picam2.preview_configuration.main.format = 'RGB888'
+        # self.picam2.preview_configuration.align()
+        # self.picam2.configure('preview')
+        self.picam2.align_configuration(config)
         self.picam2.configure(config)
         self.picam2.start()
 
@@ -54,7 +71,7 @@ class SimpleImagePublisher(Node):
         return time_msg
 
     def image_callback(self):
-        yuv = self.picam2.capture_array('lores')
+        yuv = self.picam2.capture_array('main')
 
         image = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2RGB)
         image_msg  =self.bridge.cv2_to_imgmsg(image, 'bgr8')
