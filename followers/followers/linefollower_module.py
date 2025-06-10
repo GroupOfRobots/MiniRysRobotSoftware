@@ -25,6 +25,8 @@ class LineFollowerModule:
     leftT_ = (435, 270)
     rightT_ = (5, 270)
 
+    threshold_value = 127
+
     def __init__(
             self,
             step_time: float,
@@ -151,7 +153,7 @@ class LineFollowerModule:
             processed = cv.blur(self.image_, (5, 5))
             gray = cv.cvtColor(processed, cv.COLOR_BGR2GRAY)
 
-            _, thresh = cv.threshold(gray, 127, 255, cv.THRESH_BINARY_INV)
+            _, thresh = cv.threshold(gray, self.threshold_value, 255, cv.THRESH_BINARY_INV)
             # _, thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
 
             kernel = np.ones((5, 5), np.uint8)
