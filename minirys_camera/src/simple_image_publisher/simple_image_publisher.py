@@ -24,22 +24,24 @@ class SimpleImagePublisher(Node):
         self.publisher = self.create_publisher(Image, 'internal/camera', 10)
         self.publisher_lores = self.create_publisher(Image, 'internal/camera_low_res', 10)
 
-        self.declareParameters()
+        frame_interval_main, frame_interval_lores = self.get_parameters()
 
         self.configure_picamera()
 
         self.frame_id = 0
         self.frame_id_lores = 0
 
-        self.timer = self.create_timer(self.frame_interval_main, self.image_callback_lores)
-        self.timer_lores = self.create_timer(self.frame_interval_lores, self.image_callback)
+        self.timer = self.create_timer(frame_interval_main, self.image_callback)
+        self.timer_lores = self.create_timer(frame_interval_lores, self.image_callback_lores)
 
-    def declareParameters(self):
-        self.declare_parameter('high_res_frequency', 20.0)
-        self.frame_interval_main = 1.0 / self.get_parameter('high_res_frequency').value
+    def get_parameters(self):
+        self.declare_parameter('high_res_frequency', 5.0)
+        frame_interval_main = 1.0 / self.get_parameter('high_res_frequency').value
 
-        self.declare_parameter('low_res_frequency', 5.0)
-        self.frame_interval_lores = 1.0 / self.get_parameter('low_res_frequency').value
+        self.declare_parameter('low_res_frequency', 10.0)
+        frame_interval_lores = 1.0 / self.get_parameter('low_res_frequency').value
+
+        return frame_interval_main, frame_interval_lores
 
     def configure_picamera(self):
         self.picam2 = Picamera2()
