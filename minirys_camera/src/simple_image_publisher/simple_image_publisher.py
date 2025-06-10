@@ -7,60 +7,82 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
 
-ENCODING = "rgba8"  # http://docs.ros.org/en/jade/api/sensor_msgs/html/image__encodings_8h_source.html
-
-DEFAULT_WIDTH = 640
-DEFAULT_HEIGHT = 480
-
-DEFAULT_FRAME_INTERVAL = 0.1
-
+# For debugging slow publishing
+PROFILE = False
+if PROFILE: from pyinstrument import Profiler
 
 class SimpleImagePublisher(Node):
     bridge = CvBridge()
+
+    low_resolution = (640, 480)  # almost full frame
+    high_resolution = (1296, 972)  # full frame
+    very_high_resolution = (2592, 1944)  # full frame
 
     def __init__(self):
         super().__init__('image_publisher')
 
         self.publisher = self.create_publisher(Image, 'internal/camera', 10)
+        self.publisher_lores = self.create_publisher(Image, 'internal/camera_low_res', 10)
 
         self.declareParameters()
 
         self.configure_picamera()
 
         self.frame_id = 0
+        self.frame_id_lores = 0
 
-        self.create_timer(self.frame_interval, self.image_callback)
+        self.timer = self.create_timer(self.frame_interval_main, self.image_callback_lores)
+        self.timer_lores = self.create_timer(self.frame_interval_lores, self.image_callback)
 
     def declareParameters(self):
-        self.declare_parameter('width', DEFAULT_WIDTH)
-        self.width = self.get_parameter('width').value
+        self.declare_parameter('high_res_frequency', 20.0)
+        self.frame_interval_main = 1.0 / self.get_parameter('high_res_frequency').value
 
-        self.declare_parameter('height', DEFAULT_HEIGHT)
-        self.height = self.get_parameter('height').value
-
-        self.declare_parameter('frame_interval', DEFAULT_FRAME_INTERVAL)
-        self.frame_interval = self.get_parameter('frame_interval').value
+        self.declare_parameter('low_res_frequency', 5.0)
+        self.frame_interval_lores = 1.0 / self.get_parameter('low_res_frequency').value
 
     def configure_picamera(self):
         self.picam2 = Picamera2()
+
         # https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf
+        modes = self.picam2.sensor_modes
+        sensor_modes_msg = 'Avalable sensor modes are:'
+        for mode in modes: sensor_modes_msg += f'\n{mode}'
+        self.get_logger().info(sensor_modes_msg)
+
+        def get_hires_mode(modes, desired_resolution):
+            for mode in modes:
+                if mode['size'] == desired_resolution:
+                    return mode
+            raise RuntimeError('Could not obtain a high resolution sensor mode')
+
+        mode = get_hires_mode(self.picam2.sensor_modes, self.high_resolution)
+
         config = self.picam2.create_still_configuration(
+            transform=Transform(hflip=True, vflip=True),  # Flip because camera is upside down with LiDAR up
+            buffer_count=6,  # The same as in video configuration to be on the safe side
+            queue=True,
+            sensor={
+                'output_size': mode['size'],
+                'bit_depth': mode['bit_depth'],
+            },
             main={
-                'size': (2592, 1944),  # full frame
-                'size': (1296, 972),  # full frame
+                'size': self.high_resolution,
                 'format': 'RGB888',  # Compatible with OpenCV BGR default encoding
             },
-            buffer_count=2,
-            queue=True,
-            transform=Transform(hflip=True, vflip=True),  # Flip because camera is upside down with LiDAR up
-            # lores={"size": (self.width, self.height)},
+            lores={
+                'size': self.low_resolution,
+                # 'format': 'RGB888',  # Format is mandatory to be YUV420 on Pi 4
+            },
         )
-        # self.picam2.preview_configuration.main.size = (1296, 972)
-        # self.picam2.preview_configuration.main.format = 'RGB888'
-        # self.picam2.preview_configuration.align()
-        # self.picam2.configure('preview')
+
+        self.get_logger().info('Requested configurations are:' +
+                               f"\nmain:  {config['main']}\nlores: {config['lores']}")
         self.picam2.align_configuration(config)
+        self.get_logger().info('Aligned configurations are:' +
+                               f"\nmain:  {config['main']}\nlores: {config['lores']}")
         self.picam2.configure(config)
+
         self.picam2.start()
 
     def get_time_msg(self):
@@ -71,14 +93,37 @@ class SimpleImagePublisher(Node):
         return time_msg
 
     def image_callback(self):
-        yuv = self.picam2.capture_array('main')
+        if PROFILE:
+            profiler = Profiler()
+            profiler.start(target_description="Main callback")
 
-        image = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2RGB)
-        image_msg  =self.bridge.cv2_to_imgmsg(image, 'bgr8')
+        image = self.picam2.capture_array('main')
+        image_msg = self.bridge.cv2_to_imgmsg(image)
 
         self.frame_id += 1
         image_msg.header.frame_id = str(self.frame_id)
         self.publisher.publish(image_msg)
+
+        if PROFILE:
+            profiler.stop()
+            profiler.print()
+
+    def image_callback_lores(self):
+        if PROFILE:
+            profiler = Profiler()
+            profiler.start(target_description="Lores callback")
+
+        yuv = self.picam2.capture_array('lores')
+        image = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2RGB)
+        image_msg = self.bridge.cv2_to_imgmsg(image)
+
+        self.frame_id_lores += 1
+        image_msg.header.frame_id = str(self.frame_id_lores)
+        self.publisher_lores.publish(image_msg)
+
+        if PROFILE:
+            profiler.stop()
+            profiler.print()
 
 def main(args=None):
     rclpy.init(args=args)
