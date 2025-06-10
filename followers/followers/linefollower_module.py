@@ -151,8 +151,8 @@ class LineFollowerModule:
             processed = cv.blur(self.image_, (5, 5))
             gray = cv.cvtColor(processed, cv.COLOR_BGR2GRAY)
 
-            # _, thresh = cv.threshold(gray, 178, 255, cv.THRESH_BINARY_INV)
-            _, thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
+            _, thresh = cv.threshold(gray, 127, 255, cv.THRESH_BINARY_INV)
+            # _, thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
 
             kernel = np.ones((5, 5), np.uint8)
             thresh = cv.erode(thresh, kernel, iterations=1)
