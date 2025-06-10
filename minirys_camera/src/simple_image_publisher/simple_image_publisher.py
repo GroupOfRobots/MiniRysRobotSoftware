@@ -90,7 +90,7 @@ class SimpleImagePublisher(Node):
             # "AeEnable": False,         # Disable auto-exposure
             # "AwbEnable": False,        # Optionally disable auto white balance
             # "ExposureTime": 1000,        # Use a short exposure time (near the minimum)
-            "ExposureValue": -2.5,        # Use a short exposure time (near the minimum)
+            "ExposureValue": -2.0,        # Use a short exposure time (near the minimum)
             # "AnalogueGain": 1.0,       # Use the minimal analogue gain
         })
 
