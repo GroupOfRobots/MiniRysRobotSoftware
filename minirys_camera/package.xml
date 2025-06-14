@@ -7,6 +7,15 @@
   <maintainer email="pawel.rawicki@gmail.com">pablo</maintainer>
   <license>MIT</license>
 
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>cv_bridge</depend>
+
+  <exec_depend>python3-opencv</exec_depend>
+  <exec_depend>picamera2</exec_depend>
+  <exec_depend>libcamera</exec_depend>
+
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>

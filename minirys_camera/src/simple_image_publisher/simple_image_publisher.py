@@ -1,9 +1,10 @@
 import rclpy
-from builtin_interfaces.msg import Time
 from picamera2 import Picamera2
 from libcamera import Transform
 from rclpy.node import Node  # Handles the creation of nodes
+from rclpy.qos import QoSProfile, qos_profile_sensor_data  # QoS configurations
 from sensor_msgs.msg import Image
+from std_msgs.msg import Header
 from cv_bridge import CvBridge
 import cv2
 
@@ -21,15 +22,14 @@ class SimpleImagePublisher(Node):
     def __init__(self):
         super().__init__('image_publisher')
 
-        self.publisher = self.create_publisher(Image, 'internal/camera', 10)
-        self.publisher_lores = self.create_publisher(Image, 'internal/camera_low_res', 10)
+        self.publisher       = self.create_publisher(Image, 'internal/camera',         qos_profile=qos_profile_sensor_data)
+        self.publisher_lores = self.create_publisher(Image, 'internal/camera_low_res', qos_profile=qos_profile_sensor_data)
 
         frame_interval_main, frame_interval_lores, exposure_value = self.get_parameters()
 
         self.configure_picamera(exposure_value)
 
-        self.frame_id = 0
-        self.frame_id_lores = 0
+        self.frame_id = f'{self.get_namespace()}/camera'
 
         self.timer = self.create_timer(frame_interval_main, self.image_callback)
         self.timer_lores = self.create_timer(frame_interval_lores, self.image_callback_lores)
@@ -99,23 +99,19 @@ class SimpleImagePublisher(Node):
 
         self.picam2.start()
 
-    def get_time_msg(self):
-        time_msg = Time()
-        msg_time = self.get_clock().now().seconds_nanoseconds()
-        time_msg.sec = int(msg_time[0])
-        time_msg.nanosec = int(msg_time[1])
-        return time_msg
-
     def image_callback(self):
         if PROFILE:
             profiler = Profiler()
             profiler.start(target_description="Main callback")
 
         image = self.picam2.capture_array('main')
-        image_msg = self.bridge.cv2_to_imgmsg(image)
 
-        self.frame_id += 1
-        image_msg.header.frame_id = str(self.frame_id)
+        header = Header()
+        header.stamp = self.get_clock().now().to_msg()
+        header.frame_id = self.frame_id
+
+        image_msg = self.bridge.cv2_to_imgmsg(image, encoding='bgr8', header=header)
+
         self.publisher.publish(image_msg)
 
         if PROFILE:
@@ -128,11 +124,14 @@ class SimpleImagePublisher(Node):
             profiler.start(target_description="Lores callback")
 
         yuv = self.picam2.capture_array('lores')
-        image = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2RGB)
-        image_msg = self.bridge.cv2_to_imgmsg(image)
+        image = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2BGR)
 
-        self.frame_id_lores += 1
-        image_msg.header.frame_id = str(self.frame_id_lores)
+        header = Header()
+        header.stamp = self.get_clock().now().to_msg()
+        header.frame_id = self.frame_id
+
+        image_msg = self.bridge.cv2_to_imgmsg(image, encoding='bgr8', header=header)
+
         self.publisher_lores.publish(image_msg)
 
         if PROFILE:
