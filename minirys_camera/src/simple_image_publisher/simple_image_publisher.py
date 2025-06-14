@@ -112,6 +112,7 @@ class SimpleImagePublisher(Node):
 
         image_msg = self.bridge.cv2_to_imgmsg(image, encoding='bgr8', header=header)
 
+        # NOTE(TauTheLepton): If there is a bottleneck on publishing consider publishing only relevant part of the image
         self.publisher.publish(image_msg)
 
         if PROFILE:
