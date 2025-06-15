@@ -15,6 +15,12 @@ class LineFollowerModule:
         RAW = 1
         PROCESSED = 2
 
+    # Adjustable parameters
+    threshold_value = 127
+    # If <= 0 means disabled
+    binary_image_dilation = -1
+    binary_image_erosion = 5
+
     image_ = None
     input_mode_ = InputMode.NONE
     image_binary_ = None
@@ -24,8 +30,6 @@ class LineFollowerModule:
     control_points_ = [(220, 200)]
     leftT_ = (435, 270)
     rightT_ = (5, 270)
-
-    threshold_value = 127
 
     def __init__(
             self,
@@ -44,18 +48,25 @@ class LineFollowerModule:
         self.turn_offset_ = turn_offset
         self.logger_ = logger if logger is not None else get_logger("LineFollowerModule")
 
-    def recalculate_points(self, image: np.ndarray, turn_point_horizontal_ratio: float = 0.1,
-                           turn_point_vertical_ratio: float = 0.5) -> None:
+    def recalculate_points(self,
+                           image: np.ndarray,
+                           turn_point_horizontal_ratio: float = 0.1,
+                           turn_point_vertical_ratio: float = 0.5,
+                           control_point_vertical_ratio: float = 0.5) -> None:
         """
         Recalculate control points
 
-        :param turn_point_horizontal_ratio: How far from the side edge of image the control points
+        :param turn_point_horizontal_ratio: How far from the side edge of image the turn control points
         should be located (defined as what part of the whole image; 0.1 is 10% of width from the side)
 
-        :param turn_point_vertical_ratio: How far from the top edge of the image the control points
+        :param turn_point_vertical_ratio: How far from the top edge of the image the turn control points
         should be located (defined as what part of teh whole image; 0.6 is 60% of height from the top)
+
+        :param control_point_vertical_ratio: How far from the top edge of the image the control point
+        used for line tracking should be located (defined as what part of teh whole image; 0.6 is 60%
+        of height from the top)
         """
-        y = int(image.shape[0] * 0.5)
+        y = int(image.shape[0] * control_point_vertical_ratio)
         x = int(image.shape[1] * 0.5)
         self.control_points_ = [ (x, y) ]
 
@@ -156,8 +167,12 @@ class LineFollowerModule:
             _, thresh = cv.threshold(gray, self.threshold_value, 255, cv.THRESH_BINARY_INV)
             # _, thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
 
-            kernel = np.ones((5, 5), np.uint8)
-            thresh = cv.erode(thresh, kernel, iterations=1)
+            if self.binary_image_dilation > 0:
+                kernel = np.ones((self.binary_image_dilation, self.binary_image_dilation), np.uint8)
+                thresh = cv.dilate(thresh, kernel, iterations=1)
+            if self.binary_image_erosion > 0:
+                kernel = np.ones((self.binary_image_erosion, self.binary_image_erosion), np.uint8)
+                thresh = cv.erode(thresh, kernel, iterations=1)
             self.image_binary_ = thresh
             return
 
