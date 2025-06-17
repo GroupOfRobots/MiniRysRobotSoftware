@@ -125,7 +125,7 @@ class SimpleImagePublisher(Node):
             profiler.start(target_description="Lores callback")
 
         yuv = self.picam2.capture_array('lores')
-        image = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2BGR)
+        image = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2RGB)
 
         header = Header()
         header.stamp = self.get_clock().now().to_msg()
