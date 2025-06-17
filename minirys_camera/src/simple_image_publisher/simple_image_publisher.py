@@ -30,18 +30,21 @@ class SimpleImagePublisher(Node):
         self.declare_parameter('high_res_frequency', 5.0  )
         self.declare_parameter('low_res_frequency',  20.0 )
         self.declare_parameter('exposure_value',     -2.0 )
+        self.declare_parameter('flip_image',         True )
         self.declare_parameter('debug',              False)
         self.declare_parameter('enable_profiling',   False)
 
         high_res_frequency = self.get_parameter('high_res_frequency').get_parameter_value().double_value
         low_res_frequency  = self.get_parameter('low_res_frequency' ).get_parameter_value().double_value
         exposure_value     = self.get_parameter('exposure_value'    ).get_parameter_value().double_value
+        flip_image         = self.get_parameter('flip_image'        ).get_parameter_value().bool_value
         debug              = self.get_parameter('debug'             ).get_parameter_value().bool_value
         enable_profiling   = self.get_parameter('enable_profiling'  ).get_parameter_value().bool_value
 
         self.get_logger().info(f'Got parameter: high_res_frequency := {high_res_frequency}')
         self.get_logger().info(f'Got parameter: low_res_frequency  := {low_res_frequency}' )
         self.get_logger().info(f'Got parameter: exposure_value     := {exposure_value}'    )
+        self.get_logger().info(f'Got parameter: flip_image         := {flip_image}'        )
         self.get_logger().info(f'Got parameter: debug              := {debug}'             )
         self.get_logger().info(f'Got parameter: enable_profiling   := {enable_profiling}'  )
 
@@ -51,7 +54,7 @@ class SimpleImagePublisher(Node):
         self.publisher       = self.create_publisher(Image, 'internal/camera',         qos_profile=qos_profile_sensor_data)
         self.publisher_lores = self.create_publisher(Image, 'internal/camera_low_res', qos_profile=qos_profile_sensor_data)
 
-        main_size, lores_size = self.configure_picamera(exposure_value)
+        main_size, lores_size = self.configure_picamera(exposure_value, flip_image)
 
         self.frame_id = os.path.join(self.get_namespace(), 'camera')
 
@@ -61,7 +64,7 @@ class SimpleImagePublisher(Node):
         self.get_logger().info(f'Publishing main image {main_size} on topic "{self.publisher.topic_name}" with frequency {high_res_frequency} Hz')
         self.get_logger().info(f'Publishing lores image {lores_size} on topic "{self.publisher_lores.topic_name}" with frequency {low_res_frequency} Hz')
 
-    def configure_picamera(self, exposure_value: float):
+    def configure_picamera(self, exposure_value: float, flip_image: bool):
         self.picam2 = Picamera2()
 
         # https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf
@@ -79,7 +82,7 @@ class SimpleImagePublisher(Node):
         mode = get_hires_mode(self.picam2.sensor_modes, self.high_resolution)
 
         config = self.picam2.create_still_configuration(
-            transform=Transform(hflip=True, vflip=True),  # Flip because camera is upside down with LiDAR up
+            transform=Transform(hflip=flip_image, vflip=flip_image),  # Camera is upside down with LiDAR up
             buffer_count=6,  # The same as in video configuration to be on the safe side
             queue=True,
             sensor={
