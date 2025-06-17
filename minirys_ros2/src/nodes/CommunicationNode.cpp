@@ -13,6 +13,9 @@ CommunicationNode::CommunicationNode(rclcpp::NodeOptions options):
 	Node("communication_cs", options) {
 	RCLCPP_INFO(this->get_logger(), "Initializing data relays");
 
+	declare_parameter<bool>("publish_namespaces", false);
+	const bool publish_namespaces = get_parameter("publish_namespaces").as_bool();
+
 	// Battery
 	this->batteryStatusSubscription = this->create_subscription<minirys_msgs::msg::BatteryStatus>(
 		"internal/battery_status",
@@ -57,7 +60,9 @@ CommunicationNode::CommunicationNode(rclcpp::NodeOptions options):
 
 	this->robotsNamespacesPublisher = this->create_publisher<minirys_msgs::msg::RobotsNamespaces>("robots_namespaces", 10);
 
-	timer_ = this->create_wall_timer(1s, std::bind(&CommunicationNode::publishNamespaces, this));
+	if (publish_namespaces) {
+		timer_ = this->create_wall_timer(1s, std::bind(&CommunicationNode::publishNamespaces, this));
+	}
 
 
 	RCLCPP_INFO(this->get_logger(), "Data relays initialized");
