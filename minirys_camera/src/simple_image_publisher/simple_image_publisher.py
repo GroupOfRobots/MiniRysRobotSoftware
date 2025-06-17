@@ -34,12 +34,12 @@ class SimpleImagePublisher(Node):
         self.declare_parameter('debug',              False)
         self.declare_parameter('enable_profiling',   False)
 
-        high_res_frequency = self.get_parameter('high_res_frequency').get_parameter_value().double_value
-        low_res_frequency  = self.get_parameter('low_res_frequency' ).get_parameter_value().double_value
-        exposure_value     = self.get_parameter('exposure_value'    ).get_parameter_value().double_value
-        flip_image         = self.get_parameter('flip_image'        ).get_parameter_value().bool_value
-        debug              = self.get_parameter('debug'             ).get_parameter_value().bool_value
-        enable_profiling   = self.get_parameter('enable_profiling'  ).get_parameter_value().bool_value
+        high_res_frequency = self.get_parameter('high_res_frequency').value
+        low_res_frequency  = self.get_parameter('low_res_frequency' ).value
+        exposure_value     = self.get_parameter('exposure_value'    ).value
+        flip_image         = self.get_parameter('flip_image'        ).value
+        debug              = self.get_parameter('debug'             ).value
+        enable_profiling   = self.get_parameter('enable_profiling'  ).value
 
         self.get_logger().info(f'Got parameter: high_res_frequency := {high_res_frequency}')
         self.get_logger().info(f'Got parameter: low_res_frequency  := {low_res_frequency}' )
