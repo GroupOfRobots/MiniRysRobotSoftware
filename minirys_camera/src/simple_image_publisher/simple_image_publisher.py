@@ -1,12 +1,17 @@
 import rclpy
-from picamera2 import Picamera2
-from libcamera import Transform
 from rclpy.node import Node  # Handles the creation of nodes
 from rclpy.qos import QoSProfile, qos_profile_sensor_data  # QoS configurations
+from rclpy.impl.logging_severity import LoggingSeverity
+
 from sensor_msgs.msg import Image
 from std_msgs.msg import Header
-from cv_bridge import CvBridge
+
+from picamera2 import Picamera2
+from libcamera import Transform
+
+import os
 import cv2
+from cv_bridge import CvBridge
 
 # For debugging slow publishing
 PROFILE = False
@@ -22,29 +27,39 @@ class SimpleImagePublisher(Node):
     def __init__(self):
         super().__init__('image_publisher')
 
+        self.declare_parameter('high_res_frequency', 5.0  )
+        self.declare_parameter('low_res_frequency',  20.0 )
+        self.declare_parameter('exposure_value',     -2.0 )
+        self.declare_parameter('debug',              False)
+        self.declare_parameter('enable_profiling',   False)
+
+        high_res_frequency = self.get_parameter('high_res_frequency').get_parameter_value().double_value
+        low_res_frequency  = self.get_parameter('low_res_frequency' ).get_parameter_value().double_value
+        exposure_value     = self.get_parameter('exposure_value'    ).get_parameter_value().double_value
+        debug              = self.get_parameter('debug'             ).get_parameter_value().bool_value
+        enable_profiling   = self.get_parameter('enable_profiling'  ).get_parameter_value().bool_value
+
+        self.get_logger().info(f'Got parameter: high_res_frequency := {high_res_frequency}')
+        self.get_logger().info(f'Got parameter: low_res_frequency  := {low_res_frequency}' )
+        self.get_logger().info(f'Got parameter: exposure_value     := {exposure_value}'    )
+        self.get_logger().info(f'Got parameter: debug              := {debug}'             )
+        self.get_logger().info(f'Got parameter: enable_profiling   := {enable_profiling}'  )
+
+        if debug:
+            self.get_logger().set_level(LoggingSeverity.DEBUG)
+
         self.publisher       = self.create_publisher(Image, 'internal/camera',         qos_profile=qos_profile_sensor_data)
         self.publisher_lores = self.create_publisher(Image, 'internal/camera_low_res', qos_profile=qos_profile_sensor_data)
 
-        frame_interval_main, frame_interval_lores, exposure_value = self.get_parameters()
+        main_size, lores_size = self.configure_picamera(exposure_value)
 
-        self.configure_picamera(exposure_value)
+        self.frame_id = os.path.join(self.get_namespace(), 'camera')
 
-        self.frame_id = f'{self.get_namespace()}/camera'
+        self.timer       = self.create_timer((1.0 / high_res_frequency), self.image_callback      )
+        self.timer_lores = self.create_timer((1.0 / low_res_frequency ), self.image_callback_lores)
 
-        self.timer = self.create_timer(frame_interval_main, self.image_callback)
-        self.timer_lores = self.create_timer(frame_interval_lores, self.image_callback_lores)
-
-    def get_parameters(self):
-        self.declare_parameter('high_res_frequency', 5.0)
-        frame_interval_main = 1.0 / self.get_parameter('high_res_frequency').value
-
-        self.declare_parameter('low_res_frequency', 20.0)
-        frame_interval_lores = 1.0 / self.get_parameter('low_res_frequency').value
-
-        self.declare_parameter('exposure_value', -2.0)
-        exposure_value = self.get_parameter('exposure_value').value
-
-        return frame_interval_main, frame_interval_lores, exposure_value
+        self.get_logger().info(f'Publishing main image {main_size} on topic "{self.publisher.topic_name}" with frequency {high_res_frequency} Hz')
+        self.get_logger().info(f'Publishing lores image {lores_size} on topic "{self.publisher_lores.topic_name}" with frequency {low_res_frequency} Hz')
 
     def configure_picamera(self, exposure_value: float):
         self.picam2 = Picamera2()
@@ -53,7 +68,7 @@ class SimpleImagePublisher(Node):
         modes = self.picam2.sensor_modes
         sensor_modes_msg = 'Avalable sensor modes are:'
         for mode in modes: sensor_modes_msg += f'\n{mode}'
-        self.get_logger().info(sensor_modes_msg)
+        self.get_logger().debug(sensor_modes_msg)
 
         def get_hires_mode(modes, desired_resolution):
             for mode in modes:
@@ -81,14 +96,14 @@ class SimpleImagePublisher(Node):
             },
         )
 
-        self.get_logger().info('Requested configurations are:' +
-                               f"\nmain:  {config['main']}\nlores: {config['lores']}")
+        self.get_logger().debug('Requested configurations are:' +
+                                f"\nmain:  {config['main']}\nlores: {config['lores']}")
         self.picam2.align_configuration(config)
-        self.get_logger().info('Aligned configurations are:' +
-                               f"\nmain:  {config['main']}\nlores: {config['lores']}")
+        self.get_logger().debug('Aligned configurations are:' +
+                                f"\nmain:  {config['main']}\nlores: {config['lores']}")
         self.picam2.configure(config)
 
-        print(f"Camera controls:\n{self.picam2.camera_controls}")
+        self.get_logger().debug(f"Camera controls:\n{self.picam2.camera_controls}")
         self.picam2.set_controls({
             # "AeEnable": False,
             # "AwbEnable": False,
@@ -98,6 +113,8 @@ class SimpleImagePublisher(Node):
         })
 
         self.picam2.start()
+
+        return config['main']['size'], config['lores']['size']
 
     def image_callback(self):
         if PROFILE:
