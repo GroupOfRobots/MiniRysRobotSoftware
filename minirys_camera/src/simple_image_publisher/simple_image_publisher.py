@@ -34,6 +34,16 @@ class SimpleImagePublisher(Node):
         self.declare_parameter('debug',              False)
         self.declare_parameter('enable_profiling',   False)
 
+        self.declare_parameter('high_res_crop_factor_top',    0.0)
+        self.declare_parameter('high_res_crop_factor_bottom', 0.0)
+        self.declare_parameter('high_res_crop_factor_left',   0.0)
+        self.declare_parameter('high_res_crop_factor_right',  0.0)
+
+        self.declare_parameter('low_res_crop_factor_top',    0.0)
+        self.declare_parameter('low_res_crop_factor_bottom', 0.0)
+        self.declare_parameter('low_res_crop_factor_left',   0.0)
+        self.declare_parameter('low_res_crop_factor_right',  0.0)
+
         high_res_frequency = self.get_parameter('high_res_frequency').value
         low_res_frequency  = self.get_parameter('low_res_frequency' ).value
         exposure_value     = self.get_parameter('exposure_value'    ).value
@@ -41,12 +51,32 @@ class SimpleImagePublisher(Node):
         debug              = self.get_parameter('debug'             ).value
         enable_profiling   = self.get_parameter('enable_profiling'  ).value
 
+        high_res_crop_factor_top    = self.get_parameter('high_res_crop_factor_top'   ).value
+        high_res_crop_factor_bottom = self.get_parameter('high_res_crop_factor_bottom').value
+        high_res_crop_factor_left   = self.get_parameter('high_res_crop_factor_left'  ).value
+        high_res_crop_factor_right  = self.get_parameter('high_res_crop_factor_right' ).value
+
+        low_res_crop_factor_top     = self.get_parameter('low_res_crop_factor_top'   ).value
+        low_res_crop_factor_bottom  = self.get_parameter('low_res_crop_factor_bottom').value
+        low_res_crop_factor_left    = self.get_parameter('low_res_crop_factor_left'  ).value
+        low_res_crop_factor_right   = self.get_parameter('low_res_crop_factor_right' ).value
+
         self.get_logger().info(f'Got parameter: high_res_frequency := {high_res_frequency}')
         self.get_logger().info(f'Got parameter: low_res_frequency  := {low_res_frequency}' )
         self.get_logger().info(f'Got parameter: exposure_value     := {exposure_value}'    )
         self.get_logger().info(f'Got parameter: flip_image         := {flip_image}'        )
         self.get_logger().info(f'Got parameter: debug              := {debug}'             )
         self.get_logger().info(f'Got parameter: enable_profiling   := {enable_profiling}'  )
+
+        self.get_logger().info(f'Got parameter: high_res_crop_factor_top    := {high_res_crop_factor_top}'   )
+        self.get_logger().info(f'Got parameter: high_res_crop_factor_bottom := {high_res_crop_factor_bottom}')
+        self.get_logger().info(f'Got parameter: high_res_crop_factor_left   := {high_res_crop_factor_left}'  )
+        self.get_logger().info(f'Got parameter: high_res_crop_factor_right  := {high_res_crop_factor_right}' )
+
+        self.get_logger().info(f'Got parameter: low_res_crop_factor_top     := {low_res_crop_factor_top}'   )
+        self.get_logger().info(f'Got parameter: low_res_crop_factor_bottom  := {low_res_crop_factor_bottom}')
+        self.get_logger().info(f'Got parameter: low_res_crop_factor_left    := {low_res_crop_factor_left}'  )
+        self.get_logger().info(f'Got parameter: low_res_crop_factor_right   := {low_res_crop_factor_right}' )
 
         if debug:
             self.get_logger().set_level(LoggingSeverity.DEBUG)
@@ -60,6 +90,16 @@ class SimpleImagePublisher(Node):
 
         self.timer       = self.create_timer((1.0 / high_res_frequency), self.image_callback      )
         self.timer_lores = self.create_timer((1.0 / low_res_frequency ), self.image_callback_lores)
+
+        self.high_res_crop_idx_top    = int(main_size[1] * high_res_crop_factor_top)
+        self.high_res_crop_idx_bottom = int(main_size[1] * (1.0 - high_res_crop_factor_bottom))
+        self.high_res_crop_idx_left   = int(main_size[0] * high_res_crop_factor_left)
+        self.high_res_crop_idx_right  = int(main_size[0] * (1.0 - high_res_crop_factor_right))
+
+        self.low_res_crop_idx_top    = int(lores_size[1] * low_res_crop_factor_top)
+        self.low_res_crop_idx_bottom = int(lores_size[1] * (1.0 - low_res_crop_factor_bottom))
+        self.low_res_crop_idx_left   = int(lores_size[0] * low_res_crop_factor_left)
+        self.low_res_crop_idx_right  = int(lores_size[0] * (1.0 - low_res_crop_factor_right))
 
         self.get_logger().info(f'Publishing main image {main_size} on topic "{self.publisher.topic_name}" with frequency {high_res_frequency} Hz')
         self.get_logger().info(f'Publishing lores image {lores_size} on topic "{self.publisher_lores.topic_name}" with frequency {low_res_frequency} Hz')
@@ -124,7 +164,10 @@ class SimpleImagePublisher(Node):
             profiler = Profiler()
             profiler.start(target_description="Main callback")
 
-        image = self.picam2.capture_array('main')
+        image = self.picam2.capture_array('main')[
+            self.high_res_crop_idx_top:self.high_res_crop_idx_bottom,
+            self.high_res_crop_idx_left:self.high_res_crop_idx_right
+        ]
 
         header = Header()
         header.stamp = self.get_clock().now().to_msg()
@@ -145,7 +188,10 @@ class SimpleImagePublisher(Node):
             profiler.start(target_description="Lores callback")
 
         yuv = self.picam2.capture_array('lores')
-        image = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2RGB)
+        image = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2RGB)[
+            self.low_res_crop_idx_top:self.low_res_crop_idx_bottom,
+            self.low_res_crop_idx_left:self.low_res_crop_idx_right
+        ]
 
         header = Header()
         header.stamp = self.get_clock().now().to_msg()
