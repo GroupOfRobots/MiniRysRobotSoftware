@@ -88,9 +88,9 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
       }
       else if (counter > 4)
       {
-        result->done = true;
+        result->done = false;
         goal_handle->succeed(result);
-        RCLCPP_INFO(this->get_logger(), "Goal succeeded");
+        RCLCPP_INFO(this->get_logger(), "Goal failed");
         std_msgs::msg::Bool cancel_msg;
         publisher_cancel_->publish(cancel_msg);
         break;

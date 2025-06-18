@@ -83,12 +83,13 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
 
     while(rclcpp::ok())
     {
+      auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
+
       RCLCPP_INFO_STREAM(this->get_logger(), "DISTANCE_R: " << distance_ << "rot: " << deltX_);
       if(distance_ != -1.0)
       {
           if(std::fabs(deltX_) > stop_rotate_ && distance_ > stop_rotate_dist_)
           {
-              auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
               msg_twist->angular.z = pid_->pid(deltX_,0.0f);
               publisher_vocity_->publish(*msg_twist);
           }
@@ -97,7 +98,6 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
               result->done = true;
               goal_handle->succeed(result);
               RCLCPP_INFO(this->get_logger(), "Goal succeeded");
-              auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
               publisher_vocity_->publish(*msg_twist);
               break;
           }
@@ -105,10 +105,10 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
       else
       {
           ++rotateNoShCounter;
+          publisher_vocity_->publish(*msg_twist);
       }
       if(rotateNoShCounter == 4)
       {
-          auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();
           publisher_vocity_->publish(*msg_twist);
           result->done = false;
           goal_handle->succeed(result);
