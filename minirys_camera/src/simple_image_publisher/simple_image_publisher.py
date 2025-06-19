@@ -96,8 +96,8 @@ class SimpleImagePublisher(Node):
         if debug:
             self.get_logger().set_level(LoggingSeverity.DEBUG)
 
-        self.publisher       = self.create_publisher(Image, 'internal/camera',         qos_profile=qos_profile_sensor_data)
-        self.publisher_lores = self.create_publisher(Image, 'internal/camera_low_res', qos_profile=qos_profile_sensor_data)
+        self.publisher       = self.create_publisher(Image, '~/output/camera',         qos_profile=qos_profile_sensor_data)
+        self.publisher_lores = self.create_publisher(Image, '~/output/camera_low_res', qos_profile=qos_profile_sensor_data)
 
         main_size, lores_size = self.configure_picamera(exposure_value, flip_image)
 
