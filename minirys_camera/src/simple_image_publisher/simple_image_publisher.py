@@ -128,12 +128,14 @@ class SimpleImagePublisher(Node):
                                              self.low_res_crop_idx_left,
                                              self.low_res_crop_idx_right).shape
 
-        self.get_logger().info(f'Capturing main image of size {main_size} and publishing it cropped \
-                               to size {main_size_cropped} on topic "{self.publisher.topic_name}" \
-                                with frequency {high_res_frequency} Hz')
-        self.get_logger().info(f'Capturing lores image of size {lores_size} and publishing it cropped \
-                               to size {lores_size_cropped} on topic "{self.publisher_lores.topic_name}" \
-                                with frequency {low_res_frequency} Hz')
+        self.get_logger().info(f'Capturing main image of size {main_size}'
+                               + f' and publishing it cropped to size {main_size_cropped} on topic'
+                               + f' "{self.publisher_high_res.topic_name}"'
+                               + f' with frequency {high_res_frequency} Hz')
+        self.get_logger().info(f'Capturing lores image of size {lores_size}'
+                               + f' and publishing it cropped to size {lores_size_cropped} on topic'
+                               + f' "{self.publisher_low_res.topic_name}"'
+                               + f' with frequency {low_res_frequency} Hz')
 
     def configure_picamera(self, exposure_value: float, flip_image: bool):
         self.picam2 = Picamera2()
@@ -190,12 +192,14 @@ class SimpleImagePublisher(Node):
 
         return config['main']['size'], config['lores']['size']
 
-    def crop_image(self: np.ndarray, image, crop_idx_top: int, crop_idx_bottom: int,
-                   crop_idx_left: int, crop_idx_right: int) -> np.ndarray:
-        return image[
+        image_cropped = image[
             crop_idx_top:crop_idx_bottom,
             crop_idx_left:crop_idx_right
         ]
+        self.get_logger().debug(f'Received image shape {image.shape}')
+        self.get_logger().debug(f'Cropped image shape {image_cropped.shape}')
+        self.get_logger().debug(f'Received crop indices: crop_idx_top:={crop_idx_top}, crop_idx_bottom:={crop_idx_bottom}, crop_idx_left:={crop_idx_left}, crop_idx_right:={crop_idx_right}')
+        return image_cropped
 
     def image_callback(self):
         if PROFILE:
