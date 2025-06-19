@@ -12,6 +12,7 @@ from libcamera import Transform
 import os
 import cv2
 from cv_bridge import CvBridge
+import numpy as np
 
 # For debugging slow publishing
 PROFILE = False
@@ -101,8 +102,24 @@ class SimpleImagePublisher(Node):
         self.low_res_crop_idx_left   = int(lores_size[0] * low_res_crop_factor_left)
         self.low_res_crop_idx_right  = int(lores_size[0] * (1.0 - low_res_crop_factor_right))
 
-        self.get_logger().info(f'Publishing main image {main_size} on topic "{self.publisher.topic_name}" with frequency {high_res_frequency} Hz')
-        self.get_logger().info(f'Publishing lores image {lores_size} on topic "{self.publisher_lores.topic_name}" with frequency {low_res_frequency} Hz')
+        main_size_cropped = self.crop_image(np.ones(main_size),
+                                            self.high_res_crop_idx_top,
+                                            self.high_res_crop_idx_bottom,
+                                            self.high_res_crop_idx_left,
+                                            self.high_res_crop_idx_right).shape
+
+        lores_size_cropped = self.crop_image(np.ones(lores_size),
+                                             self.low_res_crop_idx_top,
+                                             self.low_res_crop_idx_bottom,
+                                             self.low_res_crop_idx_left,
+                                             self.low_res_crop_idx_right).shape
+
+        self.get_logger().info(f'Capturing main image of size {main_size} and publishing it cropped \
+                               to size {main_size_cropped} on topic "{self.publisher.topic_name}" \
+                                with frequency {high_res_frequency} Hz')
+        self.get_logger().info(f'Capturing lores image of size {lores_size} and publishing it cropped \
+                               to size {lores_size_cropped} on topic "{self.publisher_lores.topic_name}" \
+                                with frequency {low_res_frequency} Hz')
 
     def configure_picamera(self, exposure_value: float, flip_image: bool):
         self.picam2 = Picamera2()
@@ -159,15 +176,21 @@ class SimpleImagePublisher(Node):
 
         return config['main']['size'], config['lores']['size']
 
+    def crop_image(self: np.ndarray, image, crop_idx_top: int, crop_idx_bottom: int,
+                   crop_idx_left: int, crop_idx_right: int) -> np.ndarray:
+        return image[
+            crop_idx_top:crop_idx_bottom,
+            crop_idx_left:crop_idx_right
+        ]
+
     def image_callback(self):
         if PROFILE:
             profiler = Profiler()
             profiler.start(target_description="Main callback")
 
-        image = self.picam2.capture_array('main')[
-            self.high_res_crop_idx_top:self.high_res_crop_idx_bottom,
-            self.high_res_crop_idx_left:self.high_res_crop_idx_right
-        ]
+        image = self.picam2.capture_array('main')
+        image = self.crop_image(image, self.high_res_crop_idx_top, self.high_res_crop_idx_bottom,
+                                self.high_res_crop_idx_left, self.high_res_crop_idx_right)
 
         header = Header()
         header.stamp = self.get_clock().now().to_msg()
@@ -175,7 +198,6 @@ class SimpleImagePublisher(Node):
 
         image_msg = self.bridge.cv2_to_imgmsg(image, encoding='bgr8', header=header)
 
-        # NOTE(TauTheLepton): If there is a bottleneck on publishing consider publishing only relevant part of the image
         self.publisher.publish(image_msg)
 
         if PROFILE:
@@ -188,10 +210,9 @@ class SimpleImagePublisher(Node):
             profiler.start(target_description="Lores callback")
 
         yuv = self.picam2.capture_array('lores')
-        image = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2RGB)[
-            self.low_res_crop_idx_top:self.low_res_crop_idx_bottom,
-            self.low_res_crop_idx_left:self.low_res_crop_idx_right
-        ]
+        image = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2RGB)
+        image = self.crop_image(image, self.low_res_crop_idx_top, self.low_res_crop_idx_bottom,
+                                self.low_res_crop_idx_left, self.low_res_crop_idx_right)
 
         header = Header()
         header.stamp = self.get_clock().now().to_msg()
