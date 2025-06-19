@@ -100,21 +100,24 @@ class SimpleImagePublisher(Node):
         self.publisher_lores = self.create_publisher(Image, '~/output/camera_low_res', qos_profile=qos_profile_sensor_data)
 
         main_size, lores_size = self.configure_picamera(exposure_value, flip_image)
+        # Flip (width, height) -> (height, width) so that the size is consistent with OpenCV
+        main_size[0], main_size[1] = main_size[1], main_size[0]
+        lores_size[0], lores_size[1] = lores_size[1], lores_size[0]
 
         self.frame_id = os.path.join(self.get_namespace(), 'camera')
 
         self.timer       = self.create_timer((1.0 / high_res_frequency), self.image_callback      )
         self.timer_lores = self.create_timer((1.0 / low_res_frequency ), self.image_callback_lores)
 
-        self.high_res_crop_idx_top    = int(main_size[1] * high_res_crop_factor_top)
-        self.high_res_crop_idx_bottom = int(main_size[1] * (1.0 - high_res_crop_factor_bottom))
-        self.high_res_crop_idx_left   = int(main_size[0] * high_res_crop_factor_left)
-        self.high_res_crop_idx_right  = int(main_size[0] * (1.0 - high_res_crop_factor_right))
+        self.high_res_crop_idx_top    = int(main_size[0] * high_res_crop_factor_top)
+        self.high_res_crop_idx_bottom = int(main_size[0] * (1.0 - high_res_crop_factor_bottom))
+        self.high_res_crop_idx_left   = int(main_size[1] * high_res_crop_factor_left)
+        self.high_res_crop_idx_right  = int(main_size[1] * (1.0 - high_res_crop_factor_right))
 
-        self.low_res_crop_idx_top    = int(lores_size[1] * low_res_crop_factor_top)
-        self.low_res_crop_idx_bottom = int(lores_size[1] * (1.0 - low_res_crop_factor_bottom))
-        self.low_res_crop_idx_left   = int(lores_size[0] * low_res_crop_factor_left)
-        self.low_res_crop_idx_right  = int(lores_size[0] * (1.0 - low_res_crop_factor_right))
+        self.low_res_crop_idx_top    = int(lores_size[0] * low_res_crop_factor_top)
+        self.low_res_crop_idx_bottom = int(lores_size[0] * (1.0 - low_res_crop_factor_bottom))
+        self.low_res_crop_idx_left   = int(lores_size[1] * low_res_crop_factor_left)
+        self.low_res_crop_idx_right  = int(lores_size[1] * (1.0 - low_res_crop_factor_right))
 
         main_size_cropped = self.crop_image(np.ones(main_size),
                                             self.high_res_crop_idx_top,
