@@ -109,7 +109,7 @@ class SimpleImagePublisher(Node):
 
         # https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf
         modes = self.picam2.sensor_modes
-        sensor_modes_msg = 'Avalable sensor modes are:'
+        sensor_modes_msg = 'Available sensor modes are:'
         for mode in modes: sensor_modes_msg += f'\n{mode}'
         self.get_logger().debug(sensor_modes_msg)
 
