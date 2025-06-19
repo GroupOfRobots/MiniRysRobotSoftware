@@ -62,6 +62,20 @@ class SimpleImagePublisher(Node):
         low_res_crop_factor_left    = self.get_parameter('low_res_crop_factor_left'  ).value
         low_res_crop_factor_right   = self.get_parameter('low_res_crop_factor_right' ).value
 
+        def verify_crop_factor(value: float, name: str):
+            if value < 0.0 or 1.0 < value:
+                raise RuntimeError(f'Variable {name} = {value} is outside allowed bounds: [0.0; 1.0]')
+
+        verify_crop_factor(high_res_crop_factor_top,    'high_res_crop_factor_top'   )
+        verify_crop_factor(high_res_crop_factor_bottom, 'high_res_crop_factor_bottom')
+        verify_crop_factor(high_res_crop_factor_left,   'high_res_crop_factor_left'  )
+        verify_crop_factor(high_res_crop_factor_right,  'high_res_crop_factor_right' )
+
+        verify_crop_factor(low_res_crop_factor_top,    'low_res_crop_factor_top'   )
+        verify_crop_factor(low_res_crop_factor_bottom, 'low_res_crop_factor_bottom')
+        verify_crop_factor(low_res_crop_factor_left,   'low_res_crop_factor_left'  )
+        verify_crop_factor(low_res_crop_factor_right,  'low_res_crop_factor_right' )
+
         self.get_logger().info(f'Got parameter: high_res_frequency := {high_res_frequency}')
         self.get_logger().info(f'Got parameter: low_res_frequency  := {low_res_frequency}' )
         self.get_logger().info(f'Got parameter: exposure_value     := {exposure_value}'    )
