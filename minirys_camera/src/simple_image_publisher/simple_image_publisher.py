@@ -96,8 +96,8 @@ class SimpleImagePublisher(Node):
         if debug:
             self.get_logger().set_level(LoggingSeverity.DEBUG)
 
-        self.publisher       = self.create_publisher(Image, '~/output/camera',         qos_profile=qos_profile_sensor_data)
-        self.publisher_lores = self.create_publisher(Image, '~/output/camera_low_res', qos_profile=qos_profile_sensor_data)
+        self.publisher_high_res = self.create_publisher(Image, '~/output/camera',         qos_profile=qos_profile_sensor_data)
+        self.publisher_low_res  = self.create_publisher(Image, '~/output/camera_low_res', qos_profile=qos_profile_sensor_data)
 
         main_size, lores_size = self.configure_picamera(exposure_value, flip_image)
         # Flip (width, height) -> (height, width) so that the size is consistent with OpenCV
@@ -106,8 +106,8 @@ class SimpleImagePublisher(Node):
 
         self.frame_id = os.path.join(self.get_namespace(), 'camera')
 
-        self.timer       = self.create_timer((1.0 / high_res_frequency), self.image_callback      )
-        self.timer_lores = self.create_timer((1.0 / low_res_frequency ), self.image_callback_lores)
+        self.timer_high_res = self.create_timer((1.0 / high_res_frequency), self.image_callback_high_res)
+        self.timer_low_res  = self.create_timer((1.0 / low_res_frequency ), self.image_callback_low_res )
 
         self.high_res_crop_idx_top    = int(main_size[0] * high_res_crop_factor_top)
         self.high_res_crop_idx_bottom = int(main_size[0] * (1.0 - high_res_crop_factor_bottom))
@@ -210,7 +210,7 @@ class SimpleImagePublisher(Node):
         self.get_logger().debug(f'Received crop indices: crop_idx_top:={crop_idx_top}, crop_idx_bottom:={crop_idx_bottom}, crop_idx_left:={crop_idx_left}, crop_idx_right:={crop_idx_right}')
         return image_cropped
 
-    def image_callback(self):
+    def image_callback_high_res(self):
         if PROFILE:
             profiler = Profiler()
             profiler.start(target_description="Main callback")
@@ -228,13 +228,13 @@ class SimpleImagePublisher(Node):
 
         image_msg = self.bridge.cv2_to_imgmsg(image, encoding='bgr8', header=header)
 
-        self.publisher.publish(image_msg)
+        self.publisher_high_res.publish(image_msg)
 
         if PROFILE:
             profiler.stop()
             profiler.print()
 
-    def image_callback_lores(self):
+    def image_callback_low_res(self):
         if PROFILE:
             profiler = Profiler()
             profiler.start(target_description="Lores callback")
@@ -253,7 +253,7 @@ class SimpleImagePublisher(Node):
 
         image_msg = self.bridge.cv2_to_imgmsg(image, encoding='bgr8', header=header)
 
-        self.publisher_lores.publish(image_msg)
+        self.publisher_low_res.publish(image_msg)
 
         if PROFILE:
             profiler.stop()
