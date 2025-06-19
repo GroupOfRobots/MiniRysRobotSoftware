@@ -195,6 +195,12 @@ class SimpleImagePublisher(Node):
 
         return config['main']['size'], config['lores']['size']
 
+    def crop_image(self,
+                   image: np.ndarray,
+                   crop_idx_top: int,
+                   crop_idx_bottom: int,
+                   crop_idx_left: int,
+                   crop_idx_right: int) -> np.ndarray:
         image_cropped = image[
             crop_idx_top:crop_idx_bottom,
             crop_idx_left:crop_idx_right
@@ -210,8 +216,11 @@ class SimpleImagePublisher(Node):
             profiler.start(target_description="Main callback")
 
         image = self.picam2.capture_array('main')
-        image = self.crop_image(image, self.high_res_crop_idx_top, self.high_res_crop_idx_bottom,
-                                self.high_res_crop_idx_left, self.high_res_crop_idx_right)
+        image = self.crop_image(image,
+                                self.high_res_crop_idx_top,
+                                self.high_res_crop_idx_bottom,
+                                self.high_res_crop_idx_left,
+                                self.high_res_crop_idx_right)
 
         header = Header()
         header.stamp = self.get_clock().now().to_msg()
@@ -232,8 +241,11 @@ class SimpleImagePublisher(Node):
 
         yuv = self.picam2.capture_array('lores')
         image = cv2.cvtColor(yuv, cv2.COLOR_YUV420p2RGB)
-        image = self.crop_image(image, self.low_res_crop_idx_top, self.low_res_crop_idx_bottom,
-                                self.low_res_crop_idx_left, self.low_res_crop_idx_right)
+        image = self.crop_image(image,
+                                self.low_res_crop_idx_top,
+                                self.low_res_crop_idx_bottom,
+                                self.low_res_crop_idx_left,
+                                self.low_res_crop_idx_right)
 
         header = Header()
         header.stamp = self.get_clock().now().to_msg()
