@@ -28,8 +28,8 @@ class SimpleImagePublisher(Node):
     def __init__(self):
         super().__init__('image_publisher')
 
-        self.declare_parameter('high_res_frequency', 5.0  )
-        self.declare_parameter('low_res_frequency',  20.0 )
+        self.declare_parameter('high_res_frequency', 5.0  )  # Set negative to disable publishing
+        self.declare_parameter('low_res_frequency',  20.0 )  # Set negative to disable publishing
         self.declare_parameter('exposure_value',     -2.0 )
         self.declare_parameter('flip_image',         True )
         self.declare_parameter('debug',              False)
@@ -100,14 +100,23 @@ class SimpleImagePublisher(Node):
         self.publisher_low_res  = self.create_publisher(Image, '~/output/camera_low_res', qos_profile=qos_profile_sensor_data)
 
         main_size, lores_size = self.configure_picamera(exposure_value, flip_image)
-        # Flip (width, height) -> (height, width) so that the size is consistent with OpenCV
+        # Flip (width, height) -> (height, width) so that the size is consistent with OpenCV 'shape'
         main_size[0], main_size[1] = main_size[1], main_size[0]
         lores_size[0], lores_size[1] = lores_size[1], lores_size[0]
 
         self.frame_id = os.path.join(self.get_namespace(), 'camera')
 
-        self.timer_high_res = self.create_timer((1.0 / high_res_frequency), self.image_callback_high_res)
-        self.timer_low_res  = self.create_timer((1.0 / low_res_frequency ), self.image_callback_low_res )
+        if high_res_frequency <= 0.0:
+            self.get_logger().warn('High resolution image publishing is disabled, because'
+                                   + f' high_res_frequency <= 0.0 ({high_res_frequency})')
+        else:
+            self.timer_high_res = self.create_timer((1.0 / high_res_frequency), self.image_callback_high_res)
+
+        if low_res_frequency <= 0.0:
+            self.get_logger().warn('Low resolution image publishing is disabled, because'
+                                   + f' low_res_frequency <= 0.0 ({low_res_frequency})')
+        else:
+            self.timer_low_res  = self.create_timer((1.0 / low_res_frequency), self.image_callback_low_res)
 
         self.high_res_crop_idx_top    = int(main_size[0] * high_res_crop_factor_top)
         self.high_res_crop_idx_bottom = int(main_size[0] * (1.0 - high_res_crop_factor_bottom))
