@@ -28,10 +28,10 @@ class SimpleImagePublisher(Node):
     def __init__(self):
         super().__init__('image_publisher')
 
-        self.declare_parameter('high_res_frequency', 5.0  )  # Set negative to disable publishing
-        self.declare_parameter('low_res_frequency',  20.0 )  # Set negative to disable publishing
-        self.declare_parameter('exposure_value',     -2.0 )
-        self.declare_parameter('flip_image',         True )
+        self.declare_parameter('high_res_frequency', 1.0  )  # Set negative to disable publishing
+        self.declare_parameter('low_res_frequency',  1.0  )  # Set negative to disable publishing
+        self.declare_parameter('exposure_value',     0.0  )
+        self.declare_parameter('flip_image',         False)  # By default camera is upside down when robot is oriented with LiDAR up
         self.declare_parameter('debug',              False)
         self.declare_parameter('enable_profiling',   False)
 
