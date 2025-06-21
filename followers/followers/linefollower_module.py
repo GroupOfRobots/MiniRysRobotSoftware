@@ -132,8 +132,8 @@ class LineFollowerModule:
         error_mean = error_sum / len(self.control_points_)
 
         # Draw circles for other control points
-        cv.circle(self.image_debug_, self.leftT_,     radius=5, color=(0, 0, 255), thickness=-1)
-        cv.circle(self.image_debug_, self.rightT_,    radius=5, color=(0, 0, 255), thickness=-1)
+        cv.circle(self.image_debug_, self.leftT_,  radius=5, color=(0, 0, 255), thickness=-1)
+        cv.circle(self.image_debug_, self.rightT_, radius=5, color=(0, 0, 255), thickness=-1)
 
         # recognizing 90 degree turn
         is_left_in_polygon = self._is_in_polygon(contour, self.leftT_)
