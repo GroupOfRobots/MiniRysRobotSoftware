@@ -4,7 +4,7 @@ from followers.pid import PID
 from rclpy.impl.rcutils_logger import RcutilsLogger
 from rclpy.logging import get_logger
 from enum import Enum
-from typing import Optional
+from typing import Optional, Tuple
 
 class LineFollowerModuleError(RuntimeError):
     pass
@@ -103,7 +103,7 @@ class LineFollowerModule:
     def compute_angular_velocity(self) -> Optional[float]:
         try:
             self.__process_image()
-            contour = self.__compute_max_contour()
+            contour, _ = self.__compute_max_contour()
 
         except LineFollowerModuleError as e:
             self.logger_.warning(f"Encountered error \"{e}\"."
@@ -178,7 +178,7 @@ class LineFollowerModule:
 
         raise LineFollowerModuleError('Cannot process image when input mode is not set')
 
-    def __compute_max_contour(self) -> np.ndarray:
+    def __compute_max_contour(self) -> Tuple[np.ndarray, float]:
         if self.image_binary_ is None:
             raise LineFollowerModuleError('Cannot compute max contour when the image is not set')
 
@@ -189,4 +189,4 @@ class LineFollowerModule:
             raise LineFollowerModuleError('No contour areas were found. Unable to compute the max contour')
 
         max_idx = np.argmax(areas)
-        return contours[max_idx]
+        return contours[max_idx], areas[max_idx]
