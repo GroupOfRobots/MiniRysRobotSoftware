@@ -102,8 +102,8 @@ class LineFollowerModule:
 
     def compute_angular_velocity(self) -> Optional[float]:
         try:
-            self.__process_image()
-            contour, _ = self.__compute_max_contour()
+            self._process_image()
+            contour, _ = self._compute_max_contour()
 
         except LineFollowerModuleError as e:
             self.logger_.warning(f"Encountered error \"{e}\"."
@@ -136,8 +136,8 @@ class LineFollowerModule:
         cv.circle(self.image_debug_, self.rightT_,    radius=5, color=(0, 0, 255), thickness=-1)
 
         # recognizing 90 degree turn
-        is_left_in_polygon = self.__is_in_polygon(contour, self.leftT_)
-        is_right_in_polygon = self.__is_in_polygon(contour, self.rightT_)
+        is_left_in_polygon = self._is_in_polygon(contour, self.leftT_)
+        is_right_in_polygon = self._is_in_polygon(contour, self.rightT_)
 
         if is_left_in_polygon and not is_right_in_polygon:
             turn_offset = -self.turn_offset_#-1.0 #-1
@@ -149,10 +149,10 @@ class LineFollowerModule:
         u = np.clip(u, self.min_u_, self.max_u_)
         return u
 
-    def __is_in_polygon(self, polygon: np.ndarray, point: tuple) -> bool:
+    def _is_in_polygon(self, polygon: np.ndarray, point: tuple) -> bool:
         return cv.pointPolygonTest(polygon, point, False) >= 0
 
-    def __process_image(self) -> None:
+    def _process_image(self) -> None:
         if self.image_ is None:
             raise LineFollowerModuleError('Cannot process image when the image is not set')
 
@@ -178,7 +178,7 @@ class LineFollowerModule:
 
         raise LineFollowerModuleError('Cannot process image when input mode is not set')
 
-    def __compute_max_contour(self) -> Tuple[np.ndarray, float]:
+    def _compute_max_contour(self) -> Tuple[np.ndarray, float]:
         if self.image_binary_ is None:
             raise LineFollowerModuleError('Cannot compute max contour when the image is not set')
 
