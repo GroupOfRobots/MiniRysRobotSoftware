@@ -101,6 +101,8 @@ class SimpleImagePublisher(Node):
 
         main_size, lores_size = self.configure_picamera(exposure_value, flip_image)
         # Flip (width, height) -> (height, width) so that the size is consistent with OpenCV 'shape'
+        main_size = list(main_size)
+        lores_size = list(lores_size)
         main_size[0], main_size[1] = main_size[1], main_size[0]
         lores_size[0], lores_size[1] = lores_size[1], lores_size[0]
 
