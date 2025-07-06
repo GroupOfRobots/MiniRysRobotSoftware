@@ -37,13 +37,13 @@
       stop_rotate: 0.005
       stop_rotate_dist: 0.14
       K: 1.10
-      Ti: 100.0
+      Ti: 85.0
       Td: 0.07
       timer_period: 0.7
 
   pick_shuttlecock_action_server:
     ros__parameters:
-      stop_docking: 0.15
+      stop_docking: 0.155
       linear_speed: 0.05
       timer_period: 0.5
       stop_from_planner: 0.3
@@ -51,7 +51,7 @@
 
   get_to_shuttlecock_action_server:
     ros__parameters:
-      stop_from_planner: 0.5
+      stop_from_planner: 0.36
       timer_period: 1.0
 
   back_up_action_server:
@@ -63,4 +63,4 @@
   deliver_shuttlecock_action_server:
     ros__parameters:
       timer_period: 0.5
-      position_tolerance: 0.007
+      position_tolerance: 0.005

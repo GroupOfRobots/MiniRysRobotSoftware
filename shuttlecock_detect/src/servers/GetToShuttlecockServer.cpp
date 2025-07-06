@@ -81,6 +81,7 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
             goal_handle->succeed(result);
             RCLCPP_INFO(this->get_logger(), "Goal succeeded");
             std_msgs::msg::Bool cancel_msg;
+            cancel_msg.data = true;
             publisher_cancel_->publish(cancel_msg);
             break;
           }
@@ -92,6 +93,7 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
         goal_handle->succeed(result);
         RCLCPP_INFO(this->get_logger(), "Goal failed");
         std_msgs::msg::Bool cancel_msg;
+        cancel_msg.data = true;
         publisher_cancel_->publish(cancel_msg);
         break;
       }
@@ -101,6 +103,7 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
           if(closer_counter <= 1)
           {
             std_msgs::msg::Bool cancel_msg;
+            cancel_msg.data = true;
             publisher_cancel_->publish(cancel_msg);
             result->done = false;
             goal_handle->succeed(result);

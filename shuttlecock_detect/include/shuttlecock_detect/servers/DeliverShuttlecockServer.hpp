@@ -10,6 +10,7 @@
 #include "behaviortree_ros2/bt_action_node.hpp"
 #include "nav2_msgs/action/navigate_to_pose.hpp"
 #include <tf2_ros/transform_listener.h>
+#include "std_msgs/msg/bool.hpp"
 #include <tf2_ros/buffer.h>
 
 using Standard = btcpp_ros2_interfaces::action::Standard;
