@@ -1,3 +1,4 @@
+import os
 from setuptools import setup
 from glob import glob
 
@@ -10,12 +11,15 @@ setup(
     packages=[source_path + '/ros2_rpi_camera',
               source_path + '/ros2_rpi_cv_camera',
               source_path + '/ros2_rpi_rest_camera',
-              source_path + '/ros2_rpi_video_recorder'],
+              source_path + '/ros2_rpi_video_recorder',
+              source_path + '/simple_image_publisher',
+              ],
     data_files=[
         ('share/ament_index/resource_index/packages',
-         ['resource/' + package_name]),
+            ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name, glob('launch/*launch.py')),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
+        (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -29,7 +33,8 @@ setup(
             'ros2_rpi_camera = ' + source_path + '.ros2_rpi_camera.ros2_rpi_camera:main',
             'ros2_rpi_cv_camera = ' + source_path + '.ros2_rpi_cv_camera.ros2_rpi_cv_camera:main',
             'ros2_rpi_rest_camera = ' + source_path + '.ros2_rpi_rest_camera.ros2_rpi_rest_camera:main',
-            'ros2_rpi_video_recorder = ' + source_path + '.ros2_rpi_video_recorder.ros2_rpi_video_recorder:main'
+            'ros2_rpi_video_recorder = ' + source_path + '.ros2_rpi_video_recorder.ros2_rpi_video_recorder:main',
+            'simple_image_publisher = ' + source_path + '.simple_image_publisher.simple_image_publisher:main',
         ],
     },
 )
