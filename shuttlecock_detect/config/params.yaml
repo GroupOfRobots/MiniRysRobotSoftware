@@ -43,7 +43,7 @@
 
   pick_shuttlecock_action_server:
     ros__parameters:
-      stop_docking: 0.155
+      stop_docking: 0.15
       linear_speed: 0.05
       timer_period: 0.5
       stop_from_planner: 0.3

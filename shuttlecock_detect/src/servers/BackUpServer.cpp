@@ -57,8 +57,8 @@ using GoalHandleStandard = rclcpp_action::ServerGoalHandle<Standard>;
   void BackUpServer::execute(const std::shared_ptr<GoalHandleStandard> goal_handle)
   {
     RCLCPP_INFO(this->get_logger(), "Executing goal");
-    std_msgs::msg::Bool cancel_msg;
-    publisher_cancel_->publish(cancel_msg);
+    // std_msgs::msg::Bool cancel_msg;
+    // publisher_cancel_->publish(cancel_msg);
     auto feedback = std::make_shared<Standard::Feedback>();
     auto result = std::make_shared<Standard::Result>();
     auto msg_twist = std::make_shared<geometry_msgs::msg::Twist>();

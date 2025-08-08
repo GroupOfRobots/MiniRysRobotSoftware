@@ -41,6 +41,10 @@ DeliverShuttlecockServer::DeliverShuttlecockServer(const rclcpp::NodeOptions& op
   is_goal_reached_ = false;
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+
+  publisher_cancel_ = this->create_publisher<std_msgs::msg::Bool>(
+    "stop_navigate", 
+    10);
 }
 
 rclcpp_action::GoalResponse DeliverShuttlecockServer::handle_goal(const rclcpp_action::GoalUUID&,
@@ -92,6 +96,9 @@ void DeliverShuttlecockServer::execute(const std::shared_ptr<GoalHandleStandard>
     }
 
   }
+
+  std_msgs::msg::Bool cancel_msg;
+  publisher_cancel_->publish(cancel_msg);
   // Check if goal is done
   if(rclcpp::ok())
   {

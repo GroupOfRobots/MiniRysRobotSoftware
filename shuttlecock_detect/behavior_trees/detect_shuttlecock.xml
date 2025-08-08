@@ -6,6 +6,9 @@
       <RotateAction/>
       <PickShuttlecockAction/>
       <DeliverShuttlecockAction/>
+      <ForceSuccess>
+        <RotateAction/>
+      </ForceSuccess>
       <BackUpAction/>
     </Sequence>
   </BehaviorTree>

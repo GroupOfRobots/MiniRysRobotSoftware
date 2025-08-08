@@ -48,4 +48,5 @@ private:
   double position_tolerance_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_cancel_;
 };
