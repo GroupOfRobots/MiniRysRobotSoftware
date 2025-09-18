@@ -72,14 +72,6 @@ ament_target_dependencies(Yolov7
 OpenCV
 )
 
-add_library(DetectorNode
-  src/nodes/DetectorNode.cpp 
-)
-ament_target_dependencies(DetectorNode
-rclcpp std_msgs sensor_msgs cv_bridge OpenCV ncnn nav_msgs nav2_msgs rclcpp_action geometry_msgs tf2_ros
-)
-target_link_libraries(DetectorNode Yolov7 PIDRegulator)
-
 add_library(DistancesNode
   src/nodes/DistancesNode.cpp 
 )
@@ -176,34 +168,6 @@ target_link_libraries(client_executor
   DeliverShuttlecockAction
 )
 ament_target_dependencies(client_executor ${THIS_PACKAGE_DEPS})
-
-
-add_executable(yolov7_time_test src/executables/yolov7_time_test.cpp)
-target_link_libraries(yolov7_time_test Yolov7 ncnn)
-ament_target_dependencies(yolov7_time_test OpenCV ncnn)
-
-add_executable(detector src/executables/detector.cpp)
-target_link_libraries(detector DetectorNode)
-
-add_executable(imgtest src/executables/imgtest.cpp)
-ament_target_dependencies(imgtest
-rclcpp std_msgs sensor_msgs cv_bridge OpenCV ncnn
-)
-
-install(TARGETS
-   imgtest
-   DESTINATION lib/${PROJECT_NAME}
-)
-
-install(TARGETS
-   yolov7_time_test
-   DESTINATION lib/${PROJECT_NAME}
-)
-
-install(TARGETS
-   detector
-   DESTINATION lib/${PROJECT_NAME}
-)
 
 install(TARGETS
   server_executor

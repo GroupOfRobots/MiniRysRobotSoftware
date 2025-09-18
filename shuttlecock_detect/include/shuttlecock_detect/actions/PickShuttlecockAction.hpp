@@ -5,25 +5,16 @@
 
 using namespace BT;
 
-class PickShuttlecockAction : public RosActionNode<btcpp_ros2_interfaces::action::Standard>
-{
+class PickShuttlecockAction
+    : public RosActionNode<btcpp_ros2_interfaces::action::Standard> {
 public:
-  PickShuttlecockAction(const std::string& name, const NodeConfig& conf,
-              const RosNodeParams& params)
-    : RosActionNode<btcpp_ros2_interfaces::action::Standard>(name, conf, params)
-  {}
-
-  static BT::PortsList providedPorts()
-  {
-    return providedBasicPorts({ });
-  }
-
-  bool setGoal(Goal& goal) override;
-
+  PickShuttlecockAction(const std::string &name, const NodeConfig &conf,
+                        const RosNodeParams &params)
+      : RosActionNode<btcpp_ros2_interfaces::action::Standard>(name, conf,
+                                                               params) {}
+  static BT::PortsList providedPorts() { return providedBasicPorts({}); }
+  bool setGoal(Goal &goal) override;
   void onHalt() override;
-
-  BT::NodeStatus onResultReceived(const WrappedResult& wr) override;
-
+  BT::NodeStatus onResultReceived(const WrappedResult &wr) override;
   virtual BT::NodeStatus onFailure(ActionNodeErrorCode error) override;
 };
-

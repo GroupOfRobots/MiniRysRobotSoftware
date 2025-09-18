@@ -83,6 +83,12 @@
         "cinttypes": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
-    }
+        "variant": "cpp",
+        "charconv": "cpp",
+        "ranges": "cpp",
+        "valarray": "cpp"
+    },
+    "editor.formatOnSave": true,
+    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.clang_format_style": "file"
 }
