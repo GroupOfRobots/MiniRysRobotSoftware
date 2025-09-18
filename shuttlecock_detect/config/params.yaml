@@ -46,4 +46,4 @@
   deliver_shuttlecock_action_server:
     ros__parameters:
       timer_period: 0.5
-      position_tolerance: 0.005
+      position_tolerance: 0.5

@@ -19,7 +19,7 @@ DeliverShuttlecockServer::DeliverShuttlecockServer(
 
   timer_period_ = this->get_parameter("timer_period").as_double();
   position_tolerance_ =
-      this->get_parameter("timer_period").as_double(); // to sprawdzić
+      this->get_parameter("position_tolerance").as_double();
 
   RCLCPP_INFO_STREAM(this->get_logger(),
                      "Got param: timer_period " << timer_period_);
